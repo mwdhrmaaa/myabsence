@@ -1,10 +1,9 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Configuration
-    const START_DATE = new Date('2026-01-12').getTime(); // Example start date
+    // Configuration & State
+    let startDate = localStorage.getItem('myabsence_start_date') ? parseInt(localStorage.getItem('myabsence_start_date')) : new Date('2026-01-12').getTime();
     const ADMIN_CREDENTIALS = { username: 'admin', password: 'admin123' };
     const USER_CREDENTIALS = { username: 'user', password: 'user123' };
 
-    // State
     let currentUser = JSON.parse(localStorage.getItem('myabsence_user')) || null;
     let users = JSON.parse(localStorage.getItem('myabsence_data')) || [
         { id: 1, name: 'John Doe', presentDays: 12 },
@@ -30,13 +29,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const closeModal = document.getElementById('close-modal');
     const modalTitle = document.getElementById('modal-title');
     const avgAttendanceSpan = document.getElementById('avg-attendance');
+    const startDateInput = document.getElementById('start-date-input');
 
     // --- Core Logic ---
 
     const calculateCurrentDay = () => {
-        const diffTime = Math.abs(Date.now() - START_DATE);
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        return diffDays;
+        const now = new Date();
+        now.setHours(0, 0, 0, 0); // Normalize today
+        const start = new Date(startDate);
+        start.setHours(0, 0, 0, 0); // Normalize start
+        
+        const diffTime = now.getTime() - start.getTime();
+        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
+        return diffDays > 0 ? diffDays : 0;
     };
 
     const saveData = () => {
@@ -92,6 +97,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (currentUser.role === 'admin') {
                 adminActions.classList.remove('hidden');
+                // Set current start date to input
+                const d = new Date(startDate);
+                startDateInput.value = d.toISOString().split('T')[0];
             } else {
                 adminActions.classList.add('hidden');
             }
@@ -167,6 +175,16 @@ document.addEventListener('DOMContentLoaded', () => {
             jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
         };
         html2pdf().set(opt).from(element).save();
+    });
+
+    startDateInput.addEventListener('change', (e) => {
+        const newDate = new Date(e.target.value).getTime();
+        if (newDate) {
+            startDate = newDate;
+            localStorage.setItem('myabsence_start_date', startDate);
+            currentDaySpan.textContent = calculateCurrentDay();
+            renderTable();
+        }
     });
 
     // --- Global functions for inline Event Listeners ---
