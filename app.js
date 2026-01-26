@@ -117,14 +117,22 @@ document.addEventListener('DOMContentLoaded', () => {
             
             totalOverallPercentage += parseFloat(overall);
 
+            const todayStr = new Date().toISOString().split('T')[0];
+            const isPresentToday = user.presenceDates.includes(todayStr);
+
             const row = document.createElement('tr');
             row.innerHTML = `
                 <td>${user.name}</td>
+                <td class="admin-only ${currentUser && currentUser.role === 'admin' ? '' : 'hidden'}">
+                    <button class="${isPresentToday ? 'btn-checkedin' : 'btn-checkin'}" onclick="togglePresenceToday(${user.id})">
+                        ${isPresentToday ? 'Checked-in' : 'Mark Present'}
+                    </button>
+                </td>
                 <td>${weekly}%</td>
                 <td>${monthly}%</td>
                 <td>${yearly}%</td>
                 <td style="font-weight: 700; color: ${overall >= 80 ? 'var(--secondary)' : 'var(--danger)'}">${overall}%</td>
-                <td class="${currentUser && currentUser.role === 'admin' ? '' : 'hidden'}">
+                <td class="admin-only ${currentUser && currentUser.role === 'admin' ? '' : 'hidden'}">
                     <button class="btn-sm-edit" onclick="editUser(${user.id})">Edit</button>
                     <button class="btn-sm-danger" onclick="deleteUser(${user.id})">Delete</button>
                 </td>
@@ -184,6 +192,21 @@ document.addEventListener('DOMContentLoaded', () => {
     window.removeModalDate = (date) => {
         modalDates = modalDates.filter(d => d !== date);
         renderModalDates();
+    };
+
+    window.togglePresenceToday = (userId) => {
+        const user = users.find(u => u.id === userId);
+        if (!user) return;
+
+        const todayStr = new Date().toISOString().split('T')[0];
+        if (user.presenceDates.includes(todayStr)) {
+            user.presenceDates = user.presenceDates.filter(d => d !== todayStr);
+        } else {
+            user.presenceDates.push(todayStr);
+        }
+        
+        saveData();
+        renderTable();
     };
 
     // --- Event Handlers ---
