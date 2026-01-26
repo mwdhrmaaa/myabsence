@@ -55,6 +55,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const adminActions = document.getElementById('admin-actions');
     const addUserBtn = document.getElementById('add-user-btn');
     const downloadCsvBtn = document.getElementById('download-csv-btn');
+    const importCsvBtn = document.getElementById('import-csv-btn');
+    const csvImportInput = document.getElementById('csv-import-input');
     const userModal = document.getElementById('user-modal');
     const userForm = document.getElementById('user-form');
     const closeModalBtn = document.getElementById('close-modal');
@@ -393,6 +395,54 @@ document.addEventListener('DOMContentLoaded', () => {
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
+        });
+    }
+
+    if (importCsvBtn && csvImportInput) {
+        importCsvBtn.addEventListener('click', () => csvImportInput.click());
+        csvImportInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const text = event.target.result;
+                const lines = text.split('\n').filter(l => l.trim() !== '');
+                if (lines.length < 2) return;
+                
+                const newUsers = [];
+                for (let i = 1; i < lines.length; i++) {
+                    const line = lines[i];
+                    // Robust CSV splitting to handle quoted commas
+                    const regex = /(".*?"|[^",]+)(?=\s*,|\s*$)/g;
+                    const parts = [];
+                    let m;
+                    while ((m = regex.exec(line)) !== null) {
+                        parts.push(m[0].trim());
+                    }
+
+                    if (parts.length >= 8) {
+                        const id = parseInt(parts[0]);
+                        const absNum = parts[1];
+                        const name = parts[2].replace(/"/g, '');
+                        // skip 3,4,5,6 (percents)
+                        let datesRaw = parts[7].replace(/"/g, '');
+                        const presenceDates = datesRaw ? datesRaw.split(',').map(d => d.trim()).filter(d => d !== '') : [];
+                        
+                        newUsers.push({ id, name, absence_number: absNum, presenceDates });
+                    }
+                }
+                
+                if (newUsers.length > 0) {
+                    if (confirm(`Restore ${newUsers.length} users? This will replace current data.`)) {
+                        users = newUsers;
+                        saveData();
+                        renderTable();
+                    }
+                }
+                csvImportInput.value = '';
+            };
+            reader.readAsText(file);
         });
     }
 
