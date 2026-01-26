@@ -112,6 +112,29 @@ body {
     letter-spacing: -0.025em;
 }
 
+.brand {
+    display: flex;
+    flex-direction: column;
+}
+
+.watermark {
+    display: block;
+    font-size: 0.6rem;
+    color: var(--text-muted);
+    opacity: 0.5;
+    margin-top: -0.5rem;
+    margin-bottom: 0.5rem;
+    letter-spacing: 0.05em;
+}
+
+.watermark-small {
+    font-size: 0.5rem;
+    color: var(--text-muted);
+    opacity: 0.4;
+    margin-top: -3px;
+    letter-spacing: 0.02em;
+}
+
 .user-info {
     display: flex;
     align-items: center;
