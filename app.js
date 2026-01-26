@@ -195,7 +195,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             authSection.classList.remove('active');
             dashboardSection.classList.add('active');
-            displayName.textContent = currentUser.name;
+            displayName.textContent = currentUser.role === 'admin' ? 'Admin' : currentUser.name;
             greeting.textContent = `Welcome back, ${currentUser.name}!`;
             currentDaySpan.textContent = calculateCurrentDay();
 
