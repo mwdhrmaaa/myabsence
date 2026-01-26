@@ -232,7 +232,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const btn = document.createElement('button');
             btn.type = 'button';
             // Only allow toggling presence if it's a workday
-            btn.className = `day-btn ${isPresent ? 'active' : ''} ${(!isWorkday || isFuture) ? 'disabled' : ''}`;
+            btn.className = `day-btn ${isPresent ? 'active' : ''} ${isFuture ? 'future' : (!isWorkday ? 'disabled' : '')}`;
             btn.textContent = i;
             
             if (isWorkday && !isFuture) {
@@ -264,10 +264,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const date = new Date(year, month, i);
             const dateStr = date.toISOString().split('T')[0];
             const isActive = activeWorkdays.includes(dateStr);
+            const isFuture = date.getTime() > now.getTime();
 
             const btn = document.createElement('button');
             btn.type = 'button';
-            btn.className = `day-btn ${isActive ? 'active' : ''}`;
+            btn.className = `day-btn ${isActive ? 'active' : ''} ${isFuture ? 'future' : ''}`;
             btn.textContent = i;
             btn.onclick = () => {
                 if (activeWorkdays.includes(dateStr)) {
