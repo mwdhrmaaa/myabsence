@@ -55,6 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const adminActions = document.getElementById('admin-actions');
     const addUserBtn = document.getElementById('add-user-btn');
     const downloadPdfBtn = document.getElementById('download-pdf-btn');
+    const downloadCsvBtn = document.getElementById('download-csv-btn');
     const userModal = document.getElementById('user-modal');
     const userForm = document.getElementById('user-form');
     const closeModalBtn = document.getElementById('close-modal');
@@ -368,6 +369,39 @@ document.addEventListener('DOMContentLoaded', () => {
         const val = new Date(e.target.value).getTime();
         if (val) { startDate = val; localStorage.setItem('myabsence_start_date', startDate); if (currentDaySpan) currentDaySpan.textContent = calculateCurrentDay(); renderTable(); }
     });
+
+    if (downloadCsvBtn) {
+        downloadCsvBtn.addEventListener('click', () => {
+            if (users.length === 0) return;
+            
+            // CSV Header
+            let csvContent = "ID,Absence Number,Name,Weekly %,Monthly %,Yearly %,Overall %,Presence Dates\n";
+            
+            // CSV Rows
+            users.forEach(user => {
+                const weekly = getPeriodPercentage(user.presenceDates, 'weekly');
+                const monthly = getPeriodPercentage(user.presenceDates, 'monthly');
+                const yearly = getPeriodPercentage(user.presenceDates, 'yearly');
+                const overall = getPeriodPercentage(user.presenceDates, 'overall');
+                
+                // Quote presence dates to handle commas
+                const datesStr = `"${user.presenceDates.join(", ")}"`;
+                
+                csvContent += `${user.id},${user.absence_number || user.id},${user.name},${weekly},${monthly},${yearly},${overall},${datesStr}\n`;
+            });
+            
+            // Create Download
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.setAttribute("href", url);
+            link.setAttribute("download", `MyAbsence_Data_${new Date().toISOString().split('T')[0]}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        });
+    }
 
     initPeriodSelectors();
     updateUI();
