@@ -182,11 +182,9 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     window.deleteUser = (id) => {
-        if (confirm('Are you sure you want to delete this user?')) {
-            users = users.filter(u => u.id !== id);
-            saveData();
-            renderTable();
-        }
+        users = users.filter(u => u.id !== id);
+        saveData();
+        renderTable();
     };
 
     // Initialize
