@@ -239,8 +239,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             authSection.classList.remove('active');
             dashboardSection.classList.add('active');
-            if (displayName) displayName.textContent = currentUser.role === 'admin' ? 'Admin' : currentUser.name;
-            if (greeting) greeting.textContent = `Welcome back, ${currentUser.name}!`;
+            if (greeting) greeting.textContent = "Selamat mengabsen!";
             if (currentDaySpan) currentDaySpan.textContent = calculateCurrentDay();
             if (currentUser.role === 'admin') {
                 if (adminActions) adminActions.classList.remove('hidden');
