@@ -56,6 +56,7 @@
                         </div>
                     </div>
                     <div id="admin-actions" class="hidden">
+                        <button id="manage-workdays-btn" class="btn-outline">⚙ Manage Workdays</button>
                         <button id="add-user-btn" class="btn-primary">+ Add New User</button>
                     </div>
                     <button id="download-pdf-btn" class="btn-secondary">Download PDF</button>
@@ -122,7 +123,25 @@
                         <button type="submit" class="btn-primary" id="save-user-btn">Save</button>
                     </div>
                 </form>
+                <!-- Modal for Manage Workdays -->
+        <div id="workdays-modal" class="modal hidden">
+            <div class="modal-content glass-card">
+                <h2>Manage Workdays</h2>
+                <p class="history-info">Select days that count as workdays for attendance calculation.</p>
+                <div class="month-selector">
+                    <button type="button" id="prev-month-btn" class="btn-sm">◀</button>
+                    <span id="current-month-display">January 2026</span>
+                    <button type="button" id="next-month-btn" class="btn-sm">▶</button>
+                </div>
+                <div id="workdays-grid" class="days-grid">
+                    <!-- Days will be injected here -->
+                </div>
+                <div class="modal-actions">
+                    <button type="button" id="close-workdays-modal" class="btn-primary">Done</button>
+                </div>
             </div>
+        </div>
+    </div>
         </div>
     </div>
     <script src="app.js"></script>

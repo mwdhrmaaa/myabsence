@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
         { id: 3, name: 'Alice Johnson', absence_number: '03', presentDays: 8 }
     ];
 
-    // Migrate to presenceDates if necessary
+    // Migration logic
     let users = rawUsers.map(u => {
         if (!u.absence_number) u.absence_number = u.id.toString().padStart(2, '0');
         if (!u.presenceDates) {
@@ -28,8 +28,12 @@ document.addEventListener('DOMContentLoaded', () => {
         return u;
     });
 
-    // Temp state for modal
+    // Active Workdays State
+    let activeWorkdays = JSON.parse(localStorage.getItem('myabsence_workdays')) || [];
+    
+    // Temp state for modals
     let modalDates = [];
+    let currentViewDate = new Date(); // For month navigation in workday modal
 
     // Selectors
     const authSection = document.getElementById('auth-section');
@@ -56,11 +60,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const historyGridContainer = document.getElementById('history-grid-container');
     const historyDaysGrid = document.getElementById('history-days-grid');
 
+    // Workdays Selectors
+    const manageWorkdaysBtn = document.getElementById('manage-workdays-btn');
+    const workdaysModal = document.getElementById('workdays-modal');
+    const workdaysGrid = document.getElementById('workdays-grid');
+    const currentMonthDisplay = document.getElementById('current-month-display');
+    const prevMonthBtn = document.getElementById('prev-month-btn');
+    const nextMonthBtn = document.getElementById('next-month-btn');
+    const closeWorkdaysModal = document.getElementById('close-workdays-modal');
+
     // --- Core Logic ---
 
     const calculateCurrentDay = () => {
         const now = new Date();
-        now.setHours(0, 0, 0, 0);
+        now.setHours(23, 59, 59, 999);
         const start = new Date(startDate);
         start.setHours(0, 0, 0, 0);
         const diffTime = now.getTime() - start.getTime();
@@ -68,40 +81,55 @@ document.addEventListener('DOMContentLoaded', () => {
         return diffDays > 0 ? diffDays : 0;
     };
 
-    const getPeriodPercentage = (presenceDates, daysBack) => {
-        const totalProgramDays = calculateCurrentDay();
+    const getPeriodPercentage = (presenceDates, type) => {
         const now = new Date();
-        now.setHours(0, 0, 0, 0);
-        
-        let effectiveDaysInPeriod;
-        let cutoffDate;
+        now.setHours(23, 59, 59, 999);
+        const startOfProgram = new Date(startDate);
+        startOfProgram.setHours(0, 0, 0, 0);
 
-        if (daysBack === Infinity) {
-            effectiveDaysInPeriod = totalProgramDays;
-            cutoffDate = new Date(startDate);
+        let periodStart;
+        if (type === 'weekly') {
+            // Monday of this week
+            periodStart = new Date(now);
+            const day = periodStart.getDay();
+            const diff = periodStart.getDate() - day + (day === 0 ? -6 : 1);
+            periodStart.setDate(diff);
+        } else if (type === 'monthly') {
+            // 1st of this month
+            periodStart = new Date(now.getFullYear(), now.getMonth(), 1);
+        } else if (type === 'yearly') {
+            // 1st of this year
+            periodStart = new Date(now.getFullYear(), 0, 1);
         } else {
-            effectiveDaysInPeriod = Math.min(daysBack, totalProgramDays);
-            cutoffDate = new Date();
-            cutoffDate.setDate(now.getDate() - (daysBack - 1));
-            cutoffDate.setHours(0, 0, 0, 0);
-            
-            if (cutoffDate.getTime() < startDate) {
-                cutoffDate = new Date(startDate);
-            }
+            // Overall
+            periodStart = startOfProgram;
         }
 
-        if (effectiveDaysInPeriod <= 0) return "0.0";
+        // Clip to program start date
+        if (periodStart.getTime() < startOfProgram.getTime()) {
+            periodStart = startOfProgram;
+        }
+        periodStart.setHours(0, 0, 0, 0);
 
-        const presentCount = presenceDates.filter(dateStr => {
+        // Filter active workdays in this period up to today
+        const workdaysInPeriod = activeWorkdays.filter(dateStr => {
             const d = new Date(dateStr);
-            return d.getTime() >= cutoffDate.getTime() && d.getTime() <= now.getTime();
+            return d.getTime() >= periodStart.getTime() && d.getTime() <= now.getTime();
+        });
+
+        const totalWorkdays = workdaysInPeriod.length;
+        if (totalWorkdays === 0) return "0.0";
+
+        const presentInPeriod = presenceDates.filter(dateStr => {
+            return workdaysInPeriod.includes(dateStr);
         }).length;
 
-        return ((presentCount / effectiveDaysInPeriod) * 100).toFixed(1);
+        return ((presentInPeriod / totalWorkdays) * 100).toFixed(1);
     };
 
     const saveData = () => {
         localStorage.setItem('myabsence_data', JSON.stringify(users));
+        localStorage.setItem('myabsence_workdays', JSON.stringify(activeWorkdays));
     };
 
     const renderTable = () => {
@@ -109,24 +137,27 @@ document.addEventListener('DOMContentLoaded', () => {
         let totalOverallPercentage = 0;
 
         users.forEach(user => {
-            const weekly = getPeriodPercentage(user.presenceDates, 7);
-            const monthly = getPeriodPercentage(user.presenceDates, 30);
-            const yearly = getPeriodPercentage(user.presenceDates, 365);
-            const overall = getPeriodPercentage(user.presenceDates, Infinity);
+            const weekly = getPeriodPercentage(user.presenceDates, 'weekly');
+            const monthly = getPeriodPercentage(user.presenceDates, 'monthly');
+            const yearly = getPeriodPercentage(user.presenceDates, 'yearly');
+            const overall = getPeriodPercentage(user.presenceDates, 'overall');
             
             totalOverallPercentage += parseFloat(overall);
 
             const todayStr = new Date().toISOString().split('T')[0];
             const isPresentToday = user.presenceDates.includes(todayStr);
+            const isWorkdayToday = activeWorkdays.includes(todayStr);
 
             const row = document.createElement('tr');
             row.innerHTML = `
                 <td>${user.absence_number || user.id}</td>
                 <td>${user.name}</td>
                 <td class="admin-only ${currentUser && currentUser.role === 'admin' ? '' : 'hidden'}">
-                    <button class="${isPresentToday ? 'btn-checkedin' : 'btn-checkin'}" onclick="togglePresenceToday(${user.id})">
-                        ${isPresentToday ? 'Checked-in' : 'Mark Present'}
-                    </button>
+                    ${isWorkdayToday ? `
+                        <button class="${isPresentToday ? 'btn-checkedin' : 'btn-checkin'}" onclick="togglePresenceToday(${user.id})">
+                            ${isPresentToday ? 'Checked-in' : 'Mark Present'}
+                        </button>
+                    ` : '<span style="font-size: 0.75rem; color: var(--text-muted)">Non-workday</span>'}
                 </td>
                 <td>${weekly}%</td>
                 <td>${monthly}%</td>
@@ -188,15 +219,17 @@ document.addEventListener('DOMContentLoaded', () => {
             const date = new Date(year, month, i);
             const dateStr = date.toISOString().split('T')[0];
             const isPresent = modalDates.includes(dateStr);
+            const isWorkday = activeWorkdays.includes(dateStr);
             const isFuture = date.getTime() > now.getTime();
             const isToday = dateStr === todayStr;
 
             const btn = document.createElement('button');
             btn.type = 'button';
-            btn.className = `day-btn ${isPresent ? 'active' : ''} ${isFuture ? 'disabled' : ''}`;
+            // Only allow toggling presence if it's a workday
+            btn.className = `day-btn ${isPresent ? 'active' : ''} ${(!isWorkday || isFuture) ? 'disabled' : ''}`;
             btn.textContent = i;
             
-            if (!isFuture) {
+            if (isWorkday && !isFuture) {
                 btn.title = isToday ? 'Today' : dateStr;
                 btn.onclick = () => {
                     if (modalDates.includes(dateStr)) {
@@ -206,8 +239,41 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                     renderHistoryGrid();
                 };
+            } else if (!isWorkday) {
+                btn.title = "Non-workday";
             }
             historyDaysGrid.appendChild(btn);
+        }
+    };
+
+    const renderWorkdaysGrid = () => {
+        workdaysGrid.innerHTML = '';
+        const year = currentViewDate.getFullYear();
+        const month = currentViewDate.getMonth();
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        
+        currentMonthDisplay.textContent = currentViewDate.toLocaleString('default', { month: 'long', year: 'numeric' });
+
+        for (let i = 1; i <= daysInMonth; i++) {
+            const date = new Date(year, month, i);
+            const dateStr = date.toISOString().split('T')[0];
+            const isActive = activeWorkdays.includes(dateStr);
+
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = `day-btn ${isActive ? 'active' : ''}`;
+            btn.textContent = i;
+            btn.onclick = () => {
+                if (activeWorkdays.includes(dateStr)) {
+                    activeWorkdays = activeWorkdays.filter(d => d !== dateStr);
+                } else {
+                    activeWorkdays.push(dateStr);
+                }
+                renderWorkdaysGrid();
+                saveData();
+                renderTable();
+            };
+            workdaysGrid.appendChild(btn);
         }
     };
 
@@ -219,6 +285,26 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!historyGridContainer.classList.contains('hidden')) {
             renderHistoryGrid();
         }
+    });
+
+    manageWorkdaysBtn.addEventListener('click', () => {
+        currentViewDate = new Date();
+        renderWorkdaysGrid();
+        workdaysModal.classList.remove('hidden');
+    });
+
+    prevMonthBtn.addEventListener('click', () => {
+        currentViewDate.setMonth(currentViewDate.getMonth() - 1);
+        renderWorkdaysGrid();
+    });
+
+    nextMonthBtn.addEventListener('click', () => {
+        currentViewDate.setMonth(currentViewDate.getMonth() + 1);
+        renderWorkdaysGrid();
+    });
+
+    closeWorkdaysModal.addEventListener('click', () => {
+        workdaysModal.classList.add('hidden');
     });
 
     loginForm.addEventListener('submit', (e) => {
@@ -305,6 +391,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!user) return;
 
         const todayStr = new Date().toISOString().split('T')[0];
+        if (!activeWorkdays.includes(todayStr)) return; // Prevent marking on non-workday
+
         if (user.presenceDates.includes(todayStr)) {
             user.presenceDates = user.presenceDates.filter(d => d !== todayStr);
         } else {

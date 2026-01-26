@@ -541,3 +541,19 @@ input:focus {
     cursor: not-allowed;
     pointer-events: none;
 }
+
+.month-selector {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding: 0.5rem 1rem;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 0.75rem;
+}
+
+#current-month-display {
+    font-weight: 600;
+    font-size: 1rem;
+    color: var(--text-main);
+}
