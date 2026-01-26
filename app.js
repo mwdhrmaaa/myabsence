@@ -239,7 +239,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             authSection.classList.remove('active');
             dashboardSection.classList.add('active');
-            if (greeting) greeting.textContent = "Selamat mengabsen!";
+            if (greeting) greeting.textContent = "Selamat mengabsen, Sensei!";
             if (currentDaySpan) currentDaySpan.textContent = calculateCurrentDay();
             if (currentUser.role === 'admin') {
                 if (adminActions) adminActions.classList.remove('hidden');
