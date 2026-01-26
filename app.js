@@ -54,7 +54,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const attendanceBody = document.getElementById('attendance-body');
     const adminActions = document.getElementById('admin-actions');
     const addUserBtn = document.getElementById('add-user-btn');
-    const downloadPdfBtn = document.getElementById('download-pdf-btn');
     const downloadCsvBtn = document.getElementById('download-csv-btn');
     const userModal = document.getElementById('user-modal');
     const userForm = document.getElementById('user-form');
@@ -359,11 +358,6 @@ document.addEventListener('DOMContentLoaded', () => {
         saveData();
         renderTable();
         if (userModal) userModal.classList.add('hidden');
-    });
-    if (downloadPdfBtn) downloadPdfBtn.addEventListener('click', () => {
-        const el = document.querySelector('.table-container');
-        if (!el) return;
-        html2pdf().set({ margin: 1, filename: `Attendance_${new Date().toLocaleDateString()}.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2, backgroundColor: '#0f172a' }, jsPDF: { unit: 'in', format: 'letter', orientation: 'landscape' } }).from(el).save();
     });
     if (startDateInput) startDateInput.addEventListener('change', (e) => {
         const val = new Date(e.target.value).getTime();
