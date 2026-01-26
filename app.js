@@ -35,7 +35,15 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Active Workdays State
-    let activeWorkdays = JSON.parse(localStorage.getItem('myabsence_workdays')) || [];
+    let activeWorkdays = [];
+    try {
+        const storedWorkdays = localStorage.getItem('myabsence_workdays');
+        activeWorkdays = storedWorkdays ? JSON.parse(storedWorkdays) : [];
+        if (!Array.isArray(activeWorkdays)) activeWorkdays = [];
+    } catch (e) {
+        console.error("Error parsing workdays", e);
+        activeWorkdays = [];
+    }
     
     // View State
     let selectedMonth = new Date().getMonth();
@@ -334,25 +342,20 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    manageWorkdaysBtn.addEventListener('click', () => {
+    window.openWorkdaysModal = () => {
         currentViewDate = new Date();
         renderWorkdaysGrid();
         workdaysModal.classList.remove('hidden');
-    });
+    };
 
-    prevMonthBtn.addEventListener('click', () => {
-        currentViewDate.setMonth(currentViewDate.getMonth() - 1);
+    window.changeWorkdayMonth = (diff) => {
+        currentViewDate.setMonth(currentViewDate.getMonth() + diff);
         renderWorkdaysGrid();
-    });
+    };
 
-    nextMonthBtn.addEventListener('click', () => {
-        currentViewDate.setMonth(currentViewDate.getMonth() + 1);
-        renderWorkdaysGrid();
-    });
-
-    closeWorkdaysModal.addEventListener('click', () => {
+    window.closeWorkdaysModal = () => {
         workdaysModal.classList.add('hidden');
-    });
+    };
 
     loginForm.addEventListener('submit', (e) => {
         e.preventDefault();
