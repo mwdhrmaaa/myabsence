@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyAbsence | Premium Attendance Tracking</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <!-- html2pdf Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</head>
+<body>
+    <div id="app">
+        <!-- Auth Section -->
+        <section id="auth-section" class="active">
+            <div class="glass-card login-card">
+                <h1>MyAbsence</h1>
+                <p>Sign in to monitor your attendance</p>
+                <form id="login-form">
+                    <div class="input-group">
+                        <label for="username">Username</label>
+                        <input type="text" id="username" placeholder="Enter username" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" placeholder="Enter password" required>
+                    </div>
+                    <button type="submit" class="btn-primary">Login</button>
+                    <p id="login-error" class="error-text"></p>
+                </form>
+            </div>
+        </section>
+
+        <!-- Dashboard Section -->
+        <section id="dashboard-section">
+            <nav class="glass-nav">
+                <div class="nav-content">
+                    <span class="logo">MyAbsence</span>
+                    <div class="user-info">
+                        <span id="display-name">Admin</span>
+                        <button id="logout-btn" class="btn-outline">Logout</button>
+                    </div>
+                </div>
+            </nav>
+
+            <main class="container">
+                <header class="dashboard-header">
+                    <div>
+                        <h2 id="greeting">Welcome back!</h2>
+                        <p id="day-counter">Program Day: <span id="current-day">0</span></p>
+                    </div>
+                    <div id="admin-actions" class="hidden">
+                        <button id="add-user-btn" class="btn-primary">+ Add New User</button>
+                    </div>
+                    <button id="download-pdf-btn" class="btn-secondary">Download PDF</button>
+                </header>
+
+                <div class="stats-grid">
+                    <div class="glass-card stat-card">
+                        <h3>Average Attendance</h3>
+                        <div class="stat-value" id="avg-attendance">0%</div>
+                    </div>
+                    <!-- More stats can be added here -->
+                </div>
+
+                <div class="table-container glass-card">
+                    <table id="attendance-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Present Days</th>
+                                <th>Total Days</th>
+                                <th>Percentage</th>
+                                <th class="admin-only hidden">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="attendance-body">
+                            <!-- Data will be injected here -->
+                        </tbody>
+                    </table>
+                </div>
+            </main>
+        </section>
+
+        <!-- Modal for Add/Edit User -->
+        <div id="user-modal" class="modal hidden">
+            <div class="modal-content glass-card">
+                <h2 id="modal-title">Add User</h2>
+                <form id="user-form">
+                    <input type="hidden" id="edit-user-id">
+                    <div class="input-group">
+                        <label for="user-fullname">Full Name</label>
+                        <input type="text" id="user-fullname" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="user-present">Present Days</label>
+                        <input type="number" id="user-present" min="0" value="0" required>
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" id="close-modal" class="btn-outline">Cancel</button>
+                        <button type="submit" class="btn-primary" id="save-user-btn">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>
