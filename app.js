@@ -6,6 +6,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let currentUser = JSON.parse(localStorage.getItem('myabsence_user')) || null;
     
+    // Quick fix: Update old session name if exists
+    if (currentUser && currentUser.name === 'Super Admin') {
+        currentUser.name = 'Sensei!';
+        localStorage.setItem('myabsence_user', JSON.stringify(currentUser));
+    }
+    
     // Initial users with migration logic
     let rawUsers = JSON.parse(localStorage.getItem('myabsence_data')) || [
         { id: 1, name: 'John Doe', absence_number: '01', presentDays: 12 },
