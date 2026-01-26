@@ -73,6 +73,7 @@
                     <table id="attendance-table">
                         <thead>
                             <tr>
+                                <th>#</th>
                                 <th>Name</th>
                                 <th class="admin-only hidden">Today</th>
                                 <th title="Last 7 Days">Weekly %</th>
@@ -101,13 +102,19 @@
                         <input type="text" id="user-fullname" required>
                     </div>
                     <div class="input-group">
-                        <label>Attendance Logs (Select days present)</label>
-                        <div id="date-picker-container" class="glass-container">
-                            <input type="date" id="log-date-input">
-                            <button type="button" id="add-date-btn" class="btn-sm">+ Add Date</button>
+                        <label for="user-absence-number">Absence Number</label>
+                        <input type="number" id="user-absence-number" placeholder="e.g. 01" required>
+                    </div>
+                    <div class="input-group">
+                        <div class="history-toggle-header" id="history-toggle">
+                            <label>Attendance History (Current Month)</label>
+                            <span class="arrow-icon">▼</span>
                         </div>
-                        <div id="selected-dates-list" class="tags-container">
-                            <!-- Dates will appear here as tags -->
+                        <div id="history-grid-container" class="history-grid-content hidden">
+                            <p class="history-info">Click to toggle presence for previous days</p>
+                            <div id="history-days-grid" class="days-grid">
+                                <!-- Days 1-31 will be injected here -->
+                            </div>
                         </div>
                     </div>
                     <div class="modal-actions">

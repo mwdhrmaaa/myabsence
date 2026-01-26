@@ -70,6 +70,7 @@ body {
     margin-bottom: 0.5rem;
     background: linear-gradient(to right, #818cf8, #34d399);
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
 }
 
@@ -445,4 +446,98 @@ input:focus {
     background: rgba(239, 68, 68, 0.1);
     border-color: var(--danger);
     color: var(--danger);
+}
+
+.history-toggle-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.03);
+    padding: 0.75rem 1rem;
+    border-radius: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1px solid var(--card-border);
+    margin-top: 0.5rem;
+}
+
+.history-toggle-header:hover {
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.history-toggle-header label {
+    margin-bottom: 0;
+    cursor: pointer;
+}
+
+.arrow-icon {
+    font-size: 0.75rem;
+    transition: transform 0.3s ease;
+    opacity: 0.7;
+}
+
+.history-toggle-header.active .arrow-icon {
+    transform: rotate(180deg);
+}
+
+.history-grid-content {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 1rem;
+    animation: slideDown 0.3s ease-out;
+}
+
+.history-grid-content.hidden {
+    display: none;
+}
+
+.history-info {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.days-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 0.5rem;
+}
+
+.day-btn {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--card-border);
+    border-radius: 0.5rem;
+    color: var(--text-main);
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.day-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.day-btn.active {
+    background: var(--secondary);
+    border-color: var(--secondary);
+    color: white;
+    box-shadow: 0 0 10px rgba(16, 185, 129, 0.3);
+}
+
+.day-btn.disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    pointer-events: none;
 }

@@ -8,22 +8,22 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Initial users with migration logic
     let rawUsers = JSON.parse(localStorage.getItem('myabsence_data')) || [
-        { id: 1, name: 'John Doe', presentDays: 12 },
-        { id: 2, name: 'Jane Smith', presentDays: 10 },
-        { id: 3, name: 'Alice Johnson', presentDays: 8 }
+        { id: 1, name: 'John Doe', absence_number: '01', presentDays: 12 },
+        { id: 2, name: 'Jane Smith', absence_number: '02', presentDays: 10 },
+        { id: 3, name: 'Alice Johnson', absence_number: '03', presentDays: 8 }
     ];
 
     // Migrate to presenceDates if necessary
     let users = rawUsers.map(u => {
+        if (!u.absence_number) u.absence_number = u.id.toString().padStart(2, '0');
         if (!u.presenceDates) {
             const dates = [];
-            // Dummy migration: fill dates from start date
             for(let i=0; i < (u.presentDays || 0); i++) {
                 const d = new Date(startDate);
                 d.setDate(d.getDate() + i);
                 dates.push(d.toISOString().split('T')[0]);
             }
-            return { id: u.id, name: u.name, presenceDates: dates };
+            return { ...u, presenceDates: dates };
         }
         return u;
     });
@@ -51,10 +51,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const avgAttendanceSpan = document.getElementById('avg-attendance');
     const startDateInput = document.getElementById('start-date-input');
     
-    // New selectors
-    const logDateInput = document.getElementById('log-date-input');
-    const addDateBtn = document.getElementById('add-date-btn');
-    const selectedDatesList = document.getElementById('selected-dates-list');
+    // History Selectors
+    const historyToggle = document.getElementById('history-toggle');
+    const historyGridContainer = document.getElementById('history-grid-container');
+    const historyDaysGrid = document.getElementById('history-days-grid');
 
     // --- Core Logic ---
 
@@ -85,7 +85,6 @@ document.addEventListener('DOMContentLoaded', () => {
             cutoffDate.setDate(now.getDate() - (daysBack - 1));
             cutoffDate.setHours(0, 0, 0, 0);
             
-            // Should not go before program start
             if (cutoffDate.getTime() < startDate) {
                 cutoffDate = new Date(startDate);
             }
@@ -122,6 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const row = document.createElement('tr');
             row.innerHTML = `
+                <td>${user.absence_number || user.id}</td>
                 <td>${user.name}</td>
                 <td class="admin-only ${currentUser && currentUser.role === 'admin' ? '' : 'hidden'}">
                     <button class="${isPresentToday ? 'btn-checkedin' : 'btn-checkin'}" onclick="togglePresenceToday(${user.id})">
@@ -176,40 +176,50 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    const renderModalDates = () => {
-        selectedDatesList.innerHTML = '';
-        modalDates.sort().reverse().forEach(date => {
-            const tag = document.createElement('div');
-            tag.className = 'tag';
-            tag.innerHTML = `
-                ${date}
-                <span class="tag-remove" onclick="removeModalDate('${date}')">×</span>
-            `;
-            selectedDatesList.appendChild(tag);
-        });
-    };
+    const renderHistoryGrid = () => {
+        historyDaysGrid.innerHTML = '';
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = now.getMonth();
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        const todayStr = now.toISOString().split('T')[0];
 
-    window.removeModalDate = (date) => {
-        modalDates = modalDates.filter(d => d !== date);
-        renderModalDates();
-    };
+        for (let i = 1; i <= daysInMonth; i++) {
+            const date = new Date(year, month, i);
+            const dateStr = date.toISOString().split('T')[0];
+            const isPresent = modalDates.includes(dateStr);
+            const isFuture = date.getTime() > now.getTime();
+            const isToday = dateStr === todayStr;
 
-    window.togglePresenceToday = (userId) => {
-        const user = users.find(u => u.id === userId);
-        if (!user) return;
-
-        const todayStr = new Date().toISOString().split('T')[0];
-        if (user.presenceDates.includes(todayStr)) {
-            user.presenceDates = user.presenceDates.filter(d => d !== todayStr);
-        } else {
-            user.presenceDates.push(todayStr);
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = `day-btn ${isPresent ? 'active' : ''} ${isFuture ? 'disabled' : ''}`;
+            btn.textContent = i;
+            
+            if (!isFuture) {
+                btn.title = isToday ? 'Today' : dateStr;
+                btn.onclick = () => {
+                    if (modalDates.includes(dateStr)) {
+                        modalDates = modalDates.filter(d => d !== dateStr);
+                    } else {
+                        modalDates.push(dateStr);
+                    }
+                    renderHistoryGrid();
+                };
+            }
+            historyDaysGrid.appendChild(btn);
         }
-        
-        saveData();
-        renderTable();
     };
 
     // --- Event Handlers ---
+
+    historyToggle.addEventListener('click', () => {
+        historyToggle.classList.toggle('active');
+        historyGridContainer.classList.toggle('hidden');
+        if (!historyGridContainer.classList.contains('hidden')) {
+            renderHistoryGrid();
+        }
+    });
 
     loginForm.addEventListener('submit', (e) => {
         e.preventDefault();
@@ -240,16 +250,9 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('edit-user-id').value = '';
         userForm.reset();
         modalDates = [];
-        renderModalDates();
+        historyToggle.classList.remove('active');
+        historyGridContainer.classList.add('hidden');
         userModal.classList.remove('hidden');
-    });
-
-    addDateBtn.addEventListener('click', () => {
-        const val = logDateInput.value;
-        if (val && !modalDates.includes(val)) {
-            modalDates.push(val);
-            renderModalDates();
-        }
     });
 
     closeModal.addEventListener('click', () => {
@@ -260,13 +263,14 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         const id = document.getElementById('edit-user-id').value;
         const name = document.getElementById('user-fullname').value;
+        const absence_number = document.getElementById('user-absence-number').value;
 
         if (id) {
             const index = users.findIndex(u => u.id == id);
-            users[index] = { ...users[index], name, presenceDates: modalDates };
+            users[index] = { ...users[index], name, absence_number, presenceDates: modalDates };
         } else {
             const newId = users.length > 0 ? Math.max(...users.map(u => u.id)) + 1 : 1;
-            users.push({ id: newId, name, presenceDates: modalDates });
+            users.push({ id: newId, name, absence_number, presenceDates: modalDates });
         }
 
         saveData();
@@ -281,7 +285,7 @@ document.addEventListener('DOMContentLoaded', () => {
             filename:     `Attendance_Report_${new Date().toLocaleDateString()}.pdf`,
             image:        { type: 'jpeg', quality: 0.98 },
             html2canvas:  { scale: 2, backgroundColor: '#0f172a' },
-            jsPDF:        { unit: 'in', format: 'letter', orientation: 'landscape' } // Changed to landscape for more columns
+            jsPDF:        { unit: 'in', format: 'letter', orientation: 'landscape' }
         };
         html2pdf().set(opt).from(element).save();
     });
@@ -296,6 +300,21 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    window.togglePresenceToday = (userId) => {
+        const user = users.find(u => u.id === userId);
+        if (!user) return;
+
+        const todayStr = new Date().toISOString().split('T')[0];
+        if (user.presenceDates.includes(todayStr)) {
+            user.presenceDates = user.presenceDates.filter(d => d !== todayStr);
+        } else {
+            user.presenceDates.push(todayStr);
+        }
+        
+        saveData();
+        renderTable();
+    };
+
     window.editUser = (id) => {
         const user = users.find(u => u.id === id);
         if (!user) return;
@@ -303,8 +322,12 @@ document.addEventListener('DOMContentLoaded', () => {
         modalTitle.textContent = 'Edit User';
         document.getElementById('edit-user-id').value = user.id;
         document.getElementById('user-fullname').value = user.name;
+        document.getElementById('user-absence-number').value = user.absence_number || '';
         modalDates = [...user.presenceDates];
-        renderModalDates();
+        
+        historyToggle.classList.remove('active');
+        historyGridContainer.classList.add('hidden');
+        
         userModal.classList.remove('hidden');
     };
 
