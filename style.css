@@ -208,22 +208,23 @@ tr:hover td {
     color: var(--text-muted);
 }
 
-.input-group-inline {
+#admin-date-control {
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    flex-wrap: wrap; /* Added style */
+    margin-top: 1rem;
 }
 
-.input-group-inline label {
+#admin-date-control label {
     font-size: 0.875rem;
     color: var(--text-muted);
     white-space: nowrap;
 }
 
-.input-group-inline input {
+#admin-date-control input {
     width: auto;
-    padding: 0.5rem 0.75rem;
+    padding: 0.4rem 0.6rem;
+    font-size: 0.875rem;
 }
 
 input {
