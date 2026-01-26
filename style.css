@@ -76,7 +76,33 @@ body {
 
 .login-card p {
     color: var(--text-muted);
-    margin-bottom: 2rem;
+    margin-bottom: 1.5rem;
+}
+
+.entry-gate {
+    width: 100%;
+    margin-top: 1rem;
+    animation: fadeIn 0.8s ease-out;
+}
+
+.gateway-btn {
+    width: 100%;
+    margin-top: 1rem;
+    font-size: 1.1rem;
+    padding: 1rem;
+    box-shadow: 0 4px 20px rgba(99, 102, 241, 0.3);
+}
+
+.gateway-info {
+    margin-top: 1.5rem;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    opacity: 0.8;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 /* Dashboard Section */

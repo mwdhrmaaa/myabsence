@@ -1,8 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     // Configuration & State
     let startDate = localStorage.getItem('myabsence_start_date') ? parseInt(localStorage.getItem('myabsence_start_date')) : new Date('2026-01-12').getTime();
-    const ADMIN_CREDENTIALS = { username: 'admin', password: 'admin123' };
-    const USER_CREDENTIALS = { username: 'user', password: 'user123' };
 
     let currentUser = JSON.parse(localStorage.getItem('myabsence_user')) || null;
     
@@ -56,8 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Selectors
     const authSection = document.getElementById('auth-section');
     const dashboardSection = document.getElementById('dashboard-section');
-    const loginForm = document.getElementById('login-form');
-    const loginError = document.getElementById('login-error');
+    const enterBtn = document.getElementById('enter-btn');
     const displayName = document.getElementById('display-name');
     const logoutBtn = document.getElementById('logout-btn');
     const currentDaySpan = document.getElementById('current-day');
@@ -357,23 +354,13 @@ document.addEventListener('DOMContentLoaded', () => {
         workdaysModal.classList.add('hidden');
     };
 
-    loginForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const userVal = document.getElementById('username').value;
-        const passVal = document.getElementById('password').value;
-
-        if (userVal === ADMIN_CREDENTIALS.username && passVal === ADMIN_CREDENTIALS.password) {
+    if (enterBtn) {
+        enterBtn.addEventListener('click', () => {
             currentUser = { name: 'Sensei!', role: 'admin' };
             localStorage.setItem('myabsence_user', JSON.stringify(currentUser));
             updateUI();
-        } else if (userVal === USER_CREDENTIALS.username && passVal === USER_CREDENTIALS.password) {
-            currentUser = { name: 'Regular User', role: 'user' };
-            localStorage.setItem('myabsence_user', JSON.stringify(currentUser));
-            updateUI();
-        } else {
-            loginError.textContent = 'Invalid username or password';
-        }
-    });
+        });
+    }
 
     logoutBtn.addEventListener('click', () => {
         currentUser = null;
