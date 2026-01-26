@@ -5,11 +5,31 @@ document.addEventListener('DOMContentLoaded', () => {
     const USER_CREDENTIALS = { username: 'user', password: 'user123' };
 
     let currentUser = JSON.parse(localStorage.getItem('myabsence_user')) || null;
-    let users = JSON.parse(localStorage.getItem('myabsence_data')) || [
+    
+    // Initial users with migration logic
+    let rawUsers = JSON.parse(localStorage.getItem('myabsence_data')) || [
         { id: 1, name: 'John Doe', presentDays: 12 },
         { id: 2, name: 'Jane Smith', presentDays: 10 },
         { id: 3, name: 'Alice Johnson', presentDays: 8 }
     ];
+
+    // Migrate to presenceDates if necessary
+    let users = rawUsers.map(u => {
+        if (!u.presenceDates) {
+            const dates = [];
+            // Dummy migration: fill dates from start date
+            for(let i=0; i < (u.presentDays || 0); i++) {
+                const d = new Date(startDate);
+                d.setDate(d.getDate() + i);
+                dates.push(d.toISOString().split('T')[0]);
+            }
+            return { id: u.id, name: u.name, presenceDates: dates };
+        }
+        return u;
+    });
+
+    // Temp state for modal
+    let modalDates = [];
 
     // Selectors
     const authSection = document.getElementById('auth-section');
@@ -30,18 +50,55 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalTitle = document.getElementById('modal-title');
     const avgAttendanceSpan = document.getElementById('avg-attendance');
     const startDateInput = document.getElementById('start-date-input');
+    
+    // New selectors
+    const logDateInput = document.getElementById('log-date-input');
+    const addDateBtn = document.getElementById('add-date-btn');
+    const selectedDatesList = document.getElementById('selected-dates-list');
 
     // --- Core Logic ---
 
     const calculateCurrentDay = () => {
         const now = new Date();
-        now.setHours(0, 0, 0, 0); // Normalize today
+        now.setHours(0, 0, 0, 0);
         const start = new Date(startDate);
-        start.setHours(0, 0, 0, 0); // Normalize start
-        
+        start.setHours(0, 0, 0, 0);
         const diffTime = now.getTime() - start.getTime();
         const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
         return diffDays > 0 ? diffDays : 0;
+    };
+
+    const getPeriodPercentage = (presenceDates, daysBack) => {
+        const totalProgramDays = calculateCurrentDay();
+        const now = new Date();
+        now.setHours(0, 0, 0, 0);
+        
+        let effectiveDaysInPeriod;
+        let cutoffDate;
+
+        if (daysBack === Infinity) {
+            effectiveDaysInPeriod = totalProgramDays;
+            cutoffDate = new Date(startDate);
+        } else {
+            effectiveDaysInPeriod = Math.min(daysBack, totalProgramDays);
+            cutoffDate = new Date();
+            cutoffDate.setDate(now.getDate() - (daysBack - 1));
+            cutoffDate.setHours(0, 0, 0, 0);
+            
+            // Should not go before program start
+            if (cutoffDate.getTime() < startDate) {
+                cutoffDate = new Date(startDate);
+            }
+        }
+
+        if (effectiveDaysInPeriod <= 0) return "0.0";
+
+        const presentCount = presenceDates.filter(dateStr => {
+            const d = new Date(dateStr);
+            return d.getTime() >= cutoffDate.getTime() && d.getTime() <= now.getTime();
+        }).length;
+
+        return ((presentCount / effectiveDaysInPeriod) * 100).toFixed(1);
     };
 
     const saveData = () => {
@@ -49,21 +106,24 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const renderTable = () => {
-        const totalDays = calculateCurrentDay();
         attendanceBody.innerHTML = '';
-        
-        let totalPercentage = 0;
+        let totalOverallPercentage = 0;
 
         users.forEach(user => {
-            const percentage = ((user.presentDays / totalDays) * 100).toFixed(1);
-            totalPercentage += parseFloat(percentage);
+            const weekly = getPeriodPercentage(user.presenceDates, 7);
+            const monthly = getPeriodPercentage(user.presenceDates, 30);
+            const yearly = getPeriodPercentage(user.presenceDates, 365);
+            const overall = getPeriodPercentage(user.presenceDates, Infinity);
+            
+            totalOverallPercentage += parseFloat(overall);
 
             const row = document.createElement('tr');
             row.innerHTML = `
                 <td>${user.name}</td>
-                <td>${user.presentDays}</td>
-                <td>${totalDays}</td>
-                <td style="font-weight: 700; color: ${percentage >= 80 ? 'var(--secondary)' : 'var(--danger)'}">${percentage}%</td>
+                <td>${weekly}%</td>
+                <td>${monthly}%</td>
+                <td>${yearly}%</td>
+                <td style="font-weight: 700; color: ${overall >= 80 ? 'var(--secondary)' : 'var(--danger)'}">${overall}%</td>
                 <td class="${currentUser && currentUser.role === 'admin' ? '' : 'hidden'}">
                     <button class="btn-sm-edit" onclick="editUser(${user.id})">Edit</button>
                     <button class="btn-sm-danger" onclick="deleteUser(${user.id})">Delete</button>
@@ -72,10 +132,9 @@ document.addEventListener('DOMContentLoaded', () => {
             attendanceBody.appendChild(row);
         });
 
-        const avg = users.length > 0 ? (totalPercentage / users.length).toFixed(1) : 0;
+        const avg = users.length > 0 ? (totalOverallPercentage / users.length).toFixed(1) : 0;
         avgAttendanceSpan.textContent = `${avg}%`;
 
-        // Update actions visibility
         const adminCols = document.querySelectorAll('.admin-only');
         if (currentUser && currentUser.role === 'admin') {
             adminCols.forEach(el => el.classList.remove('hidden'));
@@ -95,16 +154,36 @@ document.addEventListener('DOMContentLoaded', () => {
             greeting.textContent = `Welcome back, ${currentUser.name}!`;
             currentDaySpan.textContent = calculateCurrentDay();
 
+            const adminOnlyElements = document.querySelectorAll('.admin-only');
             if (currentUser.role === 'admin') {
                 adminActions.classList.remove('hidden');
-                // Set current start date to input
+                adminOnlyElements.forEach(el => el.classList.remove('hidden'));
                 const d = new Date(startDate);
                 startDateInput.value = d.toISOString().split('T')[0];
             } else {
                 adminActions.classList.add('hidden');
+                adminOnlyElements.forEach(el => el.classList.add('hidden'));
             }
             renderTable();
         }
+    };
+
+    const renderModalDates = () => {
+        selectedDatesList.innerHTML = '';
+        modalDates.sort().reverse().forEach(date => {
+            const tag = document.createElement('div');
+            tag.className = 'tag';
+            tag.innerHTML = `
+                ${date}
+                <span class="tag-remove" onclick="removeModalDate('${date}')">×</span>
+            `;
+            selectedDatesList.appendChild(tag);
+        });
+    };
+
+    window.removeModalDate = (date) => {
+        modalDates = modalDates.filter(d => d !== date);
+        renderModalDates();
     };
 
     // --- Event Handlers ---
@@ -137,7 +216,17 @@ document.addEventListener('DOMContentLoaded', () => {
         modalTitle.textContent = 'Add New User';
         document.getElementById('edit-user-id').value = '';
         userForm.reset();
+        modalDates = [];
+        renderModalDates();
         userModal.classList.remove('hidden');
+    });
+
+    addDateBtn.addEventListener('click', () => {
+        const val = logDateInput.value;
+        if (val && !modalDates.includes(val)) {
+            modalDates.push(val);
+            renderModalDates();
+        }
     });
 
     closeModal.addEventListener('click', () => {
@@ -148,16 +237,13 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         const id = document.getElementById('edit-user-id').value;
         const name = document.getElementById('user-fullname').value;
-        const presentDays = parseInt(document.getElementById('user-present').value);
 
         if (id) {
-            // Edit
             const index = users.findIndex(u => u.id == id);
-            users[index] = { ...users[index], name, presentDays };
+            users[index] = { ...users[index], name, presenceDates: modalDates };
         } else {
-            // Add
             const newId = users.length > 0 ? Math.max(...users.map(u => u.id)) + 1 : 1;
-            users.push({ id: newId, name, presentDays });
+            users.push({ id: newId, name, presenceDates: modalDates });
         }
 
         saveData();
@@ -172,7 +258,7 @@ document.addEventListener('DOMContentLoaded', () => {
             filename:     `Attendance_Report_${new Date().toLocaleDateString()}.pdf`,
             image:        { type: 'jpeg', quality: 0.98 },
             html2canvas:  { scale: 2, backgroundColor: '#0f172a' },
-            jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+            jsPDF:        { unit: 'in', format: 'letter', orientation: 'landscape' } // Changed to landscape for more columns
         };
         html2pdf().set(opt).from(element).save();
     });
@@ -187,7 +273,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // --- Global functions for inline Event Listeners ---
     window.editUser = (id) => {
         const user = users.find(u => u.id === id);
         if (!user) return;
@@ -195,7 +280,8 @@ document.addEventListener('DOMContentLoaded', () => {
         modalTitle.textContent = 'Edit User';
         document.getElementById('edit-user-id').value = user.id;
         document.getElementById('user-fullname').value = user.name;
-        document.getElementById('user-present').value = user.presentDays;
+        modalDates = [...user.presenceDates];
+        renderModalDates();
         userModal.classList.remove('hidden');
     };
 
