@@ -565,3 +565,35 @@ input:focus {
     font-size: 1rem;
     color: var(--text-main);
 }
+
+.period-selectors {
+    display: flex;
+    gap: 1.5rem;
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.glass-select {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--card-border);
+    color: var(--text-main);
+    padding: 0.4rem 0.8rem;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    outline: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+    width: auto;
+}
+
+.glass-select:focus {
+    border-color: var(--primary);
+    background: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 0 10px rgba(99, 102, 241, 0.2);
+}
+
+.glass-select option {
+    background: #0f172a; /* Same as body bg */
+    color: white;
+}

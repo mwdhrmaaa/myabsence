@@ -50,6 +50,18 @@
                     <div>
                         <h2 id="greeting">Welcome back!</h2>
                         <p id="day-counter">Program Day: <span id="current-day">0</span></p>
+                        
+                        <div class="period-selectors">
+                            <div class="input-group-inline">
+                                <label for="view-month">Month:</label>
+                                <select id="view-month" class="glass-select"></select>
+                            </div>
+                            <div class="input-group-inline">
+                                <label for="view-year">Year:</label>
+                                <select id="view-year" class="glass-select"></select>
+                            </div>
+                        </div>
+
                         <div id="admin-date-control" class="admin-only hidden">
                             <label for="start-date-input">Start Date:</label>
                             <input type="date" id="start-date-input">

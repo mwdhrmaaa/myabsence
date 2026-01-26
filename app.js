@@ -37,6 +37,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // Active Workdays State
     let activeWorkdays = JSON.parse(localStorage.getItem('myabsence_workdays')) || [];
     
+    // View State
+    let selectedMonth = new Date().getMonth();
+    let selectedYear = new Date().getFullYear();
+
     // Temp state for modals
     let modalDates = [];
     let currentViewDate = new Date(); // For month navigation in workday modal
@@ -61,6 +65,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const avgAttendanceSpan = document.getElementById('avg-attendance');
     const startDateInput = document.getElementById('start-date-input');
     
+    // Period Selectors
+    const viewMonthSelect = document.getElementById('view-month');
+    const viewYearSelect = document.getElementById('view-year');
+
     // History Selectors
     const historyToggle = document.getElementById('history-toggle');
     const historyGridContainer = document.getElementById('history-grid-container');
@@ -77,6 +85,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Core Logic ---
 
+    const initPeriodSelectors = () => {
+        const months = [
+            "January", "February", "March", "April", "May", "June",
+            "July", "August", "September", "October", "November", "December"
+        ];
+        
+        viewMonthSelect.innerHTML = months.map((m, i) => 
+            `<option value="${i}" ${i === selectedMonth ? 'selected' : ''}>${m}</option>`
+        ).join('');
+
+        const startYear = 2025;
+        const endYear = new Date().getFullYear() + 2;
+        let yearsHTML = '';
+        for (let y = startYear; y <= endYear; y++) {
+            yearsHTML += `<option value="${y}" ${y === selectedYear ? 'selected' : ''}>${y}</option>`;
+        }
+        viewYearSelect.innerHTML = yearsHTML;
+    };
+
     const calculateCurrentDay = () => {
         const now = new Date();
         now.setHours(23, 59, 59, 999);
@@ -89,38 +116,42 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const getPeriodPercentage = (presenceDates, type) => {
         const now = new Date();
-        now.setHours(23, 59, 59, 999);
-        const startOfProgram = new Date(startDate);
-        startOfProgram.setHours(0, 0, 0, 0);
+        const programStart = new Date(startDate);
+        programStart.setHours(0, 0, 0, 0);
+
+        // Period end boundary: End of selected Month/Year OR today if it's the current period
+        const isCurrentMonth = selectedMonth === now.getMonth() && selectedYear === now.getFullYear();
+        const endOfSelectedMonth = new Date(selectedYear, selectedMonth + 1, 0);
+        endOfSelectedMonth.setHours(23, 59, 59, 999);
+
+        const periodEndBoundary = isCurrentMonth ? now : endOfSelectedMonth;
+        periodEndBoundary.setHours(23, 59, 59, 999);
 
         let periodStart;
         if (type === 'weekly') {
-            // Monday of this week
-            periodStart = new Date(now);
+            // Monday of the week containing periodEndBoundary
+            periodStart = new Date(periodEndBoundary);
             const day = periodStart.getDay();
             const diff = periodStart.getDate() - day + (day === 0 ? -6 : 1);
             periodStart.setDate(diff);
         } else if (type === 'monthly') {
-            // 1st of this month
-            periodStart = new Date(now.getFullYear(), now.getMonth(), 1);
+            periodStart = new Date(selectedYear, selectedMonth, 1);
         } else if (type === 'yearly') {
-            // 1st of this year
-            periodStart = new Date(now.getFullYear(), 0, 1);
+            periodStart = new Date(selectedYear, 0, 1);
         } else {
-            // Overall
-            periodStart = startOfProgram;
+            periodStart = programStart;
         }
 
-        // Clip to program start date
-        if (periodStart.getTime() < startOfProgram.getTime()) {
-            periodStart = startOfProgram;
+        // Clip start to program start date
+        if (periodStart.getTime() < programStart.getTime()) {
+            periodStart = programStart;
         }
         periodStart.setHours(0, 0, 0, 0);
 
-        // Filter active workdays in this period up to today
+        // Filter active workdays in this period up to periodEndBoundary
         const workdaysInPeriod = activeWorkdays.filter(dateStr => {
             const d = new Date(dateStr);
-            return d.getTime() >= periodStart.getTime() && d.getTime() <= now.getTime();
+            return d.getTime() >= periodStart.getTime() && d.getTime() <= periodEndBoundary.getTime();
         });
 
         const totalWorkdays = workdaysInPeriod.length;
@@ -231,7 +262,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const btn = document.createElement('button');
             btn.type = 'button';
-            // Only allow toggling presence if it's a workday
             btn.className = `day-btn ${isPresent ? 'active' : ''} ${isFuture ? 'future' : (!isWorkday ? 'disabled' : '')}`;
             btn.textContent = i;
             
@@ -285,6 +315,16 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // --- Event Handlers ---
+
+    viewMonthSelect.addEventListener('change', (e) => {
+        selectedMonth = parseInt(e.target.value);
+        renderTable();
+    });
+
+    viewYearSelect.addEventListener('change', (e) => {
+        selectedYear = parseInt(e.target.value);
+        renderTable();
+    });
 
     historyToggle.addEventListener('click', () => {
         historyToggle.classList.toggle('active');
@@ -398,7 +438,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!user) return;
 
         const todayStr = new Date().toISOString().split('T')[0];
-        if (!activeWorkdays.includes(todayStr)) return; // Prevent marking on non-workday
+        if (!activeWorkdays.includes(todayStr)) return;
 
         if (user.presenceDates.includes(todayStr)) {
             user.presenceDates = user.presenceDates.filter(d => d !== todayStr);
@@ -433,5 +473,6 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // Initialize
+    initPeriodSelectors();
     updateUI();
 });
