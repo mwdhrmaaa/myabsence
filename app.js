@@ -313,7 +313,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const passVal = document.getElementById('password').value;
 
         if (userVal === ADMIN_CREDENTIALS.username && passVal === ADMIN_CREDENTIALS.password) {
-            currentUser = { name: 'Super Admin', role: 'admin' };
+            currentUser = { name: 'Sensei!', role: 'admin' };
             localStorage.setItem('myabsence_user', JSON.stringify(currentUser));
             updateUI();
         } else if (userVal === USER_CREDENTIALS.username && passVal === USER_CREDENTIALS.password) {
