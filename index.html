@@ -157,7 +157,21 @@
                 </div>
             </div>
         </div>
+    <!-- Status Selector Modal -->
+    <div id="status-modal" class="modal-overlay hidden">
+        <div class="modal-content glass-card" style="max-width: 320px; text-align: center;">
+            <h2 id="status-modal-date" style="font-size: 1.25rem; margin-bottom: 1.5rem;">Update Status</h2>
+            <div class="modal-actions" style="display: flex; flex-direction: column; gap: 0.75rem;">
+                <button type="button" class="btn-primary" onclick="confirmStatus('present')">✅ Hadir</button>
+                <button type="button" style="background:#f59e0b; border:none; color:white; padding:0.8rem; border-radius:0.75rem; font-weight:600; cursor:pointer;" onclick="confirmStatus('sick')">🤒 Sakit</button>
+                <button type="button" style="background:#3b82f6; border:none; color:white; padding:0.8rem; border-radius:0.75rem; font-weight:600; cursor:pointer;" onclick="confirmStatus('permit')">📝 Izin</button>
+                <button type="button" style="background:#ef4444; border:none; color:white; padding:0.8rem; border-radius:0.75rem; font-weight:600; cursor:pointer;" onclick="confirmStatus('alpha')">❌ Alpha</button>
+                <button type="button" class="btn-outline" onclick="confirmStatus('none')" style="margin-top: 0.5rem;">Reset Status</button>
+                <button type="button" class="btn-outline" id="close-status-modal" style="border-color:rgba(255,255,255,0.1); margin-top:0.5rem;">Cancel</button>
+            </div>
+        </div>
     </div>
+
     <input type="file" id="csv-import-input" accept=".csv" style="display: none;">
     <script src="app.js"></script>
 </body>

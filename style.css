@@ -596,6 +596,27 @@ input:focus {
     box-shadow: 0 0 10px rgba(16, 185, 129, 0.3);
 }
 
+.day-btn.sick {
+    background: #f59e0b; /* Orange/Yellow */
+    border-color: #f59e0b;
+    color: white;
+    box-shadow: 0 0 10px rgba(245, 158, 11, 0.3);
+}
+
+.day-btn.permit {
+    background: #3b82f6; /* Blue */
+    border-color: #3b82f6;
+    color: white;
+    box-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
+}
+
+.day-btn.alpha {
+    background: #ef4444; /* Red */
+    border-color: #ef4444;
+    color: white;
+    box-shadow: 0 0 10px rgba(239, 68, 68, 0.3);
+}
+
 .day-btn.future {
     opacity: 0.6;
     border-style: dashed;

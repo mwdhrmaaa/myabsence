@@ -19,15 +19,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let users = rawUsers.map(u => {
         if (!u.absence_number) u.absence_number = u.id.toString().padStart(2, '0');
-        if (!u.presenceDates) {
-            const dates = [];
-            for(let i=0; i < (u.presentDays || 0); i++) {
-                const d = new Date(startDate);
-                d.setDate(d.getDate() + i);
-                dates.push(d.toISOString().split('T')[0]);
+        
+        // Migrate to attendanceLogs
+        if (!u.attendanceLogs) {
+            u.attendanceLogs = {};
+            // Legacy presenceDates migration
+            const legacyDates = u.presenceDates || [];
+            if (legacyDates.length === 0 && u.presentDays) {
+                for(let i=0; i < u.presentDays; i++) {
+                    const d = new Date(startDate);
+                    d.setDate(d.getDate() + i);
+                    legacyDates.push(toLocalISO(d));
+                }
             }
-            return { ...u, presenceDates: dates };
+            legacyDates.forEach(dStr => u.attendanceLogs[dStr] = 'present');
         }
+        
+        // Sync presenceDates for compatibility with existing calculations (if any)
+        u.presenceDates = Object.keys(u.attendanceLogs).filter(dStr => u.attendanceLogs[dStr] === 'present');
+        
         return u;
     });
 
@@ -40,9 +50,11 @@ document.addEventListener('DOMContentLoaded', () => {
     
     let selectedMonth = new Date().getMonth();
     let selectedYear = new Date().getFullYear();
-    let modalDates = [];
+    let modalDates = []; // Deprecated but used in modal logic
+    let modalLogs = {};  // Use this for new modal logic
     let currentViewDate = new Date();
     let isRanked = false;
+    let pendingStatusDate = null;
 
     // --- 2. Selectors ---
     const authSection = document.getElementById('auth-section');
@@ -77,21 +89,39 @@ document.addEventListener('DOMContentLoaded', () => {
     const prevMonthBtn = document.getElementById('prev-month-btn');
     const nextMonthBtn = document.getElementById('next-month-btn');
     const closeWorkdaysModalBtn = document.getElementById('close-workdays-modal');
+    
+    const statusModal = document.getElementById('status-modal');
+    const statusModalDateDisplay = document.getElementById('status-modal-date');
+    const closeStatusModalBtn = document.getElementById('close-status-modal');
 
     // --- 3. Global Actions ---
 
     window.togglePresenceToday = (userId) => {
         const user = users.find(u => u.id === userId);
         if (!user) return;
-        const todayStr = new Date().toISOString().split('T')[0];
+        const todayStr = toLocalISO(new Date());
         if (!activeWorkdays.includes(todayStr)) return;
-        if (user.presenceDates.includes(todayStr)) {
-            user.presenceDates = user.presenceDates.filter(d => d !== todayStr);
+        
+        if (user.attendanceLogs[todayStr] === 'present') {
+            delete user.attendanceLogs[todayStr];
         } else {
-            user.presenceDates.push(todayStr);
+            user.attendanceLogs[todayStr] = 'present';
         }
+        user.presenceDates = Object.keys(user.attendanceLogs).filter(dStr => user.attendanceLogs[dStr] === 'present');
         saveData();
         renderTable();
+    };
+
+    window.confirmStatus = (status) => {
+        if (!pendingStatusDate) return;
+        if (status === 'none') {
+            delete modalLogs[pendingStatusDate];
+        } else {
+            modalLogs[pendingStatusDate] = status;
+        }
+        renderHistoryGrid();
+        if (statusModal) statusModal.classList.add('hidden');
+        pendingStatusDate = null;
     };
 
     window.editUser = (id) => {
@@ -104,7 +134,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if (editIdInput) editIdInput.value = user.id;
         if (fullNameInput) fullNameInput.value = user.name;
         if (absNumInput) absNumInput.value = user.absence_number || '';
-        modalDates = [...user.presenceDates];
+        
+        modalLogs = { ...user.attendanceLogs };
+        // Sync modalDates for backward compatibility of UI logic if any remains
+        modalDates = Object.keys(modalLogs).filter(dStr => modalLogs[dStr] === 'present');
+
         if (historyToggle) historyToggle.classList.remove('active');
         if (historyGridContainer) historyGridContainer.classList.add('hidden');
         if (userModal) userModal.classList.remove('hidden');
@@ -164,12 +198,11 @@ document.addEventListener('DOMContentLoaded', () => {
         return `${y}-${m}-${d}`;
     };
 
-    const getPeriodPercentage = (presenceDates, type) => {
+    const getPeriodPercentage = (attendanceLogs, type) => {
         const now = new Date();
         const todayStr = toLocalISO(now);
         const programStartStr = toLocalISO(new Date(startDate));
         
-        // Boundaries
         let periodStartStr, periodEndStr;
 
         if (type === 'weekly') {
@@ -178,7 +211,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const monday = new Date(now);
             monday.setDate(diff);
             periodStartStr = toLocalISO(monday);
-            periodEndStr = "9999-12-31"; // Use today cap below
+            periodEndStr = "9999-12-31"; 
         } else if (type === 'monthly') {
             periodStartStr = `${selectedYear}-${(selectedMonth + 1).toString().padStart(2, '0')}-01`;
             periodEndStr = toLocalISO(new Date(selectedYear, selectedMonth + 1, 0));
@@ -190,7 +223,6 @@ document.addEventListener('DOMContentLoaded', () => {
             periodEndStr = "9999-12-31";
         }
 
-        // Adjust boundaries
         const finalStart = (periodStartStr > programStartStr) ? periodStartStr : programStartStr;
         const finalEnd = (periodEndStr < todayStr) ? periodEndStr : todayStr;
 
@@ -199,8 +231,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const total = workdaysInPeriod.length;
         if (total === 0) return "0.0";
 
-        const present = presenceDates.filter(dStr => workdaysInPeriod.includes(dStr)).length;
-        return ((present / total) * 100).toFixed(1);
+        // Only count 'present' status
+        const presentCount = workdaysInPeriod.filter(dStr => attendanceLogs[dStr] === 'present').length;
+        return ((presentCount / total) * 100).toFixed(1);
     };
 
     const saveData = () => {
@@ -213,14 +246,12 @@ document.addEventListener('DOMContentLoaded', () => {
         attendanceBody.innerHTML = '';
         let totalPct = 0;
 
-        // Sorting Logic
         let displayUsers = [...users];
         if (isRanked) {
             displayUsers.sort((a, b) => {
-                const pctA = parseFloat(getPeriodPercentage(a.presenceDates, 'overall'));
-                const pctB = parseFloat(getPeriodPercentage(b.presenceDates, 'overall'));
+                const pctA = parseFloat(getPeriodPercentage(a.attendanceLogs, 'overall'));
+                const pctB = parseFloat(getPeriodPercentage(b.attendanceLogs, 'overall'));
 
-                // Special Priority Rule: "I Made Mahendra Wira Dharma" (No. 8) at 100%
                 const priorityName = "I Made Mahendra Wira Dharma";
                 const isMahendraA = (a.name.toLowerCase() === priorityName.toLowerCase() && (a.absence_number === '8' || a.absence_number === '08') && pctA === 100);
                 const isMahendraB = (b.name.toLowerCase() === priorityName.toLowerCase() && (b.absence_number === '8' || b.absence_number === '08') && pctB === 100);
@@ -228,10 +259,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (isMahendraA) return -1;
                 if (isMahendraB) return 1;
 
-                return pctB - pctA; // Standard Descending
+                return pctB - pctA; 
             });
         } else {
-            // Default: Sort by Absence Number numerically
             displayUsers.sort((a, b) => {
                 const numA = parseInt(a.absence_number) || 999;
                 const numB = parseInt(b.absence_number) || 999;
@@ -240,13 +270,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         displayUsers.forEach(user => {
-            const weekly = getPeriodPercentage(user.presenceDates, 'weekly');
-            const monthly = getPeriodPercentage(user.presenceDates, 'monthly');
-            const yearly = getPeriodPercentage(user.presenceDates, 'yearly');
-            const overall = getPeriodPercentage(user.presenceDates, 'overall');
+            const weekly = getPeriodPercentage(user.attendanceLogs, 'weekly');
+            const monthly = getPeriodPercentage(user.attendanceLogs, 'monthly');
+            const yearly = getPeriodPercentage(user.attendanceLogs, 'yearly');
+            const overall = getPeriodPercentage(user.attendanceLogs, 'overall');
             totalPct += parseFloat(overall);
             const todayStr = toLocalISO(new Date());
-            const isPresentToday = user.presenceDates.includes(todayStr);
+            const isPresentToday = user.attendanceLogs[todayStr] === 'present';
             const isWorkdayToday = activeWorkdays.includes(todayStr);
             const row = document.createElement('tr');
             row.innerHTML = `
@@ -309,21 +339,30 @@ document.addEventListener('DOMContentLoaded', () => {
         for (let i = 1; i <= daysInMonth; i++) {
             const date = new Date(year, month, i);
             const dateStr = toLocalISO(date);
-            const isPresent = modalDates.includes(dateStr);
+            const status = modalLogs[dateStr] || 'none';
             const isWorkday = activeWorkdays.includes(dateStr);
             const isFuture = dateStr > todayStr;
             
             const btn = document.createElement('button');
             btn.type = 'button';
-            // Only show active if marked present AND it is an active workday
-            btn.className = `day-btn ${ (isPresent && isWorkday) ? 'active' : ''} ${isFuture ? 'future' : (!isWorkday ? 'disabled' : '')}`;
+            
+            // Only show colors if it is an active workday
+            let statusClass = '';
+            if (isWorkday) {
+                if (status === 'present') statusClass = 'active';
+                else if (status === 'sick') statusClass = 'sick';
+                else if (status === 'permit') statusClass = 'permit';
+                else if (status === 'alpha') statusClass = 'alpha';
+            }
+
+            btn.className = `day-btn ${statusClass} ${isFuture ? 'future' : (!isWorkday ? 'disabled' : '')}`;
             btn.textContent = i;
             
             if (isWorkday && !isFuture) {
                 btn.onclick = () => {
-                    if (modalDates.includes(dateStr)) modalDates = modalDates.filter(d => d !== dateStr);
-                    else modalDates.push(dateStr);
-                    renderHistoryGrid();
+                    pendingStatusDate = dateStr;
+                    if (statusModalDateDisplay) statusModalDateDisplay.textContent = `Status: ${date.toLocaleDateString()}`;
+                    if (statusModal) statusModal.classList.remove('hidden');
                 };
             }
             historyDaysGrid.appendChild(btn);
@@ -399,14 +438,21 @@ document.addEventListener('DOMContentLoaded', () => {
         const absence_number = document.getElementById('user-absence-number').value;
         if (id) {
             const idx = users.findIndex(u => u.id == id);
-            if (idx !== -1) users[idx] = { ...users[idx], name, absence_number, presenceDates: modalDates };
+            if (idx !== -1) users[idx] = { ...users[idx], name, absence_number, attendanceLogs: modalLogs };
         } else {
             const newId = users.length > 0 ? Math.max(...users.map(u => u.id)) + 1 : 1;
-            users.push({ id: newId, name, absence_number, presenceDates: modalDates });
+            users.push({ id: newId, name, absence_number, attendanceLogs: modalLogs });
         }
+        // Sync presenceDates for legacy compatibility
+        users.forEach(u => u.presenceDates = Object.keys(u.attendanceLogs || {}).filter(dStr => u.attendanceLogs[dStr] === 'present'));
+        
         saveData();
         renderTable();
         if (userModal) userModal.classList.add('hidden');
+    });
+
+    if (closeStatusModalBtn) closeStatusModalBtn.addEventListener('click', () => { 
+        if (statusModal) statusModal.classList.add('hidden'); 
     });
     if (startDateInput) startDateInput.addEventListener('change', (e) => {
         const val = new Date(e.target.value).getTime();
@@ -426,19 +472,19 @@ document.addEventListener('DOMContentLoaded', () => {
             if (users.length === 0) return;
             
             // CSV Header
-            let csvContent = "ID,Absence Number,Name,Weekly %,Monthly %,Yearly %,Overall %,Presence Dates\n";
+            let csvContent = "ID,Absence Number,Name,Weekly %,Monthly %,Yearly %,Overall %,Detailed Logs\n";
             
             // CSV Rows
             users.forEach(user => {
-                const weekly = getPeriodPercentage(user.presenceDates, 'weekly');
-                const monthly = getPeriodPercentage(user.presenceDates, 'monthly');
-                const yearly = getPeriodPercentage(user.presenceDates, 'yearly');
-                const overall = getPeriodPercentage(user.presenceDates, 'overall');
+                const weekly = getPeriodPercentage(user.attendanceLogs, 'weekly');
+                const monthly = getPeriodPercentage(user.attendanceLogs, 'monthly');
+                const yearly = getPeriodPercentage(user.attendanceLogs, 'yearly');
+                const overall = getPeriodPercentage(user.attendanceLogs, 'overall');
                 
-                // Quote presence dates to handle commas
-                const datesStr = `"${user.presenceDates.join(", ")}"`;
+                // Format logs as: "2026-01-01:present|2026-01-02:sick"
+                const logsStr = `"${Object.entries(user.attendanceLogs).map(([d, s]) => `${d}:${s}`).join("|")}"`;
                 
-                csvContent += `${user.id},${user.absence_number || user.id},${user.name},${weekly},${monthly},${yearly},${overall},${datesStr}\n`;
+                csvContent += `${user.id},${user.absence_number || user.id},${user.name},${weekly},${monthly},${yearly},${overall},${logsStr}\n`;
             });
             
             // Create Download
@@ -469,7 +515,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 const newUsers = [];
                 for (let i = 1; i < lines.length; i++) {
                     const line = lines[i];
-                    // Robust CSV splitting to handle quoted commas
                     const regex = /(".*?"|[^",]+)(?=\s*,|\s*$)/g;
                     const parts = [];
                     let m;
@@ -481,11 +526,31 @@ document.addEventListener('DOMContentLoaded', () => {
                         const id = parseInt(parts[0]);
                         const absNum = parts[1];
                         const name = parts[2].replace(/"/g, '');
-                        // skip 3,4,5,6 (percents)
-                        let datesRaw = parts[7].replace(/"/g, '');
-                        const presenceDates = datesRaw ? datesRaw.split(',').map(d => d.trim()).filter(d => d !== '') : [];
                         
-                        newUsers.push({ id, name, absence_number: absNum, presenceDates });
+                        let logsRaw = parts[7].replace(/"/g, '');
+                        const attendanceLogs = {};
+                        if (logsRaw) {
+                            if (logsRaw.includes('|') || logsRaw.includes(':')) {
+                                logsRaw.split('|').forEach(entry => {
+                                    const [d, s] = entry.split(':');
+                                    if (d) attendanceLogs[d] = s || 'present';
+                                });
+                            } else {
+                                // Old legacy format (comma separated list of present dates)
+                                logsRaw.split(',').forEach(d => {
+                                    const trimmed = d.trim();
+                                    if (trimmed) attendanceLogs[trimmed] = 'present';
+                                });
+                            }
+                        }
+                        
+                        newUsers.push({ 
+                            id, 
+                            name, 
+                            absence_number: absNum, 
+                            attendanceLogs,
+                            presenceDates: Object.keys(attendanceLogs).filter(d => attendanceLogs[d] === 'present')
+                        });
                     }
                 }
                 
