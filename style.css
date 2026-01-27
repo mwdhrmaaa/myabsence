@@ -591,11 +591,10 @@ input:focus {
 }
 
 .day-btn.future {
-    opacity: 0.15;
-    background: rgba(0, 0, 0, 0.4);
-    border-style: dotted;
-    cursor: default;
-    pointer-events: none;
+    opacity: 0.4;
+    background: rgba(255, 255, 255, 0.02);
+    border-style: dashed;
+    cursor: pointer;
 }
 
 .day-btn.disabled {

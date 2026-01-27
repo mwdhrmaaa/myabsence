@@ -267,7 +267,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const dateStr = date.toISOString().split('T')[0];
             const isPresent = modalDates.includes(dateStr);
             const isWorkday = activeWorkdays.includes(dateStr);
-            const isFuture = date.getTime() > now.getTime();
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const isFuture = date.getTime() > today.getTime();
             const btn = document.createElement('button');
             btn.type = 'button';
             btn.className = `day-btn ${isPresent ? 'active' : ''} ${isFuture ? 'future' : (!isWorkday ? 'disabled' : '')}`;
@@ -293,7 +295,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const date = new Date(year, month, i);
             const dateStr = date.toISOString().split('T')[0];
             const isActive = activeWorkdays.includes(dateStr);
-            const isFuture = date.getTime() > new Date().getTime();
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const isFuture = date.getTime() > today.getTime();
             const btn = document.createElement('button');
             btn.type = 'button';
             btn.className = `day-btn ${isActive ? 'active' : ''} ${isFuture ? 'future' : ''}`;
