@@ -572,7 +572,7 @@ input:focus {
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid var(--card-border);
     border-radius: 0.5rem;
-    color: var(--text-main);
+    color: var(--secondary);
     font-size: 0.8rem;
     font-weight: 500;
     cursor: pointer;
