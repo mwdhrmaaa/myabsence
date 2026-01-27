@@ -374,7 +374,7 @@ input:focus {
 }
 
 /* Modals */
-.modal {
+.modal, .modal-overlay {
     position: fixed;
     top: 0;
     left: 0;
@@ -386,6 +386,10 @@ input:focus {
     align-items: center;
     justify-content: center;
     z-index: 1000;
+}
+
+#status-modal {
+    z-index: 2000; /* Ensure it's above other modals */
 }
 
 .modal-content {
