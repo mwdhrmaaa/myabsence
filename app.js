@@ -159,10 +159,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const now = new Date();
         const programStart = new Date(startDate);
         programStart.setHours(0, 0, 0, 0);
-        const isCurrentMonth = selectedMonth === now.getMonth() && selectedYear === now.getFullYear();
         const endOfSelectedMonth = new Date(selectedYear, selectedMonth + 1, 0);
         endOfSelectedMonth.setHours(23, 59, 59, 999);
-        const periodEndBoundary = isCurrentMonth ? now : endOfSelectedMonth;
+        
+        // Cap the boundary at today's end to prevent future planning from skewing percentages
+        const endOfToday = new Date();
+        endOfToday.setHours(23, 59, 59, 999);
+        
+        const periodEndBoundary = (endOfSelectedMonth.getTime() < endOfToday.getTime()) ? endOfSelectedMonth : endOfToday;
         let periodStart;
         if (type === 'weekly') {
             periodStart = new Date(periodEndBoundary);
@@ -272,7 +276,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const isFuture = date.getTime() > today.getTime();
             const btn = document.createElement('button');
             btn.type = 'button';
-            btn.className = `day-btn ${isPresent ? 'active' : ''} ${isFuture ? 'future' : (!isWorkday ? 'disabled' : '')}`;
+            // Only show 'active' (green) if it is A) marked present AND B) still a valid workday
+            btn.className = `day-btn ${ (isPresent && isWorkday) ? 'active' : ''} ${isFuture ? 'future' : (!isWorkday ? 'disabled' : '')}`;
             btn.textContent = i;
             if (isWorkday && !isFuture) {
                 btn.onclick = () => {
