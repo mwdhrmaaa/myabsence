@@ -155,40 +155,50 @@ document.addEventListener('DOMContentLoaded', () => {
         return diffDays > 0 ? diffDays : 0;
     };
 
+    const toLocalISO = (date) => {
+        const y = date.getFullYear();
+        const m = (date.getMonth() + 1).toString().padStart(2, '0');
+        const d = date.getDate().toString().padStart(2, '0');
+        return `${y}-${m}-${d}`;
+    };
+
     const getPeriodPercentage = (presenceDates, type) => {
         const now = new Date();
-        const programStart = new Date(startDate);
-        programStart.setHours(0, 0, 0, 0);
-        const endOfSelectedMonth = new Date(selectedYear, selectedMonth + 1, 0);
-        endOfSelectedMonth.setHours(23, 59, 59, 999);
+        const todayStr = toLocalISO(now);
+        const programStartStr = toLocalISO(new Date(startDate));
         
-        // Cap the boundary at today's end to prevent future planning from skewing percentages
-        const endOfToday = new Date();
-        endOfToday.setHours(23, 59, 59, 999);
-        
-        const periodEndBoundary = (endOfSelectedMonth.getTime() < endOfToday.getTime()) ? endOfSelectedMonth : endOfToday;
-        let periodStart;
+        // Boundaries
+        let periodStartStr, periodEndStr;
+
         if (type === 'weekly') {
-            periodStart = new Date(periodEndBoundary);
-            const day = periodStart.getDay();
-            const diff = periodStart.getDate() - day + (day === 0 ? -6 : 1);
-            periodStart.setDate(diff);
+            const day = now.getDay();
+            const diff = now.getDate() - day + (day === 0 ? -6 : 1);
+            const monday = new Date(now);
+            monday.setDate(diff);
+            periodStartStr = toLocalISO(monday);
+            periodEndStr = "9999-12-31"; // Use today cap below
         } else if (type === 'monthly') {
-            periodStart = new Date(selectedYear, selectedMonth, 1);
+            periodStartStr = `${selectedYear}-${(selectedMonth + 1).toString().padStart(2, '0')}-01`;
+            periodEndStr = toLocalISO(new Date(selectedYear, selectedMonth + 1, 0));
         } else if (type === 'yearly') {
-            periodStart = new Date(selectedYear, 0, 1);
+            periodStartStr = `${selectedYear}-01-01`;
+            periodEndStr = `${selectedYear}-12-31`;
         } else {
-            periodStart = programStart;
+            periodStartStr = programStartStr;
+            periodEndStr = "9999-12-31";
         }
-        if (periodStart.getTime() < programStart.getTime()) periodStart = programStart;
-        periodStart.setHours(0, 0, 0, 0);
-        const workdaysInPeriod = activeWorkdays.filter(dateStr => {
-            const d = new Date(dateStr);
-            return d.getTime() >= periodStart.getTime() && d.getTime() <= periodEndBoundary.getTime();
-        });
-        if (workdaysInPeriod.length === 0) return "0.0";
-        const presentCount = presenceDates.filter(dateStr => workdaysInPeriod.includes(dateStr)).length;
-        return ((presentCount / workdaysInPeriod.length) * 100).toFixed(1);
+
+        // Adjust boundaries
+        const finalStart = (periodStartStr > programStartStr) ? periodStartStr : programStartStr;
+        const finalEnd = (periodEndStr < todayStr) ? periodEndStr : todayStr;
+
+        const workdaysInPeriod = activeWorkdays.filter(dStr => dStr >= finalStart && dStr <= finalEnd);
+        
+        const total = workdaysInPeriod.length;
+        if (total === 0) return "0.0";
+
+        const present = presenceDates.filter(dStr => workdaysInPeriod.includes(dStr)).length;
+        return ((present / total) * 100).toFixed(1);
     };
 
     const saveData = () => {
@@ -206,7 +216,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const yearly = getPeriodPercentage(user.presenceDates, 'yearly');
             const overall = getPeriodPercentage(user.presenceDates, 'overall');
             totalPct += parseFloat(overall);
-            const todayStr = new Date().toISOString().split('T')[0];
+            const todayStr = toLocalISO(new Date());
             const isPresentToday = user.presenceDates.includes(todayStr);
             const isWorkdayToday = activeWorkdays.includes(todayStr);
             const row = document.createElement('tr');
@@ -263,22 +273,23 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!historyDaysGrid) return;
         historyDaysGrid.innerHTML = '';
         const now = new Date();
+        const todayStr = toLocalISO(now);
         const year = now.getFullYear(), month = now.getMonth();
         const daysInMonth = new Date(year, month + 1, 0).getDate();
-        const todayStr = now.toISOString().split('T')[0];
+        
         for (let i = 1; i <= daysInMonth; i++) {
             const date = new Date(year, month, i);
-            const dateStr = date.toISOString().split('T')[0];
+            const dateStr = toLocalISO(date);
             const isPresent = modalDates.includes(dateStr);
             const isWorkday = activeWorkdays.includes(dateStr);
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            const isFuture = date.getTime() > today.getTime();
+            const isFuture = dateStr > todayStr;
+            
             const btn = document.createElement('button');
             btn.type = 'button';
-            // Only show 'active' (green) if it is A) marked present AND B) still a valid workday
+            // Only show active if marked present AND it is an active workday
             btn.className = `day-btn ${ (isPresent && isWorkday) ? 'active' : ''} ${isFuture ? 'future' : (!isWorkday ? 'disabled' : '')}`;
             btn.textContent = i;
+            
             if (isWorkday && !isFuture) {
                 btn.onclick = () => {
                     if (modalDates.includes(dateStr)) modalDates = modalDates.filter(d => d !== dateStr);
@@ -293,16 +304,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const renderWorkdaysGrid = () => {
         if (!workdaysGrid || !currentMonthDisplay) return;
         workdaysGrid.innerHTML = '';
+        const todayStr = toLocalISO(new Date());
         const year = currentViewDate.getFullYear(), month = currentViewDate.getMonth();
         const daysInMonth = new Date(year, month + 1, 0).getDate();
         currentMonthDisplay.textContent = currentViewDate.toLocaleString('default', { month: 'long', year: 'numeric' });
         for (let i = 1; i <= daysInMonth; i++) {
             const date = new Date(year, month, i);
-            const dateStr = date.toISOString().split('T')[0];
+            const dateStr = toLocalISO(date);
             const isActive = activeWorkdays.includes(dateStr);
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            const isFuture = date.getTime() > today.getTime();
+            const isFuture = dateStr > todayStr;
             const btn = document.createElement('button');
             btn.type = 'button';
             btn.className = `day-btn ${isActive ? 'active' : ''} ${isFuture ? 'future' : ''}`;
