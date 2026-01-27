@@ -599,7 +599,7 @@ input:focus {
 .day-btn.future.active {
     background: rgba(16, 185, 129, 0.1);
     border: 2px dashed var(--secondary);
-    color: var(--secondary);
+    color: white;
     opacity: 1;
     box-shadow: inset 0 0 10px rgba(16, 185, 129, 0.1);
 }
