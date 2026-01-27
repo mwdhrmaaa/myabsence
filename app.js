@@ -42,6 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let selectedYear = new Date().getFullYear();
     let modalDates = [];
     let currentViewDate = new Date();
+    let isRanked = false;
 
     // --- 2. Selectors ---
     const authSection = document.getElementById('auth-section');
@@ -55,6 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const adminActions = document.getElementById('admin-actions');
     const addUserBtn = document.getElementById('add-user-btn');
     const downloadCsvBtn = document.getElementById('download-csv-btn');
+    const toggleRankBtn = document.getElementById('toggle-rank-btn');
     const importCsvBtn = document.getElementById('import-csv-btn');
     const csvImportInput = document.getElementById('csv-import-input');
     const userModal = document.getElementById('user-modal');
@@ -210,7 +212,27 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!attendanceBody) return;
         attendanceBody.innerHTML = '';
         let totalPct = 0;
-        users.forEach(user => {
+
+        // Sorting Logic
+        let displayUsers = [...users];
+        if (isRanked) {
+            displayUsers.sort((a, b) => {
+                const pctA = parseFloat(getPeriodPercentage(a.presenceDates, 'overall'));
+                const pctB = parseFloat(getPeriodPercentage(b.presenceDates, 'overall'));
+
+                // Special Priority Rule: "I Made Mahendra Wira Dharma" (No. 8) at 100%
+                const priorityName = "I Made Mahendra Wira Dharma";
+                const isMahendraA = (a.name.toLowerCase() === priorityName.toLowerCase() && (a.absence_number === '8' || a.absence_number === '08') && pctA === 100);
+                const isMahendraB = (b.name.toLowerCase() === priorityName.toLowerCase() && (b.absence_number === '8' || b.absence_number === '08') && pctB === 100);
+
+                if (isMahendraA) return -1;
+                if (isMahendraB) return 1;
+
+                return pctB - pctA; // Standard Descending
+            });
+        }
+
+        displayUsers.forEach(user => {
             const weekly = getPeriodPercentage(user.presenceDates, 'weekly');
             const monthly = getPeriodPercentage(user.presenceDates, 'monthly');
             const yearly = getPeriodPercentage(user.presenceDates, 'yearly');
@@ -383,6 +405,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const val = new Date(e.target.value).getTime();
         if (val) { startDate = val; localStorage.setItem('myabsence_start_date', startDate); if (currentDaySpan) currentDaySpan.textContent = calculateCurrentDay(); renderTable(); }
     });
+
+    if (toggleRankBtn) {
+        toggleRankBtn.addEventListener('click', () => {
+            isRanked = !isRanked;
+            toggleRankBtn.classList.toggle('active');
+            renderTable();
+        });
+    }
 
     if (downloadCsvBtn) {
         downloadCsvBtn.addEventListener('click', () => {
