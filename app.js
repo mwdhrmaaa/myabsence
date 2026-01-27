@@ -230,6 +230,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 return pctB - pctA; // Standard Descending
             });
+        } else {
+            // Default: Sort by Absence Number numerically
+            displayUsers.sort((a, b) => {
+                const numA = parseInt(a.absence_number) || 999;
+                const numB = parseInt(b.absence_number) || 999;
+                return numA - numB;
+            });
         }
 
         displayUsers.forEach(user => {
