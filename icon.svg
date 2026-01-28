@@ -1,62 +1,57 @@
 <svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <!-- Rich Gradient for the background -->
-    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#1e1b4b;stop-opacity:1" /> <!-- Deep Indigo -->
-      <stop offset="50%" style="stop-color:#312e81;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#065f46;stop-opacity:1" /> <!-- Deep Emerald -->
-    </linearGradient>
+    <!-- Ultra-Deep Radial Gradient for luxury depth -->
+    <radialGradient id="uberGrad" cx="50%" cy="50%" r="70%" fx="50%" fy="50%">
+      <stop offset="0%" style="stop-color:#312e81;stop-opacity:1" /> <!-- Indigo center -->
+      <stop offset="60%" style="stop-color:#1e1b4b;stop-opacity:1" /> <!-- Deepest Indigo -->
+      <stop offset="100%" style="stop-color:#064e3b;stop-opacity:1" /> <!-- Dark Emerald edges -->
+    </radialGradient>
     
-    <!-- Neon Glow Filter -->
-    <filter id="neon" x="-50%" y="-50%" width="200%" height="200%">
-      <feGaussianBlur stdDeviation="8" result="blur" />
-      <feFlood flood-color="white" flood-opacity="0.5" result="glowColor" />
-      <feComposite in="glowColor" in2="blur" operator="in" result="softGlow" />
+    <!-- Sophisticated Layered Glows -->
+    <filter id="neonA" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="3" result="tight"/>
+      <feGaussianBlur stdDeviation="12" result="mid"/>
       <feMerge>
-        <feMergeNode in="softGlow"/>
+        <feMergeNode in="mid"/>
+        <feMergeNode in="tight"/>
         <feMergeNode in="SourceGraphic"/>
       </feMerge>
     </filter>
 
-    <filter id="strongGlow" x="-50%" y="-50%" width="200%" height="200%">
-      <feGaussianBlur stdDeviation="15" result="blur" />
-      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    <filter id="checkGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="15" result="blur"/>
+      <feFlood flood-color="#10b981" flood-opacity="0.6"/>
+      <feComposite in2="blur" operator="in"/>
+      <feMerge>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <filter id="circleGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="10" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
     </filter>
   </defs>
 
-  <!-- Background Layer -->
-  <rect width="512" height="512" fill="url(#bgGrad)" rx="0" ry="0" />
+  <!-- Full-bleed background -->
+  <rect width="512" height="512" fill="url(#uberGrad)" />
 
-  <!-- The Glowing Circle -->
-  <circle cx="256" cy="256" r="200" fill="none" stroke="#6366f1" stroke-width="10" stroke-opacity="0.6" filter="url(#strongGlow)" />
-  <circle cx="256" cy="256" r="200" fill="none" stroke="white" stroke-width="2" stroke-opacity="0.3" />
+  <!-- The Luxury Circle -->
+  <circle cx="256" cy="256" r="215" fill="none" stroke="#6366f1" stroke-width="1.5" stroke-opacity="0.3" />
+  <circle cx="256" cy="256" r="190" fill="none" stroke="#6366f1" stroke-width="8" stroke-opacity="0.4" filter="url(#circleGlow)" />
+  <circle cx="256" cy="256" r="190" fill="none" stroke="white" stroke-width="1.5" stroke-opacity="0.2" />
 
-  <!-- The Main Symbol Group -->
-  <g transform="translate(256, 265)">
-    <!-- Stylized 'A' - Sharp and Modern -->
-    <path d="M-80,105 L0,-105 L80,105 M-55,45 L55,45" 
-          fill="none" 
-          stroke="white" 
-          stroke-width="28" 
-          stroke-linecap="round" 
-          stroke-linejoin="round" 
-          stroke-opacity="0.95" 
-          filter="url(#neon)"/>
-
-    <!-- Integrated Checkmark - Layered on top -->
-    <path d="M-65,25 L-5,90 L115,-45" 
-          fill="none" 
-          stroke="#10b981" 
-          stroke-width="34" 
-          stroke-linecap="round" 
-          stroke-linejoin="round" 
-          filter="url(#strongGlow)"/>
-          
-    <path d="M-65,25 L-5,90 L115,-45" 
-          fill="none" 
-          stroke="#34d399" 
-          stroke-width="12" 
-          stroke-linecap="round" 
-          stroke-linejoin="round" />
+  <!-- Integrated Logo Group -->
+  <g transform="translate(256, 260)">
+    <!-- Stylized Modern 'A' -->
+    <path d="M-85,110 L0,-110 L85,110" fill="none" stroke="white" stroke-width="26" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="0.8" filter="url(#neonA)"/>
+    <path d="M-55,45 L55,45" fill="none" stroke="white" stroke-width="22" stroke-linecap="round" stroke-opacity="0.8" filter="url(#neonA)"/>
+    
+    <!-- The Hero Checkmark -->
+    <path d="M-70,30 L-5,95 L125,-40" fill="none" stroke="#10b981" stroke-width="32" stroke-linecap="round" stroke-linejoin="round" filter="url(#checkGlow)"/>
+    <path d="M-70,30 L-5,95 L125,-40" fill="none" stroke="#34d399" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" />
   </g>
 </svg>
