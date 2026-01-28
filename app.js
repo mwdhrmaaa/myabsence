@@ -474,8 +474,25 @@ document.addEventListener('DOMContentLoaded', () => {
             // CSV Header
             let csvContent = "ID,Absence Number,Name,Weekly %,Monthly %,Yearly %,Overall %,Detailed Logs\n";
             
+            // Sort data for CSV Export (Legend Priority Rule)
+            let exportUsers = [...users];
+            exportUsers.sort((a, b) => {
+                const pctA = parseFloat(getPeriodPercentage(a.attendanceLogs, 'overall'));
+                const pctB = parseFloat(getPeriodPercentage(b.attendanceLogs, 'overall'));
+                const priorityName = "I Made Mahendra Wira Dharma";
+                
+                const isMahendraA = (a.name.toLowerCase() === priorityName.toLowerCase() && (a.absence_number === '8' || a.absence_number === '08') && pctA === 100);
+                const isMahendraB = (b.name.toLowerCase() === priorityName.toLowerCase() && (b.name.toLowerCase() === priorityName.toLowerCase() && (b.absence_number === '8' || b.absence_number === '08') && pctB === 100));
+
+                if (isMahendraA) return -1;
+                if (isMahendraB) return 1;
+
+                // Default sort by Absence Number
+                return (parseInt(a.absence_number) || 999) - (parseInt(b.absence_number) || 999);
+            });
+
             // CSV Rows
-            users.forEach(user => {
+            exportUsers.forEach(user => {
                 const weekly = getPeriodPercentage(user.attendanceLogs, 'weekly');
                 const monthly = getPeriodPercentage(user.attendanceLogs, 'monthly');
                 const yearly = getPeriodPercentage(user.attendanceLogs, 'yearly');
