@@ -501,7 +501,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (importCsvBtn && csvImportInput) {
-        importCsvBtn.addEventListener('click', () => csvImportInput.click());
+        importCsvBtn.addEventListener('click', () => {
+            // Reset input value to allow re-selecting the same file
+            csvImportInput.value = '';
+            csvImportInput.click();
+        });
+        
         csvImportInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (!file) return;
@@ -509,15 +514,18 @@ document.addEventListener('DOMContentLoaded', () => {
             const reader = new FileReader();
             reader.onload = (event) => {
                 const text = event.target.result;
-                // Use robust line splitting for mobile compatibility
+                if (!text) {
+                    alert("Empty file content.");
+                    return;
+                }
+
                 const lines = text.split(/\r?\n/).filter(l => l.trim() !== '');
                 if (lines.length < 2) {
-                    alert("The file seems empty or in an invalid format.");
+                    alert("Not enough data in file (found " + lines.length + " lines).");
                     return;
                 }
                 
                 const newUsers = [];
-                // Simple but robust CSV parser to handle quotes without complex lookahead
                 const parseCsvLine = (csvLine) => {
                     const result = [];
                     let cur = "";
@@ -533,55 +541,52 @@ document.addEventListener('DOMContentLoaded', () => {
                     return result;
                 };
 
-                for (let i = 1; i < lines.length; i++) {
-                    const parts = parseCsvLine(lines[i]);
-
-                    if (parts.length >= 8) {
-                        const id = parseInt(parts[0]);
-                        const absNum = parts[1];
-                        const name = parts[2].replace(/"/g, '');
-                        
-                        let logsRaw = parts[7].replace(/"/g, '');
-                        const attendanceLogs = {};
-                        if (logsRaw) {
-                            if (logsRaw.includes('|') || logsRaw.includes(':')) {
-                                logsRaw.split('|').forEach(entry => {
-                                    const entryParts = entry.split(':');
-                                    const d = entryParts[0];
-                                    const s = entryParts[1] || 'present';
-                                    if (d) attendanceLogs[d] = s;
-                                });
-                            } else {
-                                logsRaw.split(',').forEach(d => {
-                                    const trimmed = d.trim();
-                                    if (trimmed) attendanceLogs[trimmed] = 'present';
-                                });
+                try {
+                    for (let i = 1; i < lines.length; i++) {
+                        const parts = parseCsvLine(lines[i]);
+                        if (parts.length >= 8) {
+                            const id = parseInt(parts[0]) || (Date.now() + i);
+                            const absNum = parts[1] || '00';
+                            const name = parts[2].replace(/"/g, '') || "Unkown";
+                            
+                            let logsRaw = (parts[7] || "").replace(/"/g, '');
+                            const attendanceLogs = {};
+                            if (logsRaw) {
+                                if (logsRaw.includes('|') || logsRaw.includes(':')) {
+                                    logsRaw.split('|').forEach(entry => {
+                                        const entryParts = entry.split(':');
+                                        if (entryParts[0]) attendanceLogs[entryParts[0]] = entryParts[1] || 'present';
+                                    });
+                                } else {
+                                    logsRaw.split(',').forEach(d => {
+                                        const trimmed = d.trim();
+                                        if (trimmed) attendanceLogs[trimmed] = 'present';
+                                    });
+                                }
                             }
+                            newUsers.push({ id, name, absence_number: absNum, attendanceLogs });
                         }
-                        
-                        newUsers.push({ 
-                            id, 
-                            name, 
-                            absence_number: absNum, 
-                            attendanceLogs,
-                            presenceDates: Object.keys(attendanceLogs).filter(d => attendanceLogs[d] === 'present')
-                        });
                     }
-                }
-                
-                if (newUsers.length > 0) {
-                    if (confirm(`Data for ${newUsers.length} users found. Restore now? Current data will be replaced.`)) {
-                        users = newUsers;
-                        saveData();
-                        renderTable();
-                        alert("Data successfully restored! 🚀");
+
+                    if (newUsers.length > 0) {
+                        if (confirm("Found " + newUsers.length + " users. Restore current data with this file?")) {
+                            // Update core data
+                            users = newUsers.map(u => ({
+                                ...u,
+                                presenceDates: Object.keys(u.attendanceLogs).filter(d => u.attendanceLogs[d] === 'present')
+                            }));
+                            saveData();
+                            renderTable();
+                            alert("Restore Successful! 🚀");
+                        }
+                    } else {
+                        alert("No valid user records found in this CSV.");
                     }
-                } else {
-                    alert("Could not find any valid user data in this CSV file.");
+                } catch (err) {
+                    alert("Error processing CSV: " + err.message);
                 }
-                csvImportInput.value = '';
             };
-            reader.onerror = () => alert("Error reading the file.");
+            reader.onerror = () => alert("FileReader Error: " + reader.error);
             reader.readAsText(file);
         });
     }
