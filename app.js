@@ -509,18 +509,32 @@ document.addEventListener('DOMContentLoaded', () => {
             const reader = new FileReader();
             reader.onload = (event) => {
                 const text = event.target.result;
-                const lines = text.split('\n').filter(l => l.trim() !== '');
-                if (lines.length < 2) return;
+                // Use robust line splitting for mobile compatibility
+                const lines = text.split(/\r?\n/).filter(l => l.trim() !== '');
+                if (lines.length < 2) {
+                    alert("The file seems empty or in an invalid format.");
+                    return;
+                }
                 
                 const newUsers = [];
-                for (let i = 1; i < lines.length; i++) {
-                    const line = lines[i];
-                    const regex = /(".*?"|[^",]+)(?=\s*,|\s*$)/g;
-                    const parts = [];
-                    let m;
-                    while ((m = regex.exec(line)) !== null) {
-                        parts.push(m[0].trim());
+                // Simple but robust CSV parser to handle quotes without complex lookahead
+                const parseCsvLine = (csvLine) => {
+                    const result = [];
+                    let cur = "";
+                    let inQuotes = false;
+                    for (let char of csvLine) {
+                        if (char === '"') inQuotes = !inQuotes;
+                        else if (char === ',' && !inQuotes) {
+                            result.push(cur.trim());
+                            cur = "";
+                        } else cur += char;
                     }
+                    result.push(cur.trim());
+                    return result;
+                };
+
+                for (let i = 1; i < lines.length; i++) {
+                    const parts = parseCsvLine(lines[i]);
 
                     if (parts.length >= 8) {
                         const id = parseInt(parts[0]);
@@ -532,11 +546,12 @@ document.addEventListener('DOMContentLoaded', () => {
                         if (logsRaw) {
                             if (logsRaw.includes('|') || logsRaw.includes(':')) {
                                 logsRaw.split('|').forEach(entry => {
-                                    const [d, s] = entry.split(':');
-                                    if (d) attendanceLogs[d] = s || 'present';
+                                    const entryParts = entry.split(':');
+                                    const d = entryParts[0];
+                                    const s = entryParts[1] || 'present';
+                                    if (d) attendanceLogs[d] = s;
                                 });
                             } else {
-                                // Old legacy format (comma separated list of present dates)
                                 logsRaw.split(',').forEach(d => {
                                     const trimmed = d.trim();
                                     if (trimmed) attendanceLogs[trimmed] = 'present';
@@ -555,14 +570,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 
                 if (newUsers.length > 0) {
-                    if (confirm(`Restore ${newUsers.length} users? This will replace current data.`)) {
+                    if (confirm(`Data for ${newUsers.length} users found. Restore now? Current data will be replaced.`)) {
                         users = newUsers;
                         saveData();
                         renderTable();
+                        alert("Data successfully restored! 🚀");
                     }
+                } else {
+                    alert("Could not find any valid user data in this CSV file.");
                 }
                 csvImportInput.value = '';
             };
+            reader.onerror = () => alert("Error reading the file.");
             reader.readAsText(file);
         });
     }
