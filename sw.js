@@ -1,4 +1,4 @@
-const CACHE_NAME = 'myabsence-cache-v1';
+const CACHE_NAME = 'myabsence-cache-v2';
 const urlsToCache = [
   './',
   './index.html',
