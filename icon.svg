@@ -1,27 +1,62 @@
 <svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
   <defs>
+    <!-- Rich Gradient for the background -->
     <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#0f172a;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#10b981;stop-opacity:1" />
+      <stop offset="0%" style="stop-color:#1e1b4b;stop-opacity:1" /> <!-- Deep Indigo -->
+      <stop offset="50%" style="stop-color:#312e81;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#065f46;stop-opacity:1" /> <!-- Deep Emerald -->
     </linearGradient>
-    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-      <feGaussianBlur stdDeviation="12" result="blur" />
+    
+    <!-- Neon Glow Filter -->
+    <filter id="neon" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="8" result="blur" />
+      <feFlood flood-color="white" flood-opacity="0.5" result="glowColor" />
+      <feComposite in="glowColor" in2="blur" operator="in" result="softGlow" />
+      <feMerge>
+        <feMergeNode in="softGlow"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <filter id="strongGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="15" result="blur" />
       <feComposite in="SourceGraphic" in2="blur" operator="over" />
     </filter>
   </defs>
-  <!-- Full-bleed background -->
-  <rect width="512" height="512" fill="url(#bgGrad)" />
-  
-  <!-- Sophisticated Double Ring -->
-  <circle cx="256" cy="256" r="225" fill="none" stroke="white" stroke-width="2" stroke-opacity="0.1" />
-  <circle cx="256" cy="256" r="195" fill="none" stroke="#6366f1" stroke-width="8" stroke-opacity="0.5" filter="url(#glow)" />
-  
-  <!-- Centered 'A' and Checkmark Integration -->
-  <g transform="translate(256, 260)">
-    <!-- Stylized A -->
-    <path d="M-90,110 L0,-110 L90,110 M-60,40 L60,40" fill="none" stroke="white" stroke-width="26" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="0.9" filter="url(#glow)"/>
-    
-    <!-- Bold Integrated Checkmark -->
-    <path d="M-60,30 L0,90 L120,-50" fill="none" stroke="#10b981" stroke-width="32" stroke-linecap="round" stroke-linejoin="round" filter="url(#glow)"/>
+
+  <!-- Background Layer -->
+  <rect width="512" height="512" fill="url(#bgGrad)" rx="0" ry="0" />
+
+  <!-- The Glowing Circle -->
+  <circle cx="256" cy="256" r="200" fill="none" stroke="#6366f1" stroke-width="10" stroke-opacity="0.6" filter="url(#strongGlow)" />
+  <circle cx="256" cy="256" r="200" fill="none" stroke="white" stroke-width="2" stroke-opacity="0.3" />
+
+  <!-- The Main Symbol Group -->
+  <g transform="translate(256, 265)">
+    <!-- Stylized 'A' - Sharp and Modern -->
+    <path d="M-80,105 L0,-105 L80,105 M-55,45 L55,45" 
+          fill="none" 
+          stroke="white" 
+          stroke-width="28" 
+          stroke-linecap="round" 
+          stroke-linejoin="round" 
+          stroke-opacity="0.95" 
+          filter="url(#neon)"/>
+
+    <!-- Integrated Checkmark - Layered on top -->
+    <path d="M-65,25 L-5,90 L115,-45" 
+          fill="none" 
+          stroke="#10b981" 
+          stroke-width="34" 
+          stroke-linecap="round" 
+          stroke-linejoin="round" 
+          filter="url(#strongGlow)"/>
+          
+    <path d="M-65,25 L-5,90 L115,-45" 
+          fill="none" 
+          stroke="#34d399" 
+          stroke-width="12" 
+          stroke-linecap="round" 
+          stroke-linejoin="round" />
   </g>
 </svg>
