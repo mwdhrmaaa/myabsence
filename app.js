@@ -191,12 +191,12 @@ document.addEventListener('DOMContentLoaded', () => {
         return diffDays > 0 ? diffDays : 0;
     };
 
-    const toLocalISO = (date) => {
+    function toLocalISO(date) {
         const y = date.getFullYear();
         const m = (date.getMonth() + 1).toString().padStart(2, '0');
         const d = date.getDate().toString().padStart(2, '0');
         return `${y}-${m}-${d}`;
-    };
+    }
 
     const getPeriodPercentage = (attendanceLogs, type) => {
         const now = new Date();
