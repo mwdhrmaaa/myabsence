@@ -185,8 +185,11 @@
                     </div>
                     <div class="sync-code-box">
                         <label>KODE SINKRONISASI ANDA:</label>
-                        <div class="code-copy-wrapper">
+                        <div class="code-wrapper">
                             <span id="active-sync-code" class="code-large">ABC123DEF456</span>
+                            <button type="button" id="toggle-code-visibility-btn" class="btn-toggle-eye" title="Sembunyikan / Tampilkan Kode">👁️</button>
+                        </div>
+                        <div class="code-copy-wrapper" style="margin-top: 0.85rem;">
                             <button type="button" id="copy-code-modal-btn" class="btn-primary btn-copy-code">📋 Salin Kode</button>
                         </div>
                     </div>
@@ -244,6 +247,19 @@
                     <button type="button" style="background:#ef4444; border:none; color:white; padding:0.8rem; border-radius:0.75rem; font-weight:600; cursor:pointer;" onclick="confirmStatus('alpha')">❌ Alpha</button>
                     <button type="button" class="btn-outline" onclick="confirmStatus('none')" style="margin-top: 0.5rem;">Reset Status</button>
                     <button type="button" class="btn-outline" id="close-status-modal" style="border-color:rgba(255,255,255,0.1); margin-top:0.5rem;">Cancel</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Custom Confirmation Modal -->
+        <div id="confirm-modal" class="modal-overlay hidden">
+            <div class="modal-content glass-card confirm-modal-content">
+                <div class="confirm-modal-icon" id="confirm-modal-icon">🔌</div>
+                <h2 id="confirm-modal-title">Putuskan Sinkronisasi?</h2>
+                <p id="confirm-modal-msg" class="confirm-modal-desc">Data di perangkat ini tetap aman, tapi tidak akan tersinkron lagi sampai dihubungkan kembali.</p>
+                <div class="modal-actions confirm-modal-actions">
+                    <button type="button" id="confirm-modal-cancel-btn" class="btn-outline">Batal</button>
+                    <button type="button" id="confirm-modal-ok-btn" class="btn-primary btn-danger-solid">Ya, Putuskan</button>
                 </div>
             </div>
         </div>

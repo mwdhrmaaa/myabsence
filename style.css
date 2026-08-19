@@ -838,11 +838,11 @@ input:focus {
     margin-bottom: 0.6rem;
 }
 
-.code-copy-wrapper {
+.code-wrapper {
     display: flex;
-    flex-direction: column;
     align-items: center;
-    gap: 0.85rem;
+    justify-content: center;
+    gap: 0.75rem;
 }
 
 .code-large {
@@ -852,6 +852,32 @@ input:focus {
     color: #a5b4fc;
     font-family: monospace;
     text-shadow: 0 0 12px rgba(99, 102, 241, 0.5);
+    transition: all 0.2s;
+}
+
+.btn-toggle-eye {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: white;
+    font-size: 1.1rem;
+    padding: 0.35rem 0.55rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    line-height: 1;
+    transition: all 0.2s;
+}
+
+.btn-toggle-eye:hover {
+    background: rgba(99, 102, 241, 0.3);
+    border-color: var(--primary);
+    transform: scale(1.08);
+}
+
+.code-copy-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.85rem;
 }
 
 .btn-copy-code {
@@ -907,6 +933,59 @@ input:focus {
 .btn-danger-soft:hover {
     background: rgba(239, 68, 68, 0.15);
     border-color: #ef4444;
+}
+
+/* ================================================
+   Custom Confirmation Modal
+   ================================================ */
+.confirm-modal-content {
+    max-width: 360px;
+    width: 90%;
+    text-align: center;
+    padding: 2rem 1.5rem 1.5rem;
+    animation: fadeIn 0.2s ease-out;
+}
+
+.confirm-modal-icon {
+    font-size: 2.75rem;
+    margin-bottom: 0.75rem;
+    line-height: 1;
+}
+
+.confirm-modal-content h2 {
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+}
+
+.confirm-modal-desc {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+    margin-bottom: 1.25rem;
+}
+
+.confirm-modal-actions {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: center;
+}
+
+.confirm-modal-actions button {
+    flex: 1;
+    padding: 0.65rem 1rem;
+}
+
+.btn-danger-solid {
+    background: #ef4444 !important;
+    color: white !important;
+    border: none !important;
+    font-weight: 700 !important;
+    box-shadow: 0 2px 10px rgba(239, 68, 68, 0.35) !important;
+}
+
+.btn-danger-solid:hover {
+    background: #dc2626 !important;
+    box-shadow: 0 4px 15px rgba(239, 68, 68, 0.55) !important;
 }
 
 /* ================================================

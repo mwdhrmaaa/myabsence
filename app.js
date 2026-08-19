@@ -67,11 +67,11 @@ document.addEventListener('DOMContentLoaded', () => {
     let syncCode = localStorage.getItem('myabsence_sync_code') || null;
     let isDragging = false;
     let dragMode = null; // 'add' or 'remove'
+    let isCodeHidden = false;
 
     // --- 2. Selectors ---
     const authSection = document.getElementById('auth-section');
     const dashboardSection = document.getElementById('dashboard-section');
-    const enterBtn = document.getElementById('enter-btn');
     const displayName = document.getElementById('display-name');
     const logoutBtn = document.getElementById('logout-btn');
     const currentDaySpan = document.getElementById('current-day');
@@ -119,6 +119,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const syncConnectedView = document.getElementById('sync-connected-view');
     const syncDisconnectedView = document.getElementById('sync-disconnected-view');
     const activeSyncCode = document.getElementById('active-sync-code');
+    const toggleCodeVisibilityBtn = document.getElementById('toggle-code-visibility-btn');
     const copyCodeModalBtn = document.getElementById('copy-code-modal-btn');
     const disconnectSyncBtn = document.getElementById('disconnect-sync-btn');
     const closeSyncModalBtn = document.getElementById('close-sync-modal-btn');
@@ -126,6 +127,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalGenerateCodeBtn = document.getElementById('modal-generate-code-btn');
     const modalSyncCodeInput = document.getElementById('modal-sync-code-input');
     const modalConnectCodeBtn = document.getElementById('modal-connect-code-btn');
+
+    // Custom Confirmation Modal selectors
+    const confirmModal = document.getElementById('confirm-modal');
+    const confirmModalTitle = document.getElementById('confirm-modal-title');
+    const confirmModalMsg = document.getElementById('confirm-modal-msg');
+    const confirmModalIcon = document.getElementById('confirm-modal-icon');
+    const confirmModalCancelBtn = document.getElementById('confirm-modal-cancel-btn');
+    const confirmModalOkBtn = document.getElementById('confirm-modal-ok-btn');
+    let onConfirmAction = null;
 
     // --- 3. Global Actions ---
 
@@ -422,7 +432,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (syncCode) {
                     navSyncBtn.classList.add('connected');
                     if (navSyncIcon) navSyncIcon.textContent = '🟢 🔑';
-                    if (navSyncLabel) navSyncLabel.textContent = syncCode;
+                    if (navSyncLabel) navSyncLabel.textContent = isCodeHidden ? '••••••••••••' : syncCode;
                 } else {
                     navSyncBtn.classList.remove('connected');
                     if (navSyncIcon) navSyncIcon.textContent = '🔗';
@@ -433,12 +443,32 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    const renderSyncCodeDisplay = () => {
+        if (!activeSyncCode) return;
+        if (isCodeHidden) {
+            activeSyncCode.textContent = '••••••••••••';
+            if (toggleCodeVisibilityBtn) {
+                toggleCodeVisibilityBtn.textContent = '🙈';
+                toggleCodeVisibilityBtn.title = 'Tampilkan Kode';
+            }
+        } else {
+            activeSyncCode.textContent = syncCode || '';
+            if (toggleCodeVisibilityBtn) {
+                toggleCodeVisibilityBtn.textContent = '👁️';
+                toggleCodeVisibilityBtn.title = 'Sembunyikan Kode';
+            }
+        }
+        if (navSyncLabel && syncCode) {
+            navSyncLabel.textContent = isCodeHidden ? '••••••••••••' : syncCode;
+        }
+    };
+
     const openSyncModal = () => {
         if (!syncModal) return;
         if (syncCode) {
             if (syncConnectedView) syncConnectedView.classList.remove('hidden');
             if (syncDisconnectedView) syncDisconnectedView.classList.add('hidden');
-            if (activeSyncCode) activeSyncCode.textContent = syncCode;
+            renderSyncCodeDisplay();
         } else {
             if (syncConnectedView) syncConnectedView.classList.add('hidden');
             if (syncDisconnectedView) syncDisconnectedView.classList.remove('hidden');
@@ -579,7 +609,13 @@ document.addEventListener('DOMContentLoaded', () => {
     if (enterWithCodeBtn) enterWithCodeBtn.addEventListener('click', async () => {
         const raw = syncCodeInput ? syncCodeInput.value.trim().toUpperCase() : '';
         if (!/^[A-Z0-9]{12}$/.test(raw)) {
-            alert('Kode harus tepat 12 karakter (huruf A-Z dan angka 0-9).');
+            showCustomConfirm({
+                title: 'Format Kode Salah',
+                message: 'Kode harus tepat 12 karakter kombinasi huruf A-Z dan angka 0-9.',
+                icon: '⚠️',
+                okText: 'Mengerti',
+                onOk: () => {}
+            });
             return;
         }
         enterWithCodeBtn.textContent = 'Memuat data...';
@@ -588,11 +624,25 @@ document.addEventListener('DOMContentLoaded', () => {
         enterWithCodeBtn.textContent = '🔑 Masuk dengan Kode';
         enterWithCodeBtn.disabled = false;
         if (!found) {
-            if (!confirm(`Kode "${raw}" belum ada di server.\n\nMau buat sesi baru dengan kode ini?`)) return;
+            showCustomConfirm({
+                title: 'Kode Belum Terdaftar',
+                message: `Kode "${raw}" belum ada di server. Mau buat sesi baru dengan kode ini?`,
+                icon: '🔑',
+                okText: 'Buat Sesi Baru',
+                onOk: () => {
+                    syncCode = raw;
+                    localStorage.setItem('myabsence_sync_code', syncCode);
+                    currentUser = { name: 'Admin', role: 'admin' };
+                    localStorage.setItem('myabsence_user', JSON.stringify(currentUser));
+                    pushSync();
+                    updateUI();
+                }
+            });
+            return;
         }
         syncCode = raw;
         localStorage.setItem('myabsence_sync_code', syncCode);
-        currentUser = { name: 'Sensei!', role: 'admin' };
+        currentUser = { name: 'Admin', role: 'admin' };
         localStorage.setItem('myabsence_user', JSON.stringify(currentUser));
         pushSync();
         updateUI();
@@ -602,14 +652,43 @@ document.addEventListener('DOMContentLoaded', () => {
     if (generateCodeBtn) generateCodeBtn.addEventListener('click', () => {
         const code = generateSyncCode();
         if (syncCodeInput) syncCodeInput.value = code;
-        if (confirm(`Kode baru berhasil dibuat:\n\n${code}\n\nCatat kode ini! Klik OK untuk masuk.`)) {
-            syncCode = code;
-            localStorage.setItem('myabsence_sync_code', syncCode);
-            currentUser = { name: 'Sensei!', role: 'admin' };
-            localStorage.setItem('myabsence_user', JSON.stringify(currentUser));
-            pushSync();
-            updateUI();
+        showCustomConfirm({
+            title: 'Kode Baru Berhasil Dibuat! ✨',
+            message: `Kode Anda: ${code}\n\nGunakan kode ini di perangkat lain untuk sinkronisasi. Klik Lanjut untuk masuk ke Dashboard.`,
+            icon: '🔑',
+            okText: 'Lanjut ke Dashboard',
+            onOk: () => {
+                syncCode = code;
+                localStorage.setItem('myabsence_sync_code', syncCode);
+                currentUser = { name: 'Admin', role: 'admin' };
+                localStorage.setItem('myabsence_user', JSON.stringify(currentUser));
+                pushSync();
+                updateUI();
+            }
+        });
+    });
+
+    // --- Custom Confirmation Modal Helpers ---
+    const showCustomConfirm = ({ title, message, icon = '⚠️', okText = 'Ya, Lanjutkan', onOk }) => {
+        if (confirmModalTitle) confirmModalTitle.textContent = title;
+        if (confirmModalMsg) confirmModalMsg.textContent = message;
+        if (confirmModalIcon) confirmModalIcon.textContent = icon;
+        if (confirmModalOkBtn) confirmModalOkBtn.textContent = okText;
+        onConfirmAction = onOk;
+        if (confirmModal) confirmModal.classList.remove('hidden');
+    };
+
+    const closeCustomConfirm = () => {
+        if (confirmModal) confirmModal.classList.add('hidden');
+        onConfirmAction = null;
+    };
+
+    if (confirmModalCancelBtn) confirmModalCancelBtn.addEventListener('click', closeCustomConfirm);
+    if (confirmModalOkBtn) confirmModalOkBtn.addEventListener('click', () => {
+        if (typeof onConfirmAction === 'function') {
+            onConfirmAction();
         }
+        closeCustomConfirm();
     });
 
     // --- Sync Modal Event Handlers ---
@@ -617,6 +696,14 @@ document.addEventListener('DOMContentLoaded', () => {
     if (headerSyncBtn) headerSyncBtn.addEventListener('click', openSyncModal);
     if (closeSyncModalBtn) closeSyncModalBtn.addEventListener('click', closeSyncModal);
     if (closeSyncModalBtn2) closeSyncModalBtn2.addEventListener('click', closeSyncModal);
+
+    // Toggle sembunyikan/tampilkan kode
+    if (toggleCodeVisibilityBtn) {
+        toggleCodeVisibilityBtn.addEventListener('click', () => {
+            isCodeHidden = !isCodeHidden;
+            renderSyncCodeDisplay();
+        });
+    }
 
     // Salin kode di dalam modal
     if (copyCodeModalBtn) copyCodeModalBtn.addEventListener('click', () => {
@@ -652,7 +739,20 @@ document.addEventListener('DOMContentLoaded', () => {
         modalConnectCodeBtn.textContent = '🔑 Hubungkan dengan Kode';
         modalConnectCodeBtn.disabled = false;
         if (!found) {
-            if (!confirm(`Kode "${raw}" belum ada di server.\n\nMau buat sesi baru dengan kode ini?`)) return;
+            showCustomConfirm({
+                title: 'Kode Belum Terdaftar',
+                message: `Kode "${raw}" belum ada di server. Apakah Anda ingin membuat sesi baru dengan kode ini?`,
+                icon: '🔑',
+                okText: 'Buat Sesi Baru',
+                onOk: () => {
+                    syncCode = raw;
+                    localStorage.setItem('myabsence_sync_code', syncCode);
+                    pushSync();
+                    updateUI();
+                    openSyncModal();
+                }
+            });
+            return;
         }
         syncCode = raw;
         localStorage.setItem('myabsence_sync_code', syncCode);
@@ -661,14 +761,20 @@ document.addEventListener('DOMContentLoaded', () => {
         openSyncModal();
     });
 
-    // Putuskan sinkronisasi
+    // Putuskan sinkronisasi dengan custom confirmation modal
     if (disconnectSyncBtn) disconnectSyncBtn.addEventListener('click', () => {
-        if (confirm('Yakin ingin memutuskan sinkronisasi?\nData di perangkat ini tetap aman, tapi tidak akan tersinkron lagi sampai dihubungkan kembali.')) {
-            syncCode = null;
-            localStorage.removeItem('myabsence_sync_code');
-            updateUI();
-            openSyncModal();
-        }
+        showCustomConfirm({
+            title: 'Putuskan Sinkronisasi?',
+            message: 'Data di perangkat ini tetap aman, tapi tidak akan tersinkron lagi dengan perangkat lain sampai dihubungkan kembali.',
+            icon: '🔌',
+            okText: 'Ya, Putuskan',
+            onOk: () => {
+                syncCode = null;
+                localStorage.removeItem('myabsence_sync_code');
+                updateUI();
+                openSyncModal();
+            }
+        });
     });
 
     if (logoutBtn) logoutBtn.addEventListener('click', () => {
