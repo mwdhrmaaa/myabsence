@@ -126,10 +126,14 @@
                     </div>
                     <div class="input-group">
                         <div class="history-toggle-header" id="history-toggle">
-                            <label>Attendance History (Current Month)</label>
+                            <label>Attendance History</label>
                             <span class="arrow-icon">▼</span>
                         </div>
                         <div id="history-grid-container" class="history-grid-content hidden">
+                            <div class="input-group-inline" style="margin-bottom: 1rem; justify-content: space-between;">
+                                <label for="history-month-select" style="margin-bottom: 0;">Pilih Bulan:</label>
+                                <select id="history-month-select" class="glass-select" style="width: 100%; max-width: 200px;"></select>
+                            </div>
                             <p class="history-info">Click to toggle presence for previous days</p>
                             <div id="history-days-grid" class="days-grid">
                                 <!-- Days 1-31 will be injected here -->

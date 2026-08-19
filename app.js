@@ -55,6 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentViewDate = new Date();
     let isRanked = false;
     let pendingStatusDate = null;
+    let historySelectedMonth = new Date().getMonth();
 
     // --- 2. Selectors ---
     const authSection = document.getElementById('auth-section');
@@ -93,6 +94,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const statusModal = document.getElementById('status-modal');
     const statusModalDateDisplay = document.getElementById('status-modal-date');
     const closeStatusModalBtn = document.getElementById('close-status-modal');
+    const historyMonthSelect = document.getElementById('history-month-select');
 
     // --- 3. Global Actions ---
 
@@ -138,6 +140,9 @@ document.addEventListener('DOMContentLoaded', () => {
         modalLogs = { ...user.attendanceLogs };
         // Sync modalDates for backward compatibility of UI logic if any remains
         modalDates = Object.keys(modalLogs).filter(dStr => modalLogs[dStr] === 'present');
+
+        historySelectedMonth = new Date().getMonth();
+        initHistoryMonthSelect();
 
         if (historyToggle) historyToggle.classList.remove('active');
         if (historyGridContainer) historyGridContainer.classList.add('hidden');
@@ -328,12 +333,23 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    const initHistoryMonthSelect = () => {
+        if (!historyMonthSelect) return;
+        const currentRealMonth = new Date().getMonth();
+        const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+        historyMonthSelect.innerHTML = months.map((m, i) => {
+            const label = i === currentRealMonth ? `${m} (Bulan Ini)` : m;
+            return `<option value="${i}" ${i === historySelectedMonth ? 'selected' : ''}>${label}</option>`;
+        }).join('');
+    };
+
     const renderHistoryGrid = () => {
         if (!historyDaysGrid) return;
         historyDaysGrid.innerHTML = '';
         const now = new Date();
         const todayStr = toLocalISO(now);
-        const year = now.getFullYear(), month = now.getMonth();
+        const year = now.getFullYear();
+        const month = historySelectedMonth;
         const daysInMonth = new Date(year, month + 1, 0).getDate();
         
         for (let i = 1; i <= daysInMonth; i++) {
@@ -426,10 +442,20 @@ document.addEventListener('DOMContentLoaded', () => {
         if (editIdInput) editIdInput.value = '';
         if (userForm) userForm.reset();
         modalDates = [];
+        modalLogs = {};
+        historySelectedMonth = new Date().getMonth();
+        initHistoryMonthSelect();
         if (historyToggle) historyToggle.classList.remove('active');
         if (historyGridContainer) historyGridContainer.classList.add('hidden');
         if (userModal) userModal.classList.remove('hidden');
     });
+
+    if (historyMonthSelect) {
+        historyMonthSelect.addEventListener('change', (e) => {
+            historySelectedMonth = parseInt(e.target.value);
+            renderHistoryGrid();
+        });
+    }
     if (closeModalBtn) closeModalBtn.addEventListener('click', () => { if (userModal) userModal.classList.add('hidden'); });
     if (userForm) userForm.addEventListener('submit', (e) => {
         e.preventDefault();
