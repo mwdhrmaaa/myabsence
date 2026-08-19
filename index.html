@@ -23,12 +23,28 @@
                 <span class="watermark">CreateBy:MahendraWiraDharma</span>
                 <p>Advanced Attendance Monitoring System</p>
                 <div class="entry-gate">
-                    <button id="enter-btn" class="btn-primary gateway-btn">
-                        Enter MyAbsence Dashboard
-                    </button>
-                    <p class="gateway-info">
-                        Control everything with one click.
-                    </p>
+                    <div class="sync-tabs">
+                        <button class="sync-tab active" id="tab-direct">Masuk Langsung</button>
+                        <button class="sync-tab" id="tab-sync">Pakai Kode Sinkron</button>
+                    </div>
+                    <!-- Panel: Masuk Langsung -->
+                    <div id="panel-direct" class="sync-panel">
+                        <button id="enter-btn" class="btn-primary gateway-btn">
+                            Enter MyAbsence Dashboard
+                        </button>
+                        <p class="gateway-info">Masuk tanpa sinkronisasi antar device.</p>
+                    </div>
+                    <!-- Panel: Kode Sinkron -->
+                    <div id="panel-sync" class="sync-panel hidden">
+                        <div class="input-group" style="text-align:left; margin-bottom:0.75rem;">
+                            <label for="sync-code-input" style="display:block; margin-bottom:0.4rem; font-size:0.8rem; color:var(--text-muted);">Kode Sinkronisasi (12 digit)</label>
+                            <input type="text" id="sync-code-input" maxlength="12" placeholder="Contoh: ABC123DEF456" style="text-transform:uppercase; letter-spacing:0.12em; text-align:center; font-size:1rem;">
+                        </div>
+                        <button id="enter-with-code-btn" class="btn-primary gateway-btn">🔑 Masuk dengan Kode</button>
+                        <div class="divider-or"><hr><span>atau</span><hr></div>
+                        <button id="generate-code-btn" class="btn-outline gateway-btn">✨ Generate Kode Baru</button>
+                        <p class="gateway-info">Pakai kode yang sama di semua device untuk sync data real-time.</p>
+                    </div>
                 </div>
             </div>
         </section>
@@ -42,6 +58,11 @@
                         <span class="watermark-small">CreateBy:MahendraWiraDharma</span>
                     </div>
                     <div class="user-info">
+                        <div id="sync-code-display" class="sync-badge hidden">
+                            <span>🔑</span>
+                            <span id="sync-code-badge-text"></span>
+                            <button id="copy-sync-code-btn" class="sync-badge-copy" title="Salin kode">📋</button>
+                        </div>
                         <button id="logout-btn" class="btn-outline">Logout</button>
                     </div>
                 </div>

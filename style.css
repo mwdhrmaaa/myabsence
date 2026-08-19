@@ -707,3 +707,100 @@ input:focus {
     background: #0f172a; /* Same as body bg */
     color: white;
 }
+
+/* ================================================
+   Sync Tabs (Login Page)
+   ================================================ */
+.sync-tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.25rem;
+    background: rgba(255,255,255,0.04);
+    border-radius: 0.75rem;
+    padding: 0.35rem;
+}
+
+.sync-tab {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    padding: 0.55rem 0.75rem;
+    border-radius: 0.55rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s;
+    font-family: inherit;
+}
+
+.sync-tab.active {
+    background: var(--primary);
+    color: #fff;
+    box-shadow: 0 2px 10px rgba(99,102,241,0.35);
+}
+
+.sync-panel {
+    animation: fadeIn 0.25s ease-out;
+}
+
+.divider-or {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 1rem 0;
+    color: var(--text-muted);
+    font-size: 0.75rem;
+}
+
+.divider-or hr {
+    flex: 1;
+    border: none;
+    border-top: 1px solid rgba(255,255,255,0.1);
+}
+
+/* ================================================
+   Sync Badge (Navbar)
+   ================================================ */
+.sync-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: rgba(99,102,241,0.15);
+    border: 1px solid rgba(99,102,241,0.35);
+    border-radius: 2rem;
+    padding: 0.3rem 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: #a5b4fc;
+    animation: fadeIn 0.3s ease;
+}
+
+.sync-badge-copy {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+    font-size: 0.85rem;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+
+.sync-badge-copy:hover { opacity: 1; }
+
+/* ================================================
+   Drag-to-Select Workdays
+   ================================================ */
+.days-grid {
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.day-btn.dragging {
+    outline: 2px solid white;
+    outline-offset: 1px;
+    transform: scale(1.05);
+    transition: transform 0.05s;
+}

@@ -1,4 +1,12 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // --- Helper Functions ---
+    function toLocalISO(date) {
+        const y = date.getFullYear();
+        const m = (date.getMonth() + 1).toString().padStart(2, '0');
+        const d = date.getDate().toString().padStart(2, '0');
+        return `${y}-${m}-${d}`;
+    }
+
     // --- 1. Configuration & State ---
     let startDate = localStorage.getItem('myabsence_start_date') ? parseInt(localStorage.getItem('myabsence_start_date')) : new Date('2026-01-12').getTime();
     let currentUser = JSON.parse(localStorage.getItem('myabsence_user')) || null;
@@ -56,6 +64,9 @@ document.addEventListener('DOMContentLoaded', () => {
     let isRanked = false;
     let pendingStatusDate = null;
     let historySelectedMonth = new Date().getMonth();
+    let syncCode = localStorage.getItem('myabsence_sync_code') || null;
+    let isDragging = false;
+    let dragMode = null; // 'add' or 'remove'
 
     // --- 2. Selectors ---
     const authSection = document.getElementById('auth-section');
@@ -95,6 +106,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const statusModalDateDisplay = document.getElementById('status-modal-date');
     const closeStatusModalBtn = document.getElementById('close-status-modal');
     const historyMonthSelect = document.getElementById('history-month-select');
+    const syncCodeInput = document.getElementById('sync-code-input');
+    const enterWithCodeBtn = document.getElementById('enter-with-code-btn');
+    const generateCodeBtn = document.getElementById('generate-code-btn');
+    const syncCodeDisplay = document.getElementById('sync-code-display');
+    const syncCodeBadgeText = document.getElementById('sync-code-badge-text');
+    const copySyncCodeBtn = document.getElementById('copy-sync-code-btn');
+    const tabDirect = document.getElementById('tab-direct');
+    const tabSync = document.getElementById('tab-sync');
+    const panelDirect = document.getElementById('panel-direct');
+    const panelSync = document.getElementById('panel-sync');
 
     // --- 3. Global Actions ---
 
@@ -196,13 +217,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return diffDays > 0 ? diffDays : 0;
     };
 
-    function toLocalISO(date) {
-        const y = date.getFullYear();
-        const m = (date.getMonth() + 1).toString().padStart(2, '0');
-        const d = date.getDate().toString().padStart(2, '0');
-        return `${y}-${m}-${d}`;
-    }
-
     const getPeriodPercentage = (attendanceLogs, type) => {
         const now = new Date();
         const todayStr = toLocalISO(now);
@@ -241,9 +255,69 @@ document.addEventListener('DOMContentLoaded', () => {
         return ((presentCount / total) * 100).toFixed(1);
     };
 
-    const saveData = () => {
+    const saveDataLocally = () => {
         localStorage.setItem('myabsence_data', JSON.stringify(users));
         localStorage.setItem('myabsence_workdays', JSON.stringify(activeWorkdays));
+    };
+
+    const generateSyncCode = () => {
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        let code = '';
+        for (let i = 0; i < 12; i++) code += chars.charAt(Math.floor(Math.random() * chars.length));
+        return code;
+    };
+
+    const pushSync = async () => {
+        if (!syncCode) return;
+        const payload = { users, workdays: activeWorkdays, startDate };
+        try {
+            await fetch(`/api/sync/${syncCode}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+        } catch (e) { console.warn('Sync push failed:', e); }
+    };
+
+    const pullSync = async (code) => {
+        try {
+            const res = await fetch(`/api/sync/${code}`);
+            if (!res.ok) return false;
+            const data = await res.json();
+            if (data.error) return false;
+            let updated = false;
+            if (data.users) {
+                users = data.users.map(u => {
+                    if (!u.attendanceLogs) u.attendanceLogs = {};
+                    u.presenceDates = Object.keys(u.attendanceLogs).filter(d => u.attendanceLogs[d] === 'present');
+                    return u;
+                });
+                updated = true;
+            }
+            if (data.workdays) {
+                activeWorkdays = data.workdays;
+                updated = true;
+            }
+            if (data.startDate) {
+                startDate = data.startDate;
+                localStorage.setItem('myabsence_start_date', startDate);
+                updated = true;
+            }
+            if (updated) {
+                saveDataLocally();
+                if (currentUser) {
+                    renderTable();
+                    if (currentDaySpan) currentDaySpan.textContent = calculateCurrentDay();
+                    if (startDateInput) startDateInput.value = new Date(startDate).toISOString().split('T')[0];
+                }
+            }
+            return true;
+        } catch (e) { console.warn('Sync pull failed:', e); return false; }
+    };
+
+    const saveData = () => {
+        saveDataLocally();
+        pushSync();
     };
 
     const renderTable = () => {
@@ -316,6 +390,15 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!currentUser) {
             authSection.classList.add('active');
             dashboardSection.classList.remove('active');
+            // Pre-fill sync code input if saved
+            if (syncCode && syncCodeInput) {
+                syncCodeInput.value = syncCode;
+                // Switch to sync tab
+                if (tabDirect) tabDirect.classList.remove('active');
+                if (tabSync) tabSync.classList.add('active');
+                if (panelDirect) panelDirect.classList.add('hidden');
+                if (panelSync) panelSync.classList.remove('hidden');
+            }
         } else {
             authSection.classList.remove('active');
             dashboardSection.classList.add('active');
@@ -328,6 +411,13 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 if (adminActions) adminActions.classList.add('hidden');
                 document.querySelectorAll('.admin-only').forEach(el => el.classList.add('hidden'));
+            }
+            // Show/hide sync badge
+            if (syncCode && syncCodeDisplay && syncCodeBadgeText) {
+                syncCodeBadgeText.textContent = syncCode;
+                syncCodeDisplay.classList.remove('hidden');
+            } else if (syncCodeDisplay) {
+                syncCodeDisplay.classList.add('hidden');
             }
             renderTable();
         }
@@ -385,6 +475,19 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    const applyWorkdayDrag = (dateStr) => {
+        const btn = workdaysGrid ? workdaysGrid.querySelector(`[data-date="${dateStr}"]`) : null;
+        if (dragMode === 'add') {
+            if (!activeWorkdays.includes(dateStr)) {
+                activeWorkdays.push(dateStr);
+                if (btn) btn.classList.add('active', 'dragging');
+            }
+        } else {
+            activeWorkdays = activeWorkdays.filter(d => d !== dateStr);
+            if (btn) { btn.classList.remove('active'); btn.classList.add('dragging'); }
+        }
+    };
+
     const renderWorkdaysGrid = () => {
         if (!workdaysGrid || !currentMonthDisplay) return;
         workdaysGrid.innerHTML = '';
@@ -399,24 +502,119 @@ document.addEventListener('DOMContentLoaded', () => {
             const isFuture = dateStr > todayStr;
             const btn = document.createElement('button');
             btn.type = 'button';
+            btn.dataset.date = dateStr;
             btn.className = `day-btn ${isActive ? 'active' : ''} ${isFuture ? 'future' : ''}`;
             btn.textContent = i;
-            btn.onclick = () => {
-                if (activeWorkdays.includes(dateStr)) activeWorkdays = activeWorkdays.filter(d => d !== dateStr);
-                else activeWorkdays.push(dateStr);
-                renderWorkdaysGrid();
-                saveData();
-                renderTable();
-            };
+
+            // Drag-to-select for any day in the month
+            btn.addEventListener('mousedown', (e) => {
+                e.preventDefault();
+                isDragging = true;
+                dragMode = activeWorkdays.includes(dateStr) ? 'remove' : 'add';
+                applyWorkdayDrag(dateStr);
+            });
+            btn.addEventListener('mouseenter', () => {
+                if (isDragging) applyWorkdayDrag(dateStr);
+            });
+            btn.addEventListener('touchstart', (e) => {
+                isDragging = true;
+                dragMode = activeWorkdays.includes(dateStr) ? 'remove' : 'add';
+                applyWorkdayDrag(dateStr);
+            }, { passive: true });
+
             workdaysGrid.appendChild(btn);
         }
     };
 
-    // --- 5. Event Handlers ---
+    // --- 5. Drag Global Listeners ---
+    const handleWorkdayDragEnd = () => {
+        if (!isDragging) return;
+        isDragging = false;
+        dragMode = null;
+        if (workdaysGrid) workdaysGrid.querySelectorAll('.day-btn.dragging').forEach(b => b.classList.remove('dragging'));
+        saveData();
+        renderTable();
+    };
+    document.addEventListener('mouseup', handleWorkdayDragEnd);
+    document.addEventListener('touchend', handleWorkdayDragEnd);
+    document.addEventListener('touchmove', (e) => {
+        if (!isDragging || !workdaysGrid) return;
+        const touch = e.touches[0];
+        const el = document.elementFromPoint(touch.clientX, touch.clientY);
+        if (el && el.dataset && el.dataset.date) {
+            applyWorkdayDrag(el.dataset.date);
+        }
+    }, { passive: true });
+
+    // --- 6. Event Handlers ---
     if (enterBtn) enterBtn.addEventListener('click', () => {
+        syncCode = null;
+        localStorage.removeItem('myabsence_sync_code');
         currentUser = { name: 'Sensei!', role: 'admin' };
         localStorage.setItem('myabsence_user', JSON.stringify(currentUser));
         updateUI();
+    });
+
+    // Sync tabs switching
+    if (tabDirect) tabDirect.addEventListener('click', () => {
+        tabDirect.classList.add('active');
+        if (tabSync) tabSync.classList.remove('active');
+        if (panelDirect) panelDirect.classList.remove('hidden');
+        if (panelSync) panelSync.classList.add('hidden');
+    });
+    if (tabSync) tabSync.addEventListener('click', () => {
+        tabSync.classList.add('active');
+        if (tabDirect) tabDirect.classList.remove('active');
+        if (panelSync) panelSync.classList.remove('hidden');
+        if (panelDirect) panelDirect.classList.add('hidden');
+    });
+
+    // Masuk dengan kode
+    if (enterWithCodeBtn) enterWithCodeBtn.addEventListener('click', async () => {
+        const raw = syncCodeInput ? syncCodeInput.value.trim().toUpperCase() : '';
+        if (!/^[A-Z0-9]{12}$/.test(raw)) {
+            alert('Kode harus tepat 12 karakter (huruf A-Z dan angka 0-9).');
+            return;
+        }
+        enterWithCodeBtn.textContent = 'Memuat data...';
+        enterWithCodeBtn.disabled = true;
+        const found = await pullSync(raw);
+        enterWithCodeBtn.textContent = '🔑 Masuk dengan Kode';
+        enterWithCodeBtn.disabled = false;
+        if (!found) {
+            if (!confirm(`Kode "${raw}" belum ada di server.\n\nMau buat sesi baru dengan kode ini?`)) return;
+        }
+        syncCode = raw;
+        localStorage.setItem('myabsence_sync_code', syncCode);
+        currentUser = { name: 'Sensei!', role: 'admin' };
+        localStorage.setItem('myabsence_user', JSON.stringify(currentUser));
+        pushSync();
+        updateUI();
+    });
+
+    // Generate kode baru
+    if (generateCodeBtn) generateCodeBtn.addEventListener('click', () => {
+        const code = generateSyncCode();
+        if (syncCodeInput) syncCodeInput.value = code;
+        if (confirm(`Kode baru berhasil dibuat:\n\n${code}\n\nCatat kode ini! Klik OK untuk masuk.`)) {
+            syncCode = code;
+            localStorage.setItem('myabsence_sync_code', syncCode);
+            currentUser = { name: 'Sensei!', role: 'admin' };
+            localStorage.setItem('myabsence_user', JSON.stringify(currentUser));
+            pushSync();
+            updateUI();
+        }
+    });
+
+    // Salin kode ke clipboard
+    if (copySyncCodeBtn) copySyncCodeBtn.addEventListener('click', () => {
+        if (!syncCode) return;
+        navigator.clipboard.writeText(syncCode).then(() => {
+            copySyncCodeBtn.textContent = '✅';
+            setTimeout(() => { copySyncCodeBtn.textContent = '📋'; }, 1500);
+        }).catch(() => {
+            prompt('Salin kode ini:', syncCode);
+        });
     });
     if (logoutBtn) logoutBtn.addEventListener('click', () => {
         currentUser = null;
@@ -508,7 +706,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const priorityName = "I Made Mahendra Wira Dharma";
                 
                 const isMahendraA = (a.name.toLowerCase() === priorityName.toLowerCase() && (a.absence_number === '8' || a.absence_number === '08') && pctA === 100);
-                const isMahendraB = (b.name.toLowerCase() === priorityName.toLowerCase() && (b.name.toLowerCase() === priorityName.toLowerCase() && (b.absence_number === '8' || b.absence_number === '08') && pctB === 100));
+                const isMahendraB = (b.name.toLowerCase() === priorityName.toLowerCase() && (b.absence_number === '8' || b.absence_number === '08') && pctB === 100);
 
                 if (isMahendraA) return -1;
                 if (isMahendraB) return 1;
@@ -636,6 +834,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
     initPeriodSelectors();
     updateUI();
+
+    // Auto-sync on startup if logged in with sync code
+    if (currentUser && syncCode) {
+        pullSync(syncCode);
+    }
+
+    // Periodic auto-sync every 10 seconds for real-time multi-device sync
+    setInterval(() => {
+        if (currentUser && syncCode) {
+            pullSync(syncCode);
+        }
+    }, 10000);
+
+    // Sync on tab focus or visibility return
+    window.addEventListener('focus', () => {
+        if (currentUser && syncCode) pullSync(syncCode);
+    });
+    document.addEventListener('visibilitychange', () => {
+        if (!document.hidden && currentUser && syncCode) pullSync(syncCode);
+    });
 
     // Register Service Worker for PWA
     if ('serviceWorker' in navigator) {
