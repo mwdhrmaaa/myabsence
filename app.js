@@ -121,7 +121,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const THEMES = {
         indigo: { name: 'Indigo Luxe', color: '#6366f1' },
         obsidian: { name: 'Obsidian Cyan', color: '#38bdf8' },
-        violet: { name: 'Midnight Violet', color: '#a855f7' }
+        violet: { name: 'Midnight Violet', color: '#a855f7' },
+        light: { name: 'Opal Snow (Light)', color: '#4f46e5' }
     };
 
     let currentTheme = localStorage.getItem('myabsence_theme') || 'indigo';

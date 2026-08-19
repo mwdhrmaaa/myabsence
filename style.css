@@ -71,6 +71,29 @@
     --accent-badge-text: #e9d5ff;
 }
 
+/* Theme 4: Opal Snow (Pristine Modern Light) */
+[data-theme="light"] {
+    --theme-name: "Opal Snow (Light)";
+    --primary: #4f46e5;
+    --primary-hover: #4338ca;
+    --primary-glow: rgba(79, 70, 229, 0.2);
+    --secondary: #059669;
+    --secondary-hover: #047857;
+    --danger: #dc2626;
+    --bg-gradient: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #e2e8f0 100%);
+    --body-bg: #f8fafc;
+    --card-bg: rgba(255, 255, 255, 0.85);
+    --card-border: rgba(203, 213, 225, 0.85);
+    --card-border-hover: rgba(79, 70, 229, 0.45);
+    --nav-bg: rgba(255, 255, 255, 0.88);
+    --text-main: #0f172a;
+    --text-muted: #64748b;
+    --glass-blur: blur(16px);
+    --accent-badge: rgba(79, 70, 229, 0.08);
+    --accent-badge-border: rgba(79, 70, 229, 0.25);
+    --accent-badge-text: #4338ca;
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -910,6 +933,12 @@ input:focus {
     box-shadow: 0 0 8px #a855f7;
 }
 
+.theme-preview-dot.dot-light {
+    background: #ffffff;
+    border: 2px solid #4f46e5;
+    box-shadow: 0 0 8px rgba(79, 70, 229, 0.4);
+}
+
 .theme-info {
     display: flex;
     flex-direction: column;
@@ -1332,4 +1361,183 @@ input:focus {
     outline-offset: 1px;
     transform: scale(1.05);
     transition: transform 0.05s;
+}
+
+/* ================================================
+   Light Mode (Opal Snow) Specific Overrides
+   ================================================ */
+[data-theme="light"] .glass-card {
+    background: rgba(255, 255, 255, 0.88);
+    border: 1px solid rgba(203, 213, 225, 0.8);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.03);
+}
+
+[data-theme="light"] .login-card h1,
+[data-theme="light"] .brand .logo {
+    background: linear-gradient(135deg, #0f172a 40%, var(--primary) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+[data-theme="light"] input,
+[data-theme="light"] select,
+[data-theme="light"] .glass-select {
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    color: #0f172a;
+}
+
+[data-theme="light"] input:focus,
+[data-theme="light"] select:focus,
+[data-theme="light"] .glass-select:focus {
+    background: #ffffff;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+}
+
+[data-theme="light"] th {
+    background: rgba(241, 245, 249, 0.85);
+    color: #475569;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+[data-theme="light"] td {
+    border-top: 1px solid #e2e8f0;
+    color: #0f172a;
+}
+
+[data-theme="light"] tr:hover td {
+    background: rgba(79, 70, 229, 0.03);
+}
+
+[data-theme="light"] .btn-outline {
+    background: #ffffff;
+    border-color: #cbd5e1;
+    color: #334155;
+}
+
+[data-theme="light"] .btn-outline:hover {
+    background: #f1f5f9;
+    color: #0f172a;
+    border-color: #94a3b8;
+}
+
+[data-theme="light"] .btn-checkin {
+    background: rgba(0, 0, 0, 0.03);
+    border: 1px dashed #cbd5e1;
+    color: #64748b;
+}
+
+[data-theme="light"] .btn-checkin:hover {
+    background: rgba(79, 70, 229, 0.08);
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+[data-theme="light"] .day-btn {
+    background: rgba(0, 0, 0, 0.03);
+    border: 1px solid #e2e8f0;
+    color: #334155;
+}
+
+[data-theme="light"] .day-btn:hover {
+    background: rgba(79, 70, 229, 0.08);
+    border-color: var(--primary);
+}
+
+[data-theme="light"] .day-btn.disabled {
+    opacity: 0.35;
+    background: #f1f5f9;
+}
+
+[data-theme="light"] .modal,
+[data-theme="light"] .modal-overlay {
+    background: rgba(15, 23, 42, 0.45);
+}
+
+[data-theme="light"] .theme-dropdown-menu {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 14px 40px rgba(0, 0, 0, 0.1), 0 0 15px rgba(79, 70, 229, 0.08);
+}
+
+[data-theme="light"] .theme-option-btn:hover {
+    background: #f1f5f9;
+}
+
+[data-theme="light"] .sync-code-box {
+    background: rgba(79, 70, 229, 0.04);
+    border-color: rgba(79, 70, 229, 0.18);
+}
+
+[data-theme="light"] .code-large {
+    color: #4338ca;
+    text-shadow: none;
+}
+
+[data-theme="light"] .btn-toggle-eye {
+    background: #ffffff;
+    border-color: #cbd5e1;
+    color: #4338ca;
+}
+
+[data-theme="light"] .btn-toggle-eye:hover {
+    background: rgba(79, 70, 229, 0.08);
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+[data-theme="light"] .sync-instructions,
+[data-theme="light"] .sync-option-card {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+}
+
+[data-theme="light"] #toggle-rank-btn.active {
+    background: #fef3c7;
+    border-color: #f59e0b;
+    color: #b45309;
+    box-shadow: 0 0 12px rgba(245, 158, 11, 0.25);
+}
+
+[data-theme="light"] .divider-or hr {
+    border-top: 1px solid #e2e8f0;
+}
+
+[data-theme="light"] .divider-or {
+    color: #94a3b8;
+}
+
+[data-theme="light"] .history-toggle-header {
+    background: rgba(0, 0, 0, 0.03);
+    border: 1px solid #e2e8f0;
+}
+
+[data-theme="light"] .history-toggle-header:hover {
+    background: rgba(79, 70, 229, 0.05);
+}
+
+[data-theme="light"] .confirm-modal-icon.warning {
+    background: #fef3c7;
+    color: #d97706;
+    border-color: #fde68a;
+}
+
+[data-theme="light"] .confirm-modal-icon.key {
+    background: #e0e7ff;
+    color: #4f46e5;
+    border-color: #c7d2fe;
+}
+
+[data-theme="light"] .confirm-modal-icon.disconnect {
+    background: #fee2e2;
+    color: #dc2626;
+    border-color: #fecaca;
+}
+
+[data-theme="light"] .confirm-modal-icon.success {
+    background: #d1fae5;
+    color: #059669;
+    border-color: #a7f3d0;
 }
