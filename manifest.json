@@ -1,7 +1,7 @@
 {
   "name": "MyAbsence Dashboard",
   "short_name": "MyAbsence",
-  "description": "Premium Attendance Monitoring System by Sensei Mahendra",
+  "description": "Premium Attendance Monitoring System",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#0f172a",
