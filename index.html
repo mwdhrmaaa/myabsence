@@ -13,6 +13,12 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" href="icon-192.png">
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem('myabsence_theme') || 'indigo';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        })();
+    </script>
 </head>
 <body>
     <div id="app">
@@ -42,6 +48,42 @@
                         <span class="logo">MyAbsence</span>
                     </div>
                     <div class="user-info">
+                        <!-- Theme Mode Switcher -->
+                        <div class="theme-dropdown-container" id="theme-dropdown-container">
+                            <button type="button" id="theme-menu-btn" class="btn-theme-nav" title="Pilih Tema Warna">
+                                <span class="theme-active-dot" id="theme-active-dot"></span>
+                                <span id="theme-current-label">Indigo Luxe</span>
+                                <svg class="dropdown-arrow" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                            </button>
+                            <div id="theme-dropdown-menu" class="theme-dropdown-menu hidden glass-card">
+                                <div class="theme-dropdown-header">Harmoni Tema</div>
+                                <button type="button" class="theme-option-btn active" data-theme="indigo">
+                                    <span class="theme-preview-dot dot-indigo"></span>
+                                    <div class="theme-info">
+                                        <span class="theme-title">Indigo Luxe</span>
+                                        <span class="theme-subtitle">Apple & Stripe Modern</span>
+                                    </div>
+                                    <span class="theme-check">✓</span>
+                                </button>
+                                <button type="button" class="theme-option-btn" data-theme="obsidian">
+                                    <span class="theme-preview-dot dot-obsidian"></span>
+                                    <div class="theme-info">
+                                        <span class="theme-title">Obsidian Cyan</span>
+                                        <span class="theme-subtitle">Linear & Vercel Tech</span>
+                                    </div>
+                                    <span class="theme-check">✓</span>
+                                </button>
+                                <button type="button" class="theme-option-btn" data-theme="violet">
+                                    <span class="theme-preview-dot dot-violet"></span>
+                                    <div class="theme-info">
+                                        <span class="theme-title">Midnight Violet</span>
+                                        <span class="theme-subtitle">Royal Velvet Harmony</span>
+                                    </div>
+                                    <span class="theme-check">✓</span>
+                                </button>
+                            </div>
+                        </div>
+
                         <button id="nav-sync-btn" class="btn-sync-nav" title="Sinkronisasi Data">
                             <span class="sync-dot"></span>
                             <span id="nav-sync-label">Sync Kode</span>
@@ -243,10 +285,10 @@
             <div class="modal-content glass-card" style="max-width: 320px; text-align: center;">
                 <h2 id="status-modal-date" style="font-size: 1.25rem; margin-bottom: 1.5rem;">Update Status</h2>
                 <div class="modal-actions" style="display: flex; flex-direction: column; gap: 0.75rem;">
-                    <button type="button" class="btn-primary" onclick="confirmStatus('present')">Hadir</button>
-                    <button type="button" style="background:#f59e0b; border:none; color:white; padding:0.8rem; border-radius:0.75rem; font-weight:600; cursor:pointer;" onclick="confirmStatus('sick')">Sakit</button>
-                    <button type="button" style="background:#3b82f6; border:none; color:white; padding:0.8rem; border-radius:0.75rem; font-weight:600; cursor:pointer;" onclick="confirmStatus('permit')">Izin</button>
-                    <button type="button" style="background:#ef4444; border:none; color:white; padding:0.8rem; border-radius:0.75rem; font-weight:600; cursor:pointer;" onclick="confirmStatus('alpha')">Alpha</button>
+                    <button type="button" class="btn-status-option btn-status-present" onclick="confirmStatus('present')">Hadir</button>
+                    <button type="button" class="btn-status-option btn-status-sick" onclick="confirmStatus('sick')">Sakit</button>
+                    <button type="button" class="btn-status-option btn-status-permit" onclick="confirmStatus('permit')">Izin</button>
+                    <button type="button" class="btn-status-option btn-status-alpha" onclick="confirmStatus('alpha')">Alpha</button>
                     <button type="button" class="btn-outline" onclick="confirmStatus('none')" style="margin-top: 0.5rem;">Reset Status</button>
                     <button type="button" class="btn-outline" id="close-status-modal" style="border-color:rgba(255,255,255,0.1); margin-top:0.5rem;">Cancel</button>
                 </div>

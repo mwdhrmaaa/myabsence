@@ -1,15 +1,74 @@
-:root {
+/* ================================================
+   1. COLOR HARMONY THEMES
+   ================================================ */
+
+/* Theme 1: Indigo Luxe (Default - Apple / Stripe Modern) */
+:root, [data-theme="indigo"] {
+    --theme-name: "Indigo Luxe";
     --primary: #6366f1;
     --primary-hover: #4f46e5;
+    --primary-glow: rgba(99, 102, 241, 0.35);
     --secondary: #10b981;
     --secondary-hover: #059669;
     --danger: #ef4444;
-    --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
-    --card-bg: rgba(255, 255, 255, 0.05);
-    --card-border: rgba(255, 255, 255, 0.1);
+    --bg-gradient: linear-gradient(135deg, #090d16 0%, #111827 50%, #0d1322 100%);
+    --body-bg: #090d16;
+    --card-bg: rgba(255, 255, 255, 0.035);
+    --card-border: rgba(99, 102, 241, 0.15);
+    --card-border-hover: rgba(99, 102, 241, 0.35);
+    --nav-bg: rgba(9, 13, 22, 0.8);
     --text-main: #f8fafc;
     --text-muted: #94a3b8;
-    --glass-blur: blur(12px);
+    --glass-blur: blur(16px);
+    --accent-badge: rgba(99, 102, 241, 0.12);
+    --accent-badge-border: rgba(99, 102, 241, 0.3);
+    --accent-badge-text: #c7d2fe;
+}
+
+/* Theme 2: Obsidian Cyan (Linear & Vercel Tech) */
+[data-theme="obsidian"] {
+    --theme-name: "Obsidian Cyan";
+    --primary: #38bdf8;
+    --primary-hover: #0284c7;
+    --primary-glow: rgba(56, 189, 248, 0.35);
+    --secondary: #34d399;
+    --secondary-hover: #10b981;
+    --danger: #f87171;
+    --bg-gradient: linear-gradient(135deg, #08080a 0%, #0f1115 50%, #08090c 100%);
+    --body-bg: #08080a;
+    --card-bg: rgba(255, 255, 255, 0.025);
+    --card-border: rgba(255, 255, 255, 0.08);
+    --card-border-hover: rgba(56, 189, 248, 0.4);
+    --nav-bg: rgba(8, 8, 10, 0.85);
+    --text-main: #ffffff;
+    --text-muted: #8b949e;
+    --glass-blur: blur(16px);
+    --accent-badge: rgba(56, 189, 248, 0.1);
+    --accent-badge-border: rgba(56, 189, 248, 0.28);
+    --accent-badge-text: #bae6fd;
+}
+
+/* Theme 3: Midnight Violet (Royal Velvet Harmony) */
+[data-theme="violet"] {
+    --theme-name: "Midnight Violet";
+    --primary: #a855f7;
+    --primary-hover: #9333ea;
+    --primary-glow: rgba(168, 85, 247, 0.35);
+    --secondary: #2dd4bf;
+    --secondary-hover: #14b8a6;
+    --danger: #f43f5e;
+    --bg-gradient: linear-gradient(135deg, #0a0714 0%, #150e28 50%, #0c0819 100%);
+    --body-bg: #0a0714;
+    --card-bg: rgba(255, 255, 255, 0.035);
+    --card-border: rgba(168, 85, 247, 0.15);
+    --card-border-hover: rgba(168, 85, 247, 0.35);
+    --nav-bg: rgba(10, 7, 20, 0.8);
+    --text-main: #faf5ff;
+    --text-muted: #a1a1aa;
+    --glass-blur: blur(16px);
+    --accent-badge: rgba(168, 85, 247, 0.12);
+    --accent-badge-border: rgba(168, 85, 247, 0.3);
+    --accent-badge-text: #e9d5ff;
 }
 
 * {
@@ -21,9 +80,11 @@
 
 body {
     background: var(--bg-gradient);
+    background-color: var(--body-bg);
     color: var(--text-main);
     min-height: 100vh;
     overflow-x: hidden;
+    transition: background 0.3s ease, color 0.3s ease;
 }
 
 .hidden {
@@ -45,6 +106,7 @@ body {
     border-radius: 1.5rem;
     padding: 2rem;
     box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+    transition: border-color 0.25s, box-shadow 0.25s, background 0.25s;
 }
 
 /* Auth Section */
@@ -68,7 +130,7 @@ body {
 .login-card h1 {
     font-size: 2.5rem;
     margin-bottom: 0.5rem;
-    background: linear-gradient(to right, #818cf8, #34d399);
+    background: linear-gradient(135deg, #ffffff 40%, var(--primary) 100%);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -115,13 +177,15 @@ body {
 }
 
 .glass-nav {
-    background: rgba(15, 23, 42, 0.6);
+    background: var(--nav-bg);
     backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
     border-bottom: 1px solid var(--card-border);
-    padding: 1rem 2rem;
+    padding: 0.85rem 2rem;
     position: sticky;
     top: 0;
     z-index: 100;
+    transition: background 0.3s ease, border-color 0.3s ease;
 }
 
 .nav-content {
@@ -136,6 +200,10 @@ body {
     font-weight: 700;
     font-size: 1.5rem;
     letter-spacing: -0.025em;
+    background: linear-gradient(135deg, #ffffff 40%, var(--primary) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
 .brand {
@@ -143,28 +211,10 @@ body {
     flex-direction: column;
 }
 
-.watermark {
-    display: block;
-    font-size: 0.6rem;
-    color: var(--text-muted);
-    opacity: 0.5;
-    margin-top: -0.5rem;
-    margin-bottom: 0.5rem;
-    letter-spacing: 0.05em;
-}
-
-.watermark-small {
-    font-size: 0.5rem;
-    color: var(--text-muted);
-    opacity: 0.4;
-    margin-top: -3px;
-    letter-spacing: 0.02em;
-}
-
 .user-info {
     display: flex;
     align-items: center;
-    gap: 1.5rem;
+    gap: 0.85rem;
 }
 
 #display-name {
@@ -726,20 +776,184 @@ input:focus {
 }
 
 /* ================================================
+   Theme Dropdown Selector & Navbar Buttons
+   ================================================ */
+.theme-dropdown-container {
+    position: relative;
+    display: inline-block;
+}
+
+.btn-theme-nav {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--accent-badge);
+    border: 1px solid var(--accent-badge-border);
+    border-radius: 2rem;
+    padding: 0.4rem 0.85rem;
+    font-size: 0.82rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    color: var(--accent-badge-text);
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    font-family: inherit;
+}
+
+.btn-theme-nav:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: var(--primary);
+    color: #ffffff;
+    box-shadow: 0 0 12px var(--primary-glow);
+}
+
+.theme-active-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--primary);
+    box-shadow: 0 0 8px var(--primary);
+    display: inline-block;
+    transition: all 0.3s ease;
+}
+
+.dropdown-arrow {
+    transition: transform 0.2s ease;
+    opacity: 0.7;
+}
+
+.theme-dropdown-container.open .dropdown-arrow {
+    transform: rotate(180deg);
+}
+
+.theme-dropdown-menu {
+    position: absolute;
+    top: calc(100% + 0.6rem);
+    right: 0;
+    width: 240px;
+    padding: 0.5rem;
+    border-radius: 1rem;
+    background: var(--body-bg);
+    border: 1px solid var(--card-border);
+    box-shadow: 0 14px 40px rgba(0, 0, 0, 0.6), 0 0 20px var(--primary-glow);
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    animation: dropdownFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes dropdownFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-8px) scale(0.97);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.theme-dropdown-header {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+    padding: 0.4rem 0.6rem 0.2rem;
+}
+
+.theme-option-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+    padding: 0.6rem 0.75rem;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 0.65rem;
+    color: var(--text-main);
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.18s ease;
+}
+
+.theme-option-btn:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+.theme-option-btn.active {
+    background: var(--accent-badge);
+    border-color: var(--accent-badge-border);
+}
+
+.theme-preview-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.theme-preview-dot.dot-indigo {
+    background: #6366f1;
+    box-shadow: 0 0 8px #6366f1;
+}
+
+.theme-preview-dot.dot-obsidian {
+    background: #38bdf8;
+    box-shadow: 0 0 8px #38bdf8;
+}
+
+.theme-preview-dot.dot-violet {
+    background: #a855f7;
+    box-shadow: 0 0 8px #a855f7;
+}
+
+.theme-info {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.theme-title {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+.theme-subtitle {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+}
+
+.theme-check {
+    font-size: 0.85rem;
+    color: var(--primary);
+    opacity: 0;
+    font-weight: 700;
+    transition: opacity 0.2s;
+}
+
+.theme-option-btn.active .theme-check {
+    opacity: 1;
+}
+
+/* ================================================
    Sync Button (Navbar) & Glow Button
    ================================================ */
 .btn-sync-nav {
     display: inline-flex;
     align-items: center;
     gap: 0.55rem;
-    background: rgba(99, 102, 241, 0.12);
-    border: 1px solid rgba(99, 102, 241, 0.4);
+    background: var(--accent-badge);
+    border: 1px solid var(--accent-badge-border);
     border-radius: 2rem;
     padding: 0.4rem 0.95rem;
     font-size: 0.82rem;
     font-weight: 600;
     letter-spacing: 0.04em;
-    color: #c7d2fe;
+    color: var(--accent-badge-text);
     cursor: pointer;
     transition: all 0.25s;
     font-family: inherit;
@@ -749,16 +963,16 @@ input:focus {
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background: rgba(199, 210, 254, 0.5);
+    background: var(--text-muted);
     display: inline-block;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .btn-sync-nav:hover {
-    background: rgba(99, 102, 241, 0.25);
-    border-color: rgba(99, 102, 241, 0.7);
+    background: rgba(255, 255, 255, 0.08);
+    border-color: var(--primary);
     color: #ffffff;
-    box-shadow: 0 0 12px rgba(99, 102, 241, 0.35);
+    box-shadow: 0 0 12px var(--primary-glow);
 }
 
 .btn-sync-nav.connected {
@@ -787,15 +1001,72 @@ input:focus {
 
 .btn-glow {
     position: relative;
-    background: linear-gradient(135deg, var(--primary), #818cf8) !important;
+    background: linear-gradient(135deg, var(--primary), var(--primary-hover)) !important;
     border: 1px solid rgba(255, 255, 255, 0.2) !important;
-    box-shadow: 0 0 15px rgba(99, 102, 241, 0.4) !important;
+    box-shadow: 0 0 15px var(--primary-glow) !important;
     font-weight: 700 !important;
 }
 
 .btn-glow:hover {
-    box-shadow: 0 0 22px rgba(99, 102, 241, 0.7) !important;
+    box-shadow: 0 0 22px var(--primary-glow) !important;
     transform: translateY(-1px);
+}
+
+/* ================================================
+   Status Modal Buttons (Harmonious Tint)
+   ================================================ */
+.btn-status-option {
+    border-radius: 0.75rem;
+    padding: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 0.95rem;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    font-family: inherit;
+}
+
+.btn-status-present {
+    background: rgba(16, 185, 129, 0.15);
+    border: 1px solid rgba(16, 185, 129, 0.4);
+    color: #6ee7b7;
+}
+.btn-status-present:hover {
+    background: rgba(16, 185, 129, 0.28);
+    box-shadow: 0 0 14px rgba(16, 185, 129, 0.3);
+    color: #ffffff;
+}
+
+.btn-status-sick {
+    background: rgba(245, 158, 11, 0.15);
+    border: 1px solid rgba(245, 158, 11, 0.4);
+    color: #fde68a;
+}
+.btn-status-sick:hover {
+    background: rgba(245, 158, 11, 0.28);
+    box-shadow: 0 0 14px rgba(245, 158, 11, 0.3);
+    color: #ffffff;
+}
+
+.btn-status-permit {
+    background: rgba(59, 130, 246, 0.15);
+    border: 1px solid rgba(59, 130, 246, 0.4);
+    color: #93c5fd;
+}
+.btn-status-permit:hover {
+    background: rgba(59, 130, 246, 0.28);
+    box-shadow: 0 0 14px rgba(59, 130, 246, 0.3);
+    color: #ffffff;
+}
+
+.btn-status-alpha {
+    background: rgba(239, 68, 68, 0.15);
+    border: 1px solid rgba(239, 68, 68, 0.4);
+    color: #fca5a5;
+}
+.btn-status-alpha:hover {
+    background: rgba(239, 68, 68, 0.28);
+    box-shadow: 0 0 14px rgba(239, 68, 68, 0.3);
+    color: #ffffff;
 }
 
 /* ================================================
