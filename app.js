@@ -109,10 +109,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const syncCodeInput = document.getElementById('sync-code-input');
     const enterWithCodeBtn = document.getElementById('enter-with-code-btn');
     const generateCodeBtn = document.getElementById('generate-code-btn');
-    const tabDirect = document.getElementById('tab-direct');
-    const tabSync = document.getElementById('tab-sync');
-    const panelDirect = document.getElementById('panel-direct');
-    const panelSync = document.getElementById('panel-sync');
 
     // Dashboard Sync UI selectors
     const navSyncBtn = document.getElementById('nav-sync-btn');
@@ -407,11 +403,6 @@ document.addEventListener('DOMContentLoaded', () => {
             // Pre-fill sync code input if saved
             if (syncCode && syncCodeInput) {
                 syncCodeInput.value = syncCode;
-                // Switch to sync tab
-                if (tabDirect) tabDirect.classList.remove('active');
-                if (tabSync) tabSync.classList.add('active');
-                if (panelDirect) panelDirect.classList.add('hidden');
-                if (panelSync) panelSync.classList.remove('hidden');
             }
         } else {
             authSection.classList.remove('active');
@@ -584,28 +575,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }, { passive: true });
 
     // --- 6. Event Handlers ---
-    if (enterBtn) enterBtn.addEventListener('click', () => {
-        syncCode = null;
-        localStorage.removeItem('myabsence_sync_code');
-        currentUser = { name: 'Sensei!', role: 'admin' };
-        localStorage.setItem('myabsence_user', JSON.stringify(currentUser));
-        updateUI();
-    });
-
-    // Sync tabs switching
-    if (tabDirect) tabDirect.addEventListener('click', () => {
-        tabDirect.classList.add('active');
-        if (tabSync) tabSync.classList.remove('active');
-        if (panelDirect) panelDirect.classList.remove('hidden');
-        if (panelSync) panelSync.classList.add('hidden');
-    });
-    if (tabSync) tabSync.addEventListener('click', () => {
-        tabSync.classList.add('active');
-        if (tabDirect) tabDirect.classList.remove('active');
-        if (panelSync) panelSync.classList.remove('hidden');
-        if (panelDirect) panelDirect.classList.add('hidden');
-    });
-
     // Masuk dengan kode
     if (enterWithCodeBtn) enterWithCodeBtn.addEventListener('click', async () => {
         const raw = syncCodeInput ? syncCodeInput.value.trim().toUpperCase() : '';

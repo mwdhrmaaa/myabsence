@@ -708,41 +708,7 @@ input:focus {
     color: white;
 }
 
-/* ================================================
-   Sync Tabs (Login Page)
-   ================================================ */
-.sync-tabs {
-    display: flex;
-    gap: 0.5rem;
-    margin-bottom: 1.25rem;
-    background: rgba(255,255,255,0.04);
-    border-radius: 0.75rem;
-    padding: 0.35rem;
-}
 
-.sync-tab {
-    flex: 1;
-    background: transparent;
-    border: none;
-    color: var(--text-muted);
-    padding: 0.55rem 0.75rem;
-    border-radius: 0.55rem;
-    font-size: 0.85rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.25s;
-    font-family: inherit;
-}
-
-.sync-tab.active {
-    background: var(--primary);
-    color: #fff;
-    box-shadow: 0 2px 10px rgba(99,102,241,0.35);
-}
-
-.sync-panel {
-    animation: fadeIn 0.25s ease-out;
-}
 
 .divider-or {
     display: flex;

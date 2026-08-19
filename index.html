@@ -23,28 +23,14 @@
                 <span class="watermark">CreateBy:MahendraWiraDharma</span>
                 <p>Advanced Attendance Monitoring System</p>
                 <div class="entry-gate">
-                    <div class="sync-tabs">
-                        <button class="sync-tab active" id="tab-direct">Masuk Langsung</button>
-                        <button class="sync-tab" id="tab-sync">Pakai Kode Sinkron</button>
+                    <div class="input-group" style="text-align:left; margin-bottom:0.75rem;">
+                        <label for="sync-code-input" style="display:block; margin-bottom:0.4rem; font-size:0.85rem; color:var(--text-muted); font-weight:600;">Kode Sinkronisasi (12 digit)</label>
+                        <input type="text" id="sync-code-input" maxlength="12" placeholder="Contoh: ABC123DEF456" style="text-transform:uppercase; letter-spacing:0.12em; text-align:center; font-size:1.1rem; font-weight:700;">
                     </div>
-                    <!-- Panel: Masuk Langsung -->
-                    <div id="panel-direct" class="sync-panel">
-                        <button id="enter-btn" class="btn-primary gateway-btn">
-                            Enter MyAbsence Dashboard
-                        </button>
-                        <p class="gateway-info">Masuk tanpa sinkronisasi antar device.</p>
-                    </div>
-                    <!-- Panel: Kode Sinkron -->
-                    <div id="panel-sync" class="sync-panel hidden">
-                        <div class="input-group" style="text-align:left; margin-bottom:0.75rem;">
-                            <label for="sync-code-input" style="display:block; margin-bottom:0.4rem; font-size:0.8rem; color:var(--text-muted);">Kode Sinkronisasi (12 digit)</label>
-                            <input type="text" id="sync-code-input" maxlength="12" placeholder="Contoh: ABC123DEF456" style="text-transform:uppercase; letter-spacing:0.12em; text-align:center; font-size:1rem;">
-                        </div>
-                        <button id="enter-with-code-btn" class="btn-primary gateway-btn">🔑 Masuk dengan Kode</button>
-                        <div class="divider-or"><hr><span>atau</span><hr></div>
-                        <button id="generate-code-btn" class="btn-outline gateway-btn">✨ Generate Kode Baru</button>
-                        <p class="gateway-info">Pakai kode yang sama di semua device untuk sync data real-time.</p>
-                    </div>
+                    <button id="enter-with-code-btn" class="btn-primary gateway-btn">🔑 Masuk dengan Kode</button>
+                    <div class="divider-or"><hr><span>atau</span><hr></div>
+                    <button id="generate-code-btn" class="btn-outline gateway-btn">✨ Buat / Generate Kode Baru</button>
+                    <p class="gateway-info">Gunakan kode yang sama di semua HP/Laptop untuk sync data real-time.</p>
                 </div>
             </div>
         </section>
@@ -210,23 +196,17 @@
                         <p>💡 <strong>Cara Pakai di HP/Device Lain:</strong></p>
                         <ol>
                             <li>Buka MyAbsence di HP (Wi-Fi yang sama).</li>
-                            <li>Pilih tab <strong>"Pakai Kode Sinkron"</strong> atau klik tombol <strong>"Bagi / Sync Kode"</strong>.</li>
                             <li>Masukkan kode di atas lalu klik <strong>"Masuk dengan Kode"</strong>.</li>
                         </ol>
                     </div>
                     <div class="modal-actions" style="margin-top: 1.5rem;">
-                        <button type="button" id="disconnect-sync-btn" class="btn-outline btn-danger-soft">Putuskan Sinkron</button>
+                        <button type="button" id="disconnect-sync-btn" class="btn-outline btn-danger-soft">Ganti / Putuskan Kode</button>
                         <button type="button" id="close-sync-modal-btn" class="btn-primary">Tutup</button>
                     </div>
                 </div>
 
-                <!-- View when NOT CONNECTED (Standalone / Offline) -->
+                <!-- View when NOT CONNECTED -->
                 <div id="sync-disconnected-view">
-                    <div class="sync-status-box offline">
-                        <span class="status-indicator offline"></span>
-                        <span>Mode Lokal (Belum Terhubung Server)</span>
-                    </div>
-                    
                     <div class="sync-option-card">
                         <h3>1. Bagikan Data dari Laptop Ini ke HP</h3>
                         <p>Buat kode baru agar data absensi di laptop ini langsung bisa dibuka dan diedit dari HP secara bersamaan.</p>
