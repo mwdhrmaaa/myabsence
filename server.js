@@ -127,8 +127,8 @@ const server = http.createServer((req, res) => {
 
 server.listen(PORT, HOST, () => {
     const localIP = getLocalIP();
-    console.log(`\n🚀 Server berjalan sukses!`);
-    console.log(`💻 Akses dari Laptop/PC: http://localhost:${PORT}`);
-    console.log(`📱 Akses dari HP/Device: http://${localIP}:${PORT}`);
-    console.log(`\n(Pastikan HP dan Laptop terhubung ke Wi-Fi yang sama)\n`);
+    console.log(`\n[MyAbsence Server Online]`);
+    console.log(`- Local Access (Laptop/PC) : http://localhost:${PORT}`);
+    console.log(`- Network Access (HP/Device): http://${localIP}:${PORT}`);
+    console.log(`(Pastikan HP dan Laptop terhubung ke Wi-Fi yang sama)\n`);
 });

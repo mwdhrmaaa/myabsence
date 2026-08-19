@@ -731,11 +731,11 @@ input:focus {
 .btn-sync-nav {
     display: inline-flex;
     align-items: center;
-    gap: 0.45rem;
+    gap: 0.55rem;
     background: rgba(99, 102, 241, 0.12);
     border: 1px solid rgba(99, 102, 241, 0.4);
     border-radius: 2rem;
-    padding: 0.4rem 0.9rem;
+    padding: 0.4rem 0.95rem;
     font-size: 0.82rem;
     font-weight: 600;
     letter-spacing: 0.04em;
@@ -743,6 +743,15 @@ input:focus {
     cursor: pointer;
     transition: all 0.25s;
     font-family: inherit;
+}
+
+.sync-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: rgba(199, 210, 254, 0.5);
+    display: inline-block;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .btn-sync-nav:hover {
@@ -757,6 +766,23 @@ input:focus {
     border-color: rgba(16, 185, 129, 0.5);
     color: #6ee7b7;
     box-shadow: 0 0 10px rgba(16, 185, 129, 0.2);
+}
+
+.btn-sync-nav.connected .sync-dot {
+    background: #10b981;
+    box-shadow: 0 0 8px #10b981;
+    animation: syncPulse 2s infinite;
+}
+
+@keyframes syncPulse {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.5;
+        transform: scale(1.2);
+    }
 }
 
 .btn-glow {
@@ -856,11 +882,13 @@ input:focus {
 }
 
 .btn-toggle-eye {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     background: rgba(255, 255, 255, 0.08);
     border: 1px solid rgba(255, 255, 255, 0.15);
-    color: white;
-    font-size: 1.1rem;
-    padding: 0.35rem 0.55rem;
+    color: #c7d2fe;
+    padding: 0.45rem 0.6rem;
     border-radius: 0.5rem;
     cursor: pointer;
     line-height: 1;
@@ -870,7 +898,8 @@ input:focus {
 .btn-toggle-eye:hover {
     background: rgba(99, 102, 241, 0.3);
     border-color: var(--primary);
-    transform: scale(1.08);
+    color: #ffffff;
+    transform: scale(1.05);
 }
 
 .code-copy-wrapper {
@@ -947,9 +976,40 @@ input:focus {
 }
 
 .confirm-modal-icon {
-    font-size: 2.75rem;
-    margin-bottom: 0.75rem;
-    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 54px;
+    height: 54px;
+    margin: 0 auto 1rem;
+    border-radius: 50%;
+    background: rgba(99, 102, 241, 0.15);
+    color: #a5b4fc;
+    border: 1px solid rgba(99, 102, 241, 0.3);
+}
+
+.confirm-modal-icon.warning {
+    background: rgba(245, 158, 11, 0.15);
+    color: #fbbf24;
+    border-color: rgba(245, 158, 11, 0.35);
+}
+
+.confirm-modal-icon.key {
+    background: rgba(99, 102, 241, 0.18);
+    color: #a5b4fc;
+    border-color: rgba(99, 102, 241, 0.4);
+}
+
+.confirm-modal-icon.disconnect {
+    background: rgba(239, 68, 68, 0.15);
+    color: #f87171;
+    border-color: rgba(239, 68, 68, 0.35);
+}
+
+.confirm-modal-icon.success {
+    background: rgba(16, 185, 129, 0.15);
+    color: #34d399;
+    border-color: rgba(16, 185, 129, 0.35);
 }
 
 .confirm-modal-content h2 {

@@ -431,16 +431,24 @@ document.addEventListener('DOMContentLoaded', () => {
             if (navSyncBtn) {
                 if (syncCode) {
                     navSyncBtn.classList.add('connected');
-                    if (navSyncIcon) navSyncIcon.textContent = '🟢 🔑';
                     if (navSyncLabel) navSyncLabel.textContent = isCodeHidden ? '••••••••••••' : syncCode;
                 } else {
                     navSyncBtn.classList.remove('connected');
-                    if (navSyncIcon) navSyncIcon.textContent = '🔗';
-                    if (navSyncLabel) navSyncLabel.textContent = 'Bagi / Sync Kode';
+                    if (navSyncLabel) navSyncLabel.textContent = 'Sync Kode';
                 }
             }
             renderTable();
         }
+    };
+
+    const SVG_EYE = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>`;
+    const SVG_EYE_OFF = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>`;
+
+    const CONFIRM_ICONS = {
+        warning: `<svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>`,
+        key: `<svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"></path></svg>`,
+        disconnect: `<svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="1" y1="1" x2="23" y2="23"></line><path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"></path><path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"></path><path d="M10.71 5.05A16 16 0 0 1 22.58 9"></path><path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"></path><path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path><line x1="12" y1="20" x2="12.01" y2="20"></line></svg>`,
+        success: `<svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`
     };
 
     const renderSyncCodeDisplay = () => {
@@ -448,13 +456,13 @@ document.addEventListener('DOMContentLoaded', () => {
         if (isCodeHidden) {
             activeSyncCode.textContent = '••••••••••••';
             if (toggleCodeVisibilityBtn) {
-                toggleCodeVisibilityBtn.textContent = '🙈';
+                toggleCodeVisibilityBtn.innerHTML = SVG_EYE;
                 toggleCodeVisibilityBtn.title = 'Tampilkan Kode';
             }
         } else {
             activeSyncCode.textContent = syncCode || '';
             if (toggleCodeVisibilityBtn) {
-                toggleCodeVisibilityBtn.textContent = '👁️';
+                toggleCodeVisibilityBtn.innerHTML = SVG_EYE_OFF;
                 toggleCodeVisibilityBtn.title = 'Sembunyikan Kode';
             }
         }
@@ -612,7 +620,7 @@ document.addEventListener('DOMContentLoaded', () => {
             showCustomConfirm({
                 title: 'Format Kode Salah',
                 message: 'Kode harus tepat 12 karakter kombinasi huruf A-Z dan angka 0-9.',
-                icon: '⚠️',
+                icon: 'warning',
                 okText: 'Mengerti',
                 onOk: () => {}
             });
@@ -621,13 +629,13 @@ document.addEventListener('DOMContentLoaded', () => {
         enterWithCodeBtn.textContent = 'Memuat data...';
         enterWithCodeBtn.disabled = true;
         const found = await pullSync(raw);
-        enterWithCodeBtn.textContent = '🔑 Masuk dengan Kode';
+        enterWithCodeBtn.textContent = 'Masuk dengan Kode';
         enterWithCodeBtn.disabled = false;
         if (!found) {
             showCustomConfirm({
                 title: 'Kode Belum Terdaftar',
                 message: `Kode "${raw}" belum ada di server. Mau buat sesi baru dengan kode ini?`,
-                icon: '🔑',
+                icon: 'key',
                 okText: 'Buat Sesi Baru',
                 onOk: () => {
                     syncCode = raw;
@@ -653,9 +661,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const code = generateSyncCode();
         if (syncCodeInput) syncCodeInput.value = code;
         showCustomConfirm({
-            title: 'Kode Baru Berhasil Dibuat! ✨',
+            title: 'Kode Baru Berhasil Dibuat',
             message: `Kode Anda: ${code}\n\nGunakan kode ini di perangkat lain untuk sinkronisasi. Klik Lanjut untuk masuk ke Dashboard.`,
-            icon: '🔑',
+            icon: 'key',
             okText: 'Lanjut ke Dashboard',
             onOk: () => {
                 syncCode = code;
@@ -669,10 +677,13 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // --- Custom Confirmation Modal Helpers ---
-    const showCustomConfirm = ({ title, message, icon = '⚠️', okText = 'Ya, Lanjutkan', onOk }) => {
+    const showCustomConfirm = ({ title, message, icon = 'warning', okText = 'Ya, Lanjutkan', onOk }) => {
         if (confirmModalTitle) confirmModalTitle.textContent = title;
         if (confirmModalMsg) confirmModalMsg.textContent = message;
-        if (confirmModalIcon) confirmModalIcon.textContent = icon;
+        if (confirmModalIcon) {
+            confirmModalIcon.className = `confirm-modal-icon ${icon}`;
+            confirmModalIcon.innerHTML = CONFIRM_ICONS[icon] || CONFIRM_ICONS.warning;
+        }
         if (confirmModalOkBtn) confirmModalOkBtn.textContent = okText;
         onConfirmAction = onOk;
         if (confirmModal) confirmModal.classList.remove('hidden');
@@ -709,8 +720,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (copyCodeModalBtn) copyCodeModalBtn.addEventListener('click', () => {
         if (!syncCode) return;
         navigator.clipboard.writeText(syncCode).then(() => {
-            copyCodeModalBtn.textContent = '✅ Kode Tersalin!';
-            setTimeout(() => { copyCodeModalBtn.textContent = '📋 Salin Kode'; }, 2000);
+            copyCodeModalBtn.textContent = 'Kode Tersalin!';
+            setTimeout(() => { copyCodeModalBtn.textContent = 'Salin Kode'; }, 2000);
         }).catch(() => {
             prompt('Salin kode ini:', syncCode);
         });
@@ -736,13 +747,13 @@ document.addEventListener('DOMContentLoaded', () => {
         modalConnectCodeBtn.textContent = 'Menghubungkan...';
         modalConnectCodeBtn.disabled = true;
         const found = await pullSync(raw);
-        modalConnectCodeBtn.textContent = '🔑 Hubungkan dengan Kode';
+        modalConnectCodeBtn.textContent = 'Hubungkan dengan Kode';
         modalConnectCodeBtn.disabled = false;
         if (!found) {
             showCustomConfirm({
                 title: 'Kode Belum Terdaftar',
                 message: `Kode "${raw}" belum ada di server. Apakah Anda ingin membuat sesi baru dengan kode ini?`,
-                icon: '🔑',
+                icon: 'key',
                 okText: 'Buat Sesi Baru',
                 onOk: () => {
                     syncCode = raw;
@@ -766,7 +777,7 @@ document.addEventListener('DOMContentLoaded', () => {
         showCustomConfirm({
             title: 'Putuskan Sinkronisasi?',
             message: 'Data di perangkat ini tetap aman, tapi tidak akan tersinkron lagi dengan perangkat lain sampai dihubungkan kembali.',
-            icon: '🔌',
+            icon: 'disconnect',
             okText: 'Ya, Putuskan',
             onOk: () => {
                 syncCode = null;
@@ -979,7 +990,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             }));
                             saveData();
                             renderTable();
-                            alert("Restore Successful! 🚀");
+                            alert("Restore Successful!");
                         }
                     } else {
                         alert("No valid user records found in this CSV.");

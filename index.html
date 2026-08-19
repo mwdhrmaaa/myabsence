@@ -26,9 +26,9 @@
                         <label for="sync-code-input" style="display:block; margin-bottom:0.4rem; font-size:0.85rem; color:var(--text-muted); font-weight:600;">Kode Sinkronisasi (12 digit)</label>
                         <input type="text" id="sync-code-input" maxlength="12" placeholder="Contoh: ABC123DEF456" style="text-transform:uppercase; letter-spacing:0.12em; text-align:center; font-size:1.1rem; font-weight:700;">
                     </div>
-                    <button id="enter-with-code-btn" class="btn-primary gateway-btn">🔑 Masuk dengan Kode</button>
+                    <button id="enter-with-code-btn" class="btn-primary gateway-btn">Masuk dengan Kode</button>
                     <div class="divider-or"><hr><span>atau</span><hr></div>
-                    <button id="generate-code-btn" class="btn-outline gateway-btn">✨ Buat / Generate Kode Baru</button>
+                    <button id="generate-code-btn" class="btn-outline gateway-btn">Buat Kode Baru</button>
                     <p class="gateway-info">Gunakan kode yang sama di semua HP/Laptop untuk sync data real-time.</p>
                 </div>
             </div>
@@ -42,9 +42,9 @@
                         <span class="logo">MyAbsence</span>
                     </div>
                     <div class="user-info">
-                        <button id="nav-sync-btn" class="btn-sync-nav" title="Sinkronisasi & Bagi Kode">
-                            <span id="nav-sync-icon">🔗</span>
-                            <span id="nav-sync-label">Bagi / Sync Kode</span>
+                        <button id="nav-sync-btn" class="btn-sync-nav" title="Sinkronisasi Data">
+                            <span class="sync-dot"></span>
+                            <span id="nav-sync-label">Sync Kode</span>
                         </button>
                         <button id="logout-btn" class="btn-outline">Logout</button>
                     </div>
@@ -74,12 +74,12 @@
                         </div>
                     </div>
                     <div id="admin-actions" class="hidden">
-                        <button id="manage-workdays-btn" class="btn-outline">⚙ Manage Workdays</button>
+                        <button id="manage-workdays-btn" class="btn-outline">Manage Workdays</button>
                         <button id="add-user-btn" class="btn-primary">+ Add New User</button>
                     </div>
                     <div class="export-actions">
-                        <button id="header-sync-btn" class="btn-primary btn-glow">🔗 Bagi / Sync Kode</button>
-                        <button id="toggle-rank-btn" class="btn-secondary">🏆 Rank</button>
+                        <button id="header-sync-btn" class="btn-primary btn-glow">Sync Kode</button>
+                        <button id="toggle-rank-btn" class="btn-secondary">Rank</button>
                         <button id="import-csv-btn" class="btn-outline">Import CSV</button>
                         <button id="download-csv-btn" class="btn-secondary">Download CSV</button>
                     </div>
@@ -174,7 +174,7 @@
         <!-- Modal for Sync & Share Code -->
         <div id="sync-modal" class="modal hidden">
             <div class="modal-content glass-card sync-modal-content">
-                <h2>🔗 Sinkronisasi & Bagi Kode</h2>
+                <h2>Sinkronisasi Data</h2>
                 <p class="history-info">Hubungkan data absensi antar HP dan Laptop secara real-time.</p>
 
                 <!-- View when ALREADY CONNECTED -->
@@ -187,14 +187,16 @@
                         <label>KODE SINKRONISASI ANDA:</label>
                         <div class="code-wrapper">
                             <span id="active-sync-code" class="code-large">ABC123DEF456</span>
-                            <button type="button" id="toggle-code-visibility-btn" class="btn-toggle-eye" title="Sembunyikan / Tampilkan Kode">👁️</button>
+                            <button type="button" id="toggle-code-visibility-btn" class="btn-toggle-eye" title="Sembunyikan / Tampilkan Kode">
+                                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                            </button>
                         </div>
                         <div class="code-copy-wrapper" style="margin-top: 0.85rem;">
-                            <button type="button" id="copy-code-modal-btn" class="btn-primary btn-copy-code">📋 Salin Kode</button>
+                            <button type="button" id="copy-code-modal-btn" class="btn-primary btn-copy-code">Salin Kode</button>
                         </div>
                     </div>
                     <div class="sync-instructions">
-                        <p>💡 <strong>Cara Pakai di HP/Device Lain:</strong></p>
+                        <p><strong>Cara Pakai di HP/Device Lain:</strong></p>
                         <ol>
                             <li>Buka MyAbsence di HP (Wi-Fi yang sama).</li>
                             <li>Masukkan kode di atas lalu klik <strong>"Masuk dengan Kode"</strong>.</li>
@@ -212,7 +214,7 @@
                         <h3>1. Bagikan Data dari Laptop Ini ke HP</h3>
                         <p>Buat kode baru agar data absensi di laptop ini langsung bisa dibuka dan diedit dari HP secara bersamaan.</p>
                         <button type="button" id="modal-generate-code-btn" class="btn-primary" style="width: 100%;">
-                            ✨ Buat Kode Baru & Bagikan
+                            Buat Kode Baru & Bagikan
                         </button>
                     </div>
 
@@ -225,7 +227,7 @@
                             <input type="text" id="modal-sync-code-input" maxlength="12" placeholder="Contoh: ABC123DEF456" style="text-transform:uppercase; letter-spacing:0.12em; text-align:center; font-size:1.1rem; font-weight:700;">
                         </div>
                         <button type="button" id="modal-connect-code-btn" class="btn-secondary" style="width: 100%;">
-                            🔑 Hubungkan dengan Kode
+                            Hubungkan dengan Kode
                         </button>
                     </div>
 
@@ -241,10 +243,10 @@
             <div class="modal-content glass-card" style="max-width: 320px; text-align: center;">
                 <h2 id="status-modal-date" style="font-size: 1.25rem; margin-bottom: 1.5rem;">Update Status</h2>
                 <div class="modal-actions" style="display: flex; flex-direction: column; gap: 0.75rem;">
-                    <button type="button" class="btn-primary" onclick="confirmStatus('present')">✅ Hadir</button>
-                    <button type="button" style="background:#f59e0b; border:none; color:white; padding:0.8rem; border-radius:0.75rem; font-weight:600; cursor:pointer;" onclick="confirmStatus('sick')">🤒 Sakit</button>
-                    <button type="button" style="background:#3b82f6; border:none; color:white; padding:0.8rem; border-radius:0.75rem; font-weight:600; cursor:pointer;" onclick="confirmStatus('permit')">📝 Izin</button>
-                    <button type="button" style="background:#ef4444; border:none; color:white; padding:0.8rem; border-radius:0.75rem; font-weight:600; cursor:pointer;" onclick="confirmStatus('alpha')">❌ Alpha</button>
+                    <button type="button" class="btn-primary" onclick="confirmStatus('present')">Hadir</button>
+                    <button type="button" style="background:#f59e0b; border:none; color:white; padding:0.8rem; border-radius:0.75rem; font-weight:600; cursor:pointer;" onclick="confirmStatus('sick')">Sakit</button>
+                    <button type="button" style="background:#3b82f6; border:none; color:white; padding:0.8rem; border-radius:0.75rem; font-weight:600; cursor:pointer;" onclick="confirmStatus('permit')">Izin</button>
+                    <button type="button" style="background:#ef4444; border:none; color:white; padding:0.8rem; border-radius:0.75rem; font-weight:600; cursor:pointer;" onclick="confirmStatus('alpha')">Alpha</button>
                     <button type="button" class="btn-outline" onclick="confirmStatus('none')" style="margin-top: 0.5rem;">Reset Status</button>
                     <button type="button" class="btn-outline" id="close-status-modal" style="border-color:rgba(255,255,255,0.1); margin-top:0.5rem;">Cancel</button>
                 </div>
@@ -254,7 +256,7 @@
         <!-- Custom Confirmation Modal -->
         <div id="confirm-modal" class="modal-overlay hidden">
             <div class="modal-content glass-card confirm-modal-content">
-                <div class="confirm-modal-icon" id="confirm-modal-icon">🔌</div>
+                <div class="confirm-modal-icon" id="confirm-modal-icon"></div>
                 <h2 id="confirm-modal-title">Putuskan Sinkronisasi?</h2>
                 <p id="confirm-modal-msg" class="confirm-modal-desc">Data di perangkat ini tetap aman, tapi tidak akan tersinkron lagi sampai dihubungkan kembali.</p>
                 <div class="modal-actions confirm-modal-actions">
