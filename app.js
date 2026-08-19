@@ -109,13 +109,27 @@ document.addEventListener('DOMContentLoaded', () => {
     const syncCodeInput = document.getElementById('sync-code-input');
     const enterWithCodeBtn = document.getElementById('enter-with-code-btn');
     const generateCodeBtn = document.getElementById('generate-code-btn');
-    const syncCodeDisplay = document.getElementById('sync-code-display');
-    const syncCodeBadgeText = document.getElementById('sync-code-badge-text');
-    const copySyncCodeBtn = document.getElementById('copy-sync-code-btn');
     const tabDirect = document.getElementById('tab-direct');
     const tabSync = document.getElementById('tab-sync');
     const panelDirect = document.getElementById('panel-direct');
     const panelSync = document.getElementById('panel-sync');
+
+    // Dashboard Sync UI selectors
+    const navSyncBtn = document.getElementById('nav-sync-btn');
+    const navSyncIcon = document.getElementById('nav-sync-icon');
+    const navSyncLabel = document.getElementById('nav-sync-label');
+    const headerSyncBtn = document.getElementById('header-sync-btn');
+    const syncModal = document.getElementById('sync-modal');
+    const syncConnectedView = document.getElementById('sync-connected-view');
+    const syncDisconnectedView = document.getElementById('sync-disconnected-view');
+    const activeSyncCode = document.getElementById('active-sync-code');
+    const copyCodeModalBtn = document.getElementById('copy-code-modal-btn');
+    const disconnectSyncBtn = document.getElementById('disconnect-sync-btn');
+    const closeSyncModalBtn = document.getElementById('close-sync-modal-btn');
+    const closeSyncModalBtn2 = document.getElementById('close-sync-modal-btn2');
+    const modalGenerateCodeBtn = document.getElementById('modal-generate-code-btn');
+    const modalSyncCodeInput = document.getElementById('modal-sync-code-input');
+    const modalConnectCodeBtn = document.getElementById('modal-connect-code-btn');
 
     // --- 3. Global Actions ---
 
@@ -412,15 +426,38 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (adminActions) adminActions.classList.add('hidden');
                 document.querySelectorAll('.admin-only').forEach(el => el.classList.add('hidden'));
             }
-            // Show/hide sync badge
-            if (syncCode && syncCodeDisplay && syncCodeBadgeText) {
-                syncCodeBadgeText.textContent = syncCode;
-                syncCodeDisplay.classList.remove('hidden');
-            } else if (syncCodeDisplay) {
-                syncCodeDisplay.classList.add('hidden');
+            // Update sync button in navbar
+            if (navSyncBtn) {
+                if (syncCode) {
+                    navSyncBtn.classList.add('connected');
+                    if (navSyncIcon) navSyncIcon.textContent = '🟢 🔑';
+                    if (navSyncLabel) navSyncLabel.textContent = syncCode;
+                } else {
+                    navSyncBtn.classList.remove('connected');
+                    if (navSyncIcon) navSyncIcon.textContent = '🔗';
+                    if (navSyncLabel) navSyncLabel.textContent = 'Bagi / Sync Kode';
+                }
             }
             renderTable();
         }
+    };
+
+    const openSyncModal = () => {
+        if (!syncModal) return;
+        if (syncCode) {
+            if (syncConnectedView) syncConnectedView.classList.remove('hidden');
+            if (syncDisconnectedView) syncDisconnectedView.classList.add('hidden');
+            if (activeSyncCode) activeSyncCode.textContent = syncCode;
+        } else {
+            if (syncConnectedView) syncConnectedView.classList.add('hidden');
+            if (syncDisconnectedView) syncDisconnectedView.classList.remove('hidden');
+            if (modalSyncCodeInput) modalSyncCodeInput.value = '';
+        }
+        syncModal.classList.remove('hidden');
+    };
+
+    const closeSyncModal = () => {
+        if (syncModal) syncModal.classList.add('hidden');
     };
 
     const initHistoryMonthSelect = () => {
@@ -606,16 +643,65 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Salin kode ke clipboard
-    if (copySyncCodeBtn) copySyncCodeBtn.addEventListener('click', () => {
+    // --- Sync Modal Event Handlers ---
+    if (navSyncBtn) navSyncBtn.addEventListener('click', openSyncModal);
+    if (headerSyncBtn) headerSyncBtn.addEventListener('click', openSyncModal);
+    if (closeSyncModalBtn) closeSyncModalBtn.addEventListener('click', closeSyncModal);
+    if (closeSyncModalBtn2) closeSyncModalBtn2.addEventListener('click', closeSyncModal);
+
+    // Salin kode di dalam modal
+    if (copyCodeModalBtn) copyCodeModalBtn.addEventListener('click', () => {
         if (!syncCode) return;
         navigator.clipboard.writeText(syncCode).then(() => {
-            copySyncCodeBtn.textContent = '✅';
-            setTimeout(() => { copySyncCodeBtn.textContent = '📋'; }, 1500);
+            copyCodeModalBtn.textContent = '✅ Kode Tersalin!';
+            setTimeout(() => { copyCodeModalBtn.textContent = '📋 Salin Kode'; }, 2000);
         }).catch(() => {
             prompt('Salin kode ini:', syncCode);
         });
     });
+
+    // Buat kode baru dari dalam dashboard
+    if (modalGenerateCodeBtn) modalGenerateCodeBtn.addEventListener('click', () => {
+        const code = generateSyncCode();
+        syncCode = code;
+        localStorage.setItem('myabsence_sync_code', syncCode);
+        pushSync();
+        updateUI();
+        openSyncModal();
+    });
+
+    // Hubungkan dengan kode dari dalam dashboard
+    if (modalConnectCodeBtn) modalConnectCodeBtn.addEventListener('click', async () => {
+        const raw = modalSyncCodeInput ? modalSyncCodeInput.value.trim().toUpperCase() : '';
+        if (!/^[A-Z0-9]{12}$/.test(raw)) {
+            alert('Kode harus tepat 12 karakter (huruf A-Z dan angka 0-9).');
+            return;
+        }
+        modalConnectCodeBtn.textContent = 'Menghubungkan...';
+        modalConnectCodeBtn.disabled = true;
+        const found = await pullSync(raw);
+        modalConnectCodeBtn.textContent = '🔑 Hubungkan dengan Kode';
+        modalConnectCodeBtn.disabled = false;
+        if (!found) {
+            if (!confirm(`Kode "${raw}" belum ada di server.\n\nMau buat sesi baru dengan kode ini?`)) return;
+        }
+        syncCode = raw;
+        localStorage.setItem('myabsence_sync_code', syncCode);
+        pushSync();
+        updateUI();
+        openSyncModal();
+    });
+
+    // Putuskan sinkronisasi
+    if (disconnectSyncBtn) disconnectSyncBtn.addEventListener('click', () => {
+        if (confirm('Yakin ingin memutuskan sinkronisasi?\nData di perangkat ini tetap aman, tapi tidak akan tersinkron lagi sampai dihubungkan kembali.')) {
+            syncCode = null;
+            localStorage.removeItem('myabsence_sync_code');
+            updateUI();
+            openSyncModal();
+        }
+    });
+
     if (logoutBtn) logoutBtn.addEventListener('click', () => {
         currentUser = null;
         localStorage.removeItem('myabsence_user');

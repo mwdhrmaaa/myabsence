@@ -760,35 +760,188 @@ input:focus {
 }
 
 /* ================================================
-   Sync Badge (Navbar)
+   Sync Button (Navbar) & Glow Button
    ================================================ */
-.sync-badge {
+.btn-sync-nav {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    background: rgba(99, 102, 241, 0.12);
+    border: 1px solid rgba(99, 102, 241, 0.4);
+    border-radius: 2rem;
+    padding: 0.4rem 0.9rem;
+    font-size: 0.82rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: #c7d2fe;
+    cursor: pointer;
+    transition: all 0.25s;
+    font-family: inherit;
+}
+
+.btn-sync-nav:hover {
+    background: rgba(99, 102, 241, 0.25);
+    border-color: rgba(99, 102, 241, 0.7);
+    color: #ffffff;
+    box-shadow: 0 0 12px rgba(99, 102, 241, 0.35);
+}
+
+.btn-sync-nav.connected {
+    background: rgba(16, 185, 129, 0.15);
+    border-color: rgba(16, 185, 129, 0.5);
+    color: #6ee7b7;
+    box-shadow: 0 0 10px rgba(16, 185, 129, 0.2);
+}
+
+.btn-glow {
+    position: relative;
+    background: linear-gradient(135deg, var(--primary), #818cf8) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    box-shadow: 0 0 15px rgba(99, 102, 241, 0.4) !important;
+    font-weight: 700 !important;
+}
+
+.btn-glow:hover {
+    box-shadow: 0 0 22px rgba(99, 102, 241, 0.7) !important;
+    transform: translateY(-1px);
+}
+
+/* ================================================
+   Sync Modal Components
+   ================================================ */
+.sync-modal-content {
+    max-width: 460px;
+    width: 90%;
+    text-align: center;
+}
+
+.sync-status-box {
     display: flex;
     align-items: center;
-    gap: 0.4rem;
-    background: rgba(99,102,241,0.15);
-    border: 1px solid rgba(99,102,241,0.35);
-    border-radius: 2rem;
-    padding: 0.3rem 0.75rem;
+    justify-content: center;
+    gap: 0.6rem;
+    padding: 0.65rem 1rem;
+    border-radius: 0.75rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 1.25rem;
+}
+
+.sync-status-box.success {
+    background: rgba(16, 185, 129, 0.12);
+    border: 1px solid rgba(16, 185, 129, 0.35);
+    color: #6ee7b7;
+}
+
+.sync-status-box.offline {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-muted);
+}
+
+.status-indicator {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.status-indicator.online {
+    background: #10b981;
+    box-shadow: 0 0 8px #10b981;
+}
+
+.status-indicator.offline {
+    background: #64748b;
+}
+
+.sync-code-box {
+    background: rgba(0, 0, 0, 0.35);
+    border: 1px solid rgba(99, 102, 241, 0.3);
+    border-radius: 1rem;
+    padding: 1.2rem;
+    margin-bottom: 1rem;
+}
+
+.sync-code-box label {
+    display: block;
     font-size: 0.75rem;
     font-weight: 700;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.12em;
+    color: var(--text-muted);
+    margin-bottom: 0.6rem;
+}
+
+.code-copy-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.85rem;
+}
+
+.code-large {
+    font-size: 1.7rem;
+    font-weight: 800;
+    letter-spacing: 0.22em;
     color: #a5b4fc;
-    animation: fadeIn 0.3s ease;
+    font-family: monospace;
+    text-shadow: 0 0 12px rgba(99, 102, 241, 0.5);
 }
 
-.sync-badge-copy {
-    background: none;
-    border: none;
-    cursor: pointer;
+.btn-copy-code {
+    font-size: 0.9rem;
+    padding: 0.5rem 1.4rem;
+}
+
+.sync-instructions {
+    text-align: left;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 0.75rem;
+    padding: 0.9rem 1.1rem;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+}
+
+.sync-instructions ol {
+    margin: 0.4rem 0 0 1.2rem;
     padding: 0;
-    line-height: 1;
-    font-size: 0.85rem;
-    opacity: 0.7;
-    transition: opacity 0.2s;
 }
 
-.sync-badge-copy:hover { opacity: 1; }
+.sync-instructions li {
+    margin-bottom: 0.3rem;
+}
+
+.sync-option-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 0.85rem;
+    padding: 1.1rem;
+    text-align: left;
+}
+
+.sync-option-card h3 {
+    font-size: 0.95rem;
+    margin-bottom: 0.35rem;
+    color: var(--text-main);
+}
+
+.sync-option-card p {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-bottom: 0.85rem;
+    line-height: 1.4;
+}
+
+.btn-danger-soft {
+    border-color: rgba(239, 68, 68, 0.4);
+    color: #f87171;
+}
+
+.btn-danger-soft:hover {
+    background: rgba(239, 68, 68, 0.15);
+    border-color: #ef4444;
+}
 
 /* ================================================
    Drag-to-Select Workdays
