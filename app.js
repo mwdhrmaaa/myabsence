@@ -42,14 +42,13 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     let rawUsers = [];
-    try {
-        const stored = localStorage.getItem('myabsence_data');
-        if (stored) {
+    const stored = localStorage.getItem('myabsence_data');
+    if (stored !== null) {
+        try {
             rawUsers = JSON.parse(stored);
-        }
-    } catch (e) { rawUsers = []; }
-
-    if (!Array.isArray(rawUsers) || rawUsers.length === 0) {
+            if (!Array.isArray(rawUsers)) rawUsers = [];
+        } catch (e) { rawUsers = []; }
+    } else {
         rawUsers = JSON.parse(JSON.stringify(DEFAULT_STUDENTS));
     }
 
@@ -113,6 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const attendanceBody = document.getElementById('attendance-body');
     const adminActions = document.getElementById('admin-actions');
     const addUserBtn = document.getElementById('add-user-btn');
+    const clearUsersBtn = document.getElementById('clear-users-btn');
     const downloadCsvBtn = document.getElementById('download-csv-btn');
     const toggleRankBtn = document.getElementById('toggle-rank-btn');
     const importCsvBtn = document.getElementById('import-csv-btn');
@@ -517,6 +517,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 const numB = parseInt(b.absence_number) || 999;
                 return numA - numB;
             });
+        }
+
+        if (displayUsers.length === 0) {
+            const emptyRow = document.createElement('tr');
+            emptyRow.innerHTML = `
+                <td colspan="8" style="text-align:center; padding: 2.5rem 1rem; color: var(--text-muted); font-size: 0.95rem;">
+                    Belum ada data siswa. Klik <strong>"+ Add New User"</strong> untuk menambahkan siswa baru.
+                </td>
+            `;
+            attendanceBody.appendChild(emptyRow);
+            if (avgAttendanceSpan) avgAttendanceSpan.textContent = '0%';
+            return;
         }
 
         displayUsers.forEach(user => {
@@ -942,6 +954,32 @@ document.addEventListener('DOMContentLoaded', () => {
         if (historyGridContainer) historyGridContainer.classList.add('hidden');
         if (userModal) userModal.classList.remove('hidden');
     });
+
+    if (clearUsersBtn) {
+        clearUsersBtn.addEventListener('click', () => {
+            if (users.length === 0) {
+                showCustomConfirm({
+                    title: 'Daftar Siswa Kosong',
+                    message: 'Tidak ada data siswa untuk dihapus.',
+                    icon: 'warning',
+                    okText: 'Tutup',
+                    onOk: () => {}
+                });
+                return;
+            }
+            showCustomConfirm({
+                title: 'Hapus Semua Siswa?',
+                message: `Apakah Anda yakin ingin menghapus seluruh ${users.length} data siswa beserta riwayat absensinya? Tindakan ini tidak dapat dibatalkan.`,
+                icon: 'disconnect',
+                okText: 'Ya, Hapus Semua',
+                onOk: () => {
+                    users = [];
+                    saveData();
+                    renderTable();
+                }
+            });
+        });
+    }
 
     if (historyMonthSelect) {
         historyMonthSelect.addEventListener('change', (e) => {
