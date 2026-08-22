@@ -140,9 +140,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const statusModalDateDisplay = document.getElementById('status-modal-date');
     const closeStatusModalBtn = document.getElementById('close-status-modal');
     const historyMonthSelect = document.getElementById('history-month-select');
-    const syncCodeInput = document.getElementById('sync-code-input');
-    const enterWithCodeBtn = document.getElementById('enter-with-code-btn');
-    const generateCodeBtn = document.getElementById('generate-code-btn');
+    const enterAppBtn = document.getElementById('enter-app-btn');
 
     // Theme Switcher selectors
     const themeDropdownContainer = document.getElementById('theme-dropdown-container');
@@ -563,10 +561,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!currentUser) {
             authSection.classList.add('active');
             dashboardSection.classList.remove('active');
-            // Pre-fill sync code input if saved
-            if (syncCode && syncCodeInput) {
-                syncCodeInput.value = syncCode;
-            }
         } else {
             authSection.classList.remove('active');
             dashboardSection.classList.add('active');
@@ -766,68 +760,17 @@ document.addEventListener('DOMContentLoaded', () => {
     }, { passive: true });
 
     // --- 6. Event Handlers ---
-    // Masuk dengan kode
-    if (enterWithCodeBtn) enterWithCodeBtn.addEventListener('click', async () => {
-        const raw = syncCodeInput ? syncCodeInput.value.trim().toUpperCase() : '';
-        if (!/^[A-Z0-9]{12}$/.test(raw)) {
-            showCustomConfirm({
-                title: 'Format Kode Salah',
-                message: 'Kode harus tepat 12 karakter kombinasi huruf A-Z dan angka 0-9.',
-                icon: 'warning',
-                okText: 'Mengerti',
-                onOk: () => {}
-            });
-            return;
-        }
-        enterWithCodeBtn.textContent = 'Memuat data...';
-        enterWithCodeBtn.disabled = true;
-        const found = await pullSync(raw);
-        enterWithCodeBtn.textContent = 'Masuk dengan Kode';
-        enterWithCodeBtn.disabled = false;
-        if (!found) {
-            showCustomConfirm({
-                title: 'Kode Belum Terdaftar',
-                message: `Kode "${raw}" belum ada di server. Mau buat sesi baru dengan kode ini?`,
-                icon: 'key',
-                okText: 'Buat Sesi Baru',
-                onOk: () => {
-                    syncCode = raw;
-                    localStorage.setItem('myabsence_sync_code', syncCode);
-                    currentUser = { name: 'Admin', role: 'admin' };
-                    localStorage.setItem('myabsence_user', JSON.stringify(currentUser));
-                    pushSync();
-                    updateUI();
-                }
-            });
-            return;
-        }
-        syncCode = raw;
-        localStorage.setItem('myabsence_sync_code', syncCode);
-        currentUser = { name: 'Admin', role: 'admin' };
-        localStorage.setItem('myabsence_user', JSON.stringify(currentUser));
-        pushSync();
-        updateUI();
-    });
-
-    // Generate kode baru
-    if (generateCodeBtn) generateCodeBtn.addEventListener('click', () => {
-        const code = generateSyncCode();
-        if (syncCodeInput) syncCodeInput.value = code;
-        showCustomConfirm({
-            title: 'Kode Baru Berhasil Dibuat',
-            message: `Kode Anda: ${code}\n\nGunakan kode ini di perangkat lain untuk sinkronisasi. Klik Lanjut untuk masuk ke Dashboard.`,
-            icon: 'key',
-            okText: 'Lanjut ke Dashboard',
-            onOk: () => {
-                syncCode = code;
-                localStorage.setItem('myabsence_sync_code', syncCode);
-                currentUser = { name: 'Admin', role: 'admin' };
-                localStorage.setItem('myabsence_user', JSON.stringify(currentUser));
-                pushSync();
-                updateUI();
+    // Masuk ke aplikasi langsung dari welcome screen
+    if (enterAppBtn) {
+        enterAppBtn.addEventListener('click', () => {
+            currentUser = { name: 'Admin', role: 'admin' };
+            localStorage.setItem('myabsence_user', JSON.stringify(currentUser));
+            updateUI();
+            if (syncCode) {
+                pullSync(syncCode);
             }
         });
-    });
+    }
 
     // --- Custom Confirmation Modal Helpers ---
     const showCustomConfirm = ({ title, message, icon = 'warning', okText = 'Ya, Lanjutkan', onOk }) => {

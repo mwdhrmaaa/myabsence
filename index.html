@@ -22,20 +22,21 @@
 </head>
 <body>
     <div id="app">
-        <!-- Auth Section (Entry Gate) -->
+        <!-- Auth / Welcome Section (Entry Gate) -->
         <section id="auth-section" class="active">
-            <div class="glass-card login-card">
-                <h1>MyAbsence</h1>
-                <p>Advanced Attendance Monitoring System</p>
+            <div class="glass-card login-card welcome-card">
+                <div class="welcome-badge">
+                    <span class="welcome-dot"></span>
+                    <span>Modern Attendance System</span>
+                </div>
+                <h1>Welcome to MyAbsence</h1>
+                <p class="welcome-subtitle">Aplikasi pemantauan dan pencatatan absensi harian yang cepat, modern, dan mudah digunakan.</p>
                 <div class="entry-gate">
-                    <div class="input-group" style="text-align:left; margin-bottom:0.75rem;">
-                        <label for="sync-code-input" style="display:block; margin-bottom:0.4rem; font-size:0.85rem; color:var(--text-muted); font-weight:600;">Kode Sinkronisasi (12 digit)</label>
-                        <input type="text" id="sync-code-input" maxlength="12" placeholder="Contoh: ABC123DEF456" style="text-transform:uppercase; letter-spacing:0.12em; text-align:center; font-size:1.1rem; font-weight:700;">
-                    </div>
-                    <button id="enter-with-code-btn" class="btn-primary gateway-btn">Masuk dengan Kode</button>
-                    <div class="divider-or"><hr><span>atau</span><hr></div>
-                    <button id="generate-code-btn" class="btn-outline gateway-btn">Buat Kode Baru</button>
-                    <p class="gateway-info">Gunakan kode yang sama di semua HP/Laptop untuk sync data real-time (bisa pakai paket data / beda Wi-Fi).</p>
+                    <button type="button" id="enter-app-btn" class="btn-primary gateway-btn enter-btn">
+                        <span>Enter to MyAbsence</span>
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                    </button>
+                    <p class="gateway-info">Klik tombol di atas untuk langsung masuk ke dashboard absensi.</p>
                 </div>
             </div>
         </section>
