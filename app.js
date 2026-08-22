@@ -22,6 +22,15 @@ document.addEventListener('DOMContentLoaded', () => {
         { id: 3, name: 'Student 3', absence_number: '03', presentDays: 8 }
     ];
 
+    const sanitizeStudentName = (name) => {
+        if (!name || typeof name !== 'string') return name;
+        const lower = name.trim().toLowerCase();
+        if (lower === 'john doe') return 'Student 1';
+        if (lower === 'jane smith') return 'Student 2';
+        if (lower === 'alice johnson') return 'Student 3';
+        return name;
+    };
+
     const isDummyStudent = (u) => {
         if (!u || !u.name) return false;
         const n = u.name.trim().toLowerCase();
@@ -37,21 +46,18 @@ document.addEventListener('DOMContentLoaded', () => {
         const stored = localStorage.getItem('myabsence_data');
         if (stored) {
             rawUsers = JSON.parse(stored);
-            if (hasOnlyDummyStudents(rawUsers)) {
-                const hasLegacyNames = rawUsers.some(u => ['john doe', 'jane smith', 'alice johnson'].includes((u.name || '').trim().toLowerCase()));
-                if (hasLegacyNames) {
-                    rawUsers = JSON.parse(JSON.stringify(DEFAULT_STUDENTS));
-                }
-            }
-        } else {
-            rawUsers = JSON.parse(JSON.stringify(DEFAULT_STUDENTS));
         }
-    } catch (e) {
+    } catch (e) { rawUsers = []; }
+
+    if (!Array.isArray(rawUsers) || rawUsers.length === 0) {
         rawUsers = JSON.parse(JSON.stringify(DEFAULT_STUDENTS));
     }
 
     let users = rawUsers.map(u => {
-        if (!u.absence_number) u.absence_number = u.id.toString().padStart(2, '0');
+        if (!u.absence_number) u.absence_number = (u.id || 1).toString().padStart(2, '0');
+        
+        // Auto convert legacy dummy names (John Doe, etc.) to Student 1, 2, 3
+        u.name = sanitizeStudentName(u.name);
         
         // Migrate to attendanceLogs
         if (!u.attendanceLogs) {
@@ -73,6 +79,9 @@ document.addEventListener('DOMContentLoaded', () => {
         
         return u;
     });
+
+    // Save immediately so localStorage is guaranteed up-to-date with Student 1, 2, 3
+    localStorage.setItem('myabsence_data', JSON.stringify(users));
 
     let activeWorkdays = [];
     try {
@@ -388,6 +397,7 @@ document.addEventListener('DOMContentLoaded', () => {
             users = data.users.map(u => {
                 if (!u.attendanceLogs) u.attendanceLogs = {};
                 u.presenceDates = Object.keys(u.attendanceLogs).filter(d => u.attendanceLogs[d] === 'present');
+                u.name = sanitizeStudentName(u.name);
                 return u;
             });
             updated = true;
@@ -523,7 +533,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const row = document.createElement('tr');
             row.innerHTML = `
                 <td>${user.absence_number || user.id}</td>
-                <td>${user.name}</td>
+                <td>${sanitizeStudentName(user.name)}</td>
                 <td class="admin-only ${currentUser && currentUser.role === 'admin' ? '' : 'hidden'}">
                     ${isWorkdayToday ? `
                         <button class="${isPresentToday ? 'btn-checkedin' : 'btn-checkin'}" onclick="togglePresenceToday(${user.id})">
