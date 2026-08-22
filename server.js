@@ -130,5 +130,5 @@ server.listen(PORT, HOST, () => {
     console.log(`\n[MyAbsence Server Online]`);
     console.log(`- Local Access (Laptop/PC) : http://localhost:${PORT}`);
     console.log(`- Network Access (HP/Device): http://${localIP}:${PORT}`);
-    console.log(`(Pastikan HP dan Laptop terhubung ke Wi-Fi yang sama)\n`);
+    console.log(`- Cloud Sync Support       : Firebase Cloud Sync & REST API Ready\n`);
 });

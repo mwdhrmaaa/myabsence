@@ -1,9 +1,10 @@
-const CACHE_NAME = 'myabsence-cache-v10';
+const CACHE_NAME = 'myabsence-cache-v11';
 const urlsToCache = [
   './',
   './index.html',
   './style.css',
   './app.js',
+  './firebase-config.js',
   './icon-192.png',
   './icon-512.png',
   './manifest.json'

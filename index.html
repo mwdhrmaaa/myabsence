@@ -35,7 +35,7 @@
                     <button id="enter-with-code-btn" class="btn-primary gateway-btn">Masuk dengan Kode</button>
                     <div class="divider-or"><hr><span>atau</span><hr></div>
                     <button id="generate-code-btn" class="btn-outline gateway-btn">Buat Kode Baru</button>
-                    <p class="gateway-info">Gunakan kode yang sama di semua HP/Laptop untuk sync data real-time.</p>
+                    <p class="gateway-info">Gunakan kode yang sama di semua HP/Laptop untuk sync data real-time (bisa pakai paket data / beda Wi-Fi).</p>
                 </div>
             </div>
         </section>
@@ -248,7 +248,7 @@
                     <div class="sync-instructions">
                         <p><strong>Cara Pakai di HP/Device Lain:</strong></p>
                         <ol>
-                            <li>Buka MyAbsence di HP (Wi-Fi yang sama).</li>
+                            <li>Buka MyAbsence di HP (bisa pakai paket data atau Wi-Fi apa saja).</li>
                             <li>Masukkan kode di atas lalu klik <strong>"Masuk dengan Kode"</strong>.</li>
                         </ol>
                     </div>
@@ -317,6 +317,10 @@
         </div>
 
         <input type="file" id="csv-import-input" accept=".csv,text/csv,text/plain" style="display: none;">
+        <!-- Firebase SDK for Cloud Multi-Network Real-Time Sync -->
+        <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+        <script src="firebase-config.js"></script>
         <script src="app.js"></script>
     </body>
 </html>

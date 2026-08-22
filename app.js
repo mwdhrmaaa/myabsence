@@ -16,14 +16,39 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('myabsence_user', JSON.stringify(currentUser));
     }
     
+    const DEFAULT_STUDENTS = [
+        { id: 1, name: 'Student 1', absence_number: '01', presentDays: 12 },
+        { id: 2, name: 'Student 2', absence_number: '02', presentDays: 10 },
+        { id: 3, name: 'Student 3', absence_number: '03', presentDays: 8 }
+    ];
+
+    const isDummyStudent = (u) => {
+        if (!u || !u.name) return false;
+        const n = u.name.trim().toLowerCase();
+        return ['student 1', 'student 2', 'student 3', 'john doe', 'jane smith', 'alice johnson'].includes(n);
+    };
+
+    const hasOnlyDummyStudents = (list) => {
+        return Array.isArray(list) && list.length > 0 && list.every(isDummyStudent);
+    };
+
     let rawUsers = [];
     try {
-        rawUsers = JSON.parse(localStorage.getItem('myabsence_data')) || [
-            { id: 1, name: 'John Doe', absence_number: '01', presentDays: 12 },
-            { id: 2, name: 'Jane Smith', absence_number: '02', presentDays: 10 },
-            { id: 3, name: 'Alice Johnson', absence_number: '03', presentDays: 8 }
-        ];
-    } catch (e) { rawUsers = []; }
+        const stored = localStorage.getItem('myabsence_data');
+        if (stored) {
+            rawUsers = JSON.parse(stored);
+            if (hasOnlyDummyStudents(rawUsers)) {
+                const hasLegacyNames = rawUsers.some(u => ['john doe', 'jane smith', 'alice johnson'].includes((u.name || '').trim().toLowerCase()));
+                if (hasLegacyNames) {
+                    rawUsers = JSON.parse(JSON.stringify(DEFAULT_STUDENTS));
+                }
+            }
+        } else {
+            rawUsers = JSON.parse(JSON.stringify(DEFAULT_STUDENTS));
+        }
+    } catch (e) {
+        rawUsers = JSON.parse(JSON.stringify(DEFAULT_STUDENTS));
+    }
 
     let users = rawUsers.map(u => {
         if (!u.absence_number) u.absence_number = u.id.toString().padStart(2, '0');
@@ -312,6 +337,81 @@ document.addEventListener('DOMContentLoaded', () => {
         return ((presentCount / total) * 100).toFixed(1);
     };
 
+    // --- Cloud Sync & Storage Engine ---
+    let firestoreDb = null;
+    let realtimeUnsub = null;
+
+    const initCloudSync = () => {
+        if (typeof firebase !== 'undefined' && window.FIREBASE_CONFIG && window.FIREBASE_CONFIG.projectId) {
+            try {
+                if (!firebase.apps.length) {
+                    firebase.initializeApp(window.FIREBASE_CONFIG);
+                }
+                firestoreDb = firebase.firestore();
+                console.log('[MyAbsence] Firebase Cloud Sync Aktif (Multi-Network Real-Time)');
+                return true;
+            } catch (e) {
+                console.warn('[MyAbsence] Gagal inisialisasi Firebase:', e);
+                firestoreDb = null;
+                return false;
+            }
+        }
+        return false;
+    };
+
+    initCloudSync();
+
+    const subscribeRealtimeSync = (code) => {
+        if (realtimeUnsub) {
+            try { realtimeUnsub(); } catch(e){}
+            realtimeUnsub = null;
+        }
+        if (!code || !firestoreDb) return;
+        try {
+            realtimeUnsub = firestoreDb.collection('myabsence_sync').doc(code).onSnapshot((doc) => {
+                if (doc.exists) {
+                    const data = doc.data();
+                    applySyncData(data);
+                }
+            }, (err) => {
+                console.warn('Firestore realtime error:', err);
+            });
+        } catch (e) {
+            console.warn('Failed to subscribe realtime sync:', e);
+        }
+    };
+
+    const applySyncData = (data) => {
+        if (!data) return false;
+        let updated = false;
+        if (data.users && Array.isArray(data.users)) {
+            users = data.users.map(u => {
+                if (!u.attendanceLogs) u.attendanceLogs = {};
+                u.presenceDates = Object.keys(u.attendanceLogs).filter(d => u.attendanceLogs[d] === 'present');
+                return u;
+            });
+            updated = true;
+        }
+        if (data.workdays && Array.isArray(data.workdays)) {
+            activeWorkdays = data.workdays;
+            updated = true;
+        }
+        if (data.startDate) {
+            startDate = data.startDate;
+            localStorage.setItem('myabsence_start_date', startDate);
+            updated = true;
+        }
+        if (updated) {
+            saveDataLocally();
+            if (currentUser) {
+                renderTable();
+                if (currentDaySpan) currentDaySpan.textContent = calculateCurrentDay();
+                if (startDateInput) startDateInput.value = new Date(startDate).toISOString().split('T')[0];
+            }
+        }
+        return true;
+    };
+
     const saveDataLocally = () => {
         localStorage.setItem('myabsence_data', JSON.stringify(users));
         localStorage.setItem('myabsence_workdays', JSON.stringify(activeWorkdays));
@@ -326,48 +426,54 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const pushSync = async () => {
         if (!syncCode) return;
-        const payload = { users, workdays: activeWorkdays, startDate };
+        const payload = { users, workdays: activeWorkdays, startDate, updatedAt: Date.now() };
+
+        // 1. Cloud Firestore (Bisa sinkron di mana saja, beda Wi-Fi / paket data)
+        if (firestoreDb) {
+            try {
+                await firestoreDb.collection('myabsence_sync').doc(syncCode).set(payload, { merge: true });
+                subscribeRealtimeSync(syncCode);
+                return;
+            } catch (e) {
+                console.warn('[Firebase Cloud Push Error]', e);
+            }
+        }
+
+        // 2. Fallback ke API Server lokal / custom backend
         try {
             await fetch(`/api/sync/${syncCode}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             });
-        } catch (e) { console.warn('Sync push failed:', e); }
+        } catch (e) { console.warn('Local Sync push failed:', e); }
     };
 
     const pullSync = async (code) => {
+        if (!code) return false;
+
+        // 1. Coba dari Cloud Firestore
+        if (firestoreDb) {
+            try {
+                const doc = await firestoreDb.collection('myabsence_sync').doc(code).get();
+                if (doc.exists) {
+                    const data = doc.data();
+                    applySyncData(data);
+                    subscribeRealtimeSync(code);
+                    return true;
+                }
+            } catch (e) {
+                console.warn('[Firebase Cloud Pull Error]', e);
+            }
+        }
+
+        // 2. Fallback ke API Server lokal
         try {
             const res = await fetch(`/api/sync/${code}`);
             if (!res.ok) return false;
             const data = await res.json();
             if (data.error) return false;
-            let updated = false;
-            if (data.users) {
-                users = data.users.map(u => {
-                    if (!u.attendanceLogs) u.attendanceLogs = {};
-                    u.presenceDates = Object.keys(u.attendanceLogs).filter(d => u.attendanceLogs[d] === 'present');
-                    return u;
-                });
-                updated = true;
-            }
-            if (data.workdays) {
-                activeWorkdays = data.workdays;
-                updated = true;
-            }
-            if (data.startDate) {
-                startDate = data.startDate;
-                localStorage.setItem('myabsence_start_date', startDate);
-                updated = true;
-            }
-            if (updated) {
-                saveDataLocally();
-                if (currentUser) {
-                    renderTable();
-                    if (currentDaySpan) currentDaySpan.textContent = calculateCurrentDay();
-                    if (startDateInput) startDateInput.value = new Date(startDate).toISOString().split('T')[0];
-                }
-            }
+            applySyncData(data);
             return true;
         } catch (e) { console.warn('Sync pull failed:', e); return false; }
     };
@@ -900,8 +1006,14 @@ document.addEventListener('DOMContentLoaded', () => {
             const idx = users.findIndex(u => u.id == id);
             if (idx !== -1) users[idx] = { ...users[idx], name, absence_number, attendanceLogs: modalLogs };
         } else {
+            // Jika daftar saat ini hanya berisi dummy siswa default (Student 1, 2, 3 atau John Doe dll),
+            // hapus otomatis data dummy tersebut sehingga siswa baru yang diinput menjadi siswa pertama
+            if (hasOnlyDummyStudents(users)) {
+                users = [];
+            }
             const newId = users.length > 0 ? Math.max(...users.map(u => u.id)) + 1 : 1;
-            users.push({ id: newId, name, absence_number, attendanceLogs: modalLogs });
+            const finalAbsNum = absence_number ? absence_number.trim() : String(newId).padStart(2, '0');
+            users.push({ id: newId, name, absence_number: finalAbsNum, attendanceLogs: modalLogs });
         }
         // Sync presenceDates for legacy compatibility
         users.forEach(u => u.presenceDates = Object.keys(u.attendanceLogs || {}).filter(dStr => u.attendanceLogs[dStr] === 'present'));
