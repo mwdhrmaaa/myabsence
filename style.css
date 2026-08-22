@@ -311,24 +311,9 @@ body {
     margin-bottom: 0.25rem;
 }
 
-.header-actions-group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-    align-items: flex-end;
-}
-
-.admin-actions-row {
-    display: flex;
-    gap: 0.75rem;
-    align-items: center;
-}
-
 .export-actions {
     display: flex;
     gap: 0.75rem;
-    align-items: center;
-    flex-wrap: wrap;
 }
 
 #toggle-rank-btn.active {
