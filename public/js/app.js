@@ -7,12 +7,18 @@ document.addEventListener('DOMContentLoaded', () => {
         return `${y}-${m}-${d}`;
     }
 
+    function formatIndonesianDate(date) {
+        const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+        const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+        return `${days[date.getDay()]}, ${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`;
+    }
+
     // --- 1. Configuration & State ---
     let startDate = localStorage.getItem('myabsence_start_date') ? parseInt(localStorage.getItem('myabsence_start_date')) : new Date('2026-01-12').getTime();
-    let currentUser = JSON.parse(localStorage.getItem('myabsence_user')) || null;
+    let currentUser = JSON.parse(localStorage.getItem('myabsence_user')) || { name: 'Pendidik', role: 'admin' };
     
     if (currentUser && currentUser.name === 'Super Admin') {
-        currentUser.name = 'Sensei!';
+        currentUser.name = 'Pendidik';
         localStorage.setItem('myabsence_user', JSON.stringify(currentUser));
     }
     
@@ -208,20 +214,59 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- 3. Global Actions ---
 
-    window.togglePresenceToday = (userId) => {
+    window.setStudentStatusToday = (userId, status) => {
         const user = users.find(u => u.id === userId);
         if (!user) return;
         const todayStr = toLocalISO(new Date());
-        if (!activeWorkdays.includes(todayStr)) return;
+        if (!activeWorkdays.includes(todayStr)) {
+            activeWorkdays.push(todayStr);
+            localStorage.setItem('myabsence_workdays', JSON.stringify(activeWorkdays));
+        }
         
-        if (user.attendanceLogs[todayStr] === 'present') {
+        if (user.attendanceLogs[todayStr] === status) {
             delete user.attendanceLogs[todayStr];
         } else {
-            user.attendanceLogs[todayStr] = 'present';
+            user.attendanceLogs[todayStr] = status;
         }
         user.presenceDates = Object.keys(user.attendanceLogs).filter(dStr => user.attendanceLogs[dStr] === 'present');
         saveData();
         renderTable();
+    };
+
+    window.togglePresenceToday = (userId) => {
+        window.setStudentStatusToday(userId, 'present');
+    };
+
+    window.markAllPresentToday = () => {
+        const todayStr = toLocalISO(new Date());
+        if (!activeWorkdays.includes(todayStr)) {
+            activeWorkdays.push(todayStr);
+            localStorage.setItem('myabsence_workdays', JSON.stringify(activeWorkdays));
+        }
+        users.forEach(user => {
+            user.attendanceLogs[todayStr] = 'present';
+            user.presenceDates = Object.keys(user.attendanceLogs).filter(dStr => user.attendanceLogs[dStr] === 'present');
+        });
+        saveData();
+        renderTable();
+    };
+
+    window.resetAllToday = () => {
+        showCustomConfirm({
+            title: 'Reset Absensi Hari Ini?',
+            message: 'Status kehadiran seluruh siswa untuk tanggal hari ini akan dikosongkan kembali.',
+            icon: 'warning',
+            okText: 'Ya, Kosongkan',
+            onOk: () => {
+                const todayStr = toLocalISO(new Date());
+                users.forEach(user => {
+                    delete user.attendanceLogs[todayStr];
+                    user.presenceDates = Object.keys(user.attendanceLogs).filter(dStr => user.attendanceLogs[dStr] === 'present');
+                });
+                saveData();
+                renderTable();
+            }
+        });
     };
 
     window.confirmStatus = (status) => {
@@ -497,6 +542,18 @@ document.addEventListener('DOMContentLoaded', () => {
         let totalPct = 0;
 
         let displayUsers = [...users];
+
+        // Real-time live search filter
+        const studentSearchInput = document.getElementById('student-search-input');
+        const query = studentSearchInput ? studentSearchInput.value.trim().toLowerCase() : '';
+        if (query) {
+            displayUsers = displayUsers.filter(u => {
+                const name = (u.name || '').toLowerCase();
+                const absNum = (u.absence_number || '').toString().toLowerCase();
+                return name.includes(query) || absNum.includes(query);
+            });
+        }
+
         if (isRanked) {
             displayUsers.sort((a, b) => {
                 const pctA = parseFloat(getPeriodPercentage(a.attendanceLogs, 'overall'));
@@ -524,42 +581,51 @@ document.addEventListener('DOMContentLoaded', () => {
         let countAlphaToday = 0;
         const todayStr = toLocalISO(new Date());
 
-        displayUsers.forEach(user => {
-            const weekly = getPeriodPercentage(user.attendanceLogs, 'weekly');
-            const monthly = getPeriodPercentage(user.attendanceLogs, 'monthly');
-            const yearly = getPeriodPercentage(user.attendanceLogs, 'yearly');
-            const overall = getPeriodPercentage(user.attendanceLogs, 'overall');
-            totalPct += parseFloat(overall);
-
-            const todayStatus = user.attendanceLogs[todayStr];
-            if (todayStatus === 'present') countPresentToday++;
-            else if (todayStatus === 'sick' || todayStatus === 'permit') countExcusedToday++;
-            else if (todayStatus === 'alpha') countAlphaToday++;
-
-            const isPresentToday = todayStatus === 'present';
-            const isWorkdayToday = activeWorkdays.includes(todayStr);
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${user.absence_number || user.id}</td>
-                <td>${sanitizeStudentName(user.name)}</td>
-                <td class="admin-only ${currentUser && currentUser.role === 'admin' ? '' : 'hidden'}">
-                    ${isWorkdayToday ? `
-                        <button class="${isPresentToday ? 'btn-checkedin' : 'btn-checkin'}" onclick="togglePresenceToday(${user.id})">
-                            ${isPresentToday ? 'Checked-in' : 'Mark Present'}
-                        </button>
-                    ` : '<span style="font-size: 0.75rem; color: var(--text-muted)">Non-workday</span>'}
-                </td>
-                <td>${weekly}%</td>
-                <td>${monthly}%</td>
-                <td>${yearly}%</td>
-                <td style="font-weight: 700; color: ${overall >= 80 ? 'var(--secondary)' : 'var(--danger)'}">${overall}%</td>
-                <td class="admin-only ${currentUser && currentUser.role === 'admin' ? '' : 'hidden'}">
-                    <button class="btn-sm-edit" onclick="editUser(${user.id})">Edit</button>
-                    <button class="btn-sm-danger" onclick="deleteUser(${user.id})">Delete</button>
+        if (displayUsers.length === 0) {
+            const emptyRow = document.createElement('tr');
+            emptyRow.innerHTML = `
+                <td colspan="8" style="text-align: center; padding: 2rem; color: var(--text-muted); font-size: 0.9rem;">
+                    ${query ? `Tidak ada siswa dengan kata kunci "${query}".` : 'Belum ada data siswa. Klik "+ Add New User" untuk menambahkan.'}
                 </td>
             `;
-            attendanceBody.appendChild(row);
-        });
+            attendanceBody.appendChild(emptyRow);
+        } else {
+            displayUsers.forEach(user => {
+                const weekly = getPeriodPercentage(user.attendanceLogs, 'weekly');
+                const monthly = getPeriodPercentage(user.attendanceLogs, 'monthly');
+                const yearly = getPeriodPercentage(user.attendanceLogs, 'yearly');
+                const overall = getPeriodPercentage(user.attendanceLogs, 'overall');
+                totalPct += parseFloat(overall);
+
+                const todayStatus = user.attendanceLogs[todayStr];
+                if (todayStatus === 'present') countPresentToday++;
+                else if (todayStatus === 'sick' || todayStatus === 'permit') countExcusedToday++;
+                else if (todayStatus === 'alpha') countAlphaToday++;
+
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="col-num">${user.absence_number || user.id}</td>
+                    <td class="col-name">${sanitizeStudentName(user.name)}</td>
+                    <td class="admin-only ${currentUser && currentUser.role === 'admin' ? '' : 'hidden'}" style="text-align: center;">
+                        <div class="status-btn-group">
+                            <button type="button" class="status-btn btn-h ${todayStatus === 'present' ? 'active' : ''}" onclick="setStudentStatusToday(${user.id}, 'present')" title="Hadir (H)">H</button>
+                            <button type="button" class="status-btn btn-s ${todayStatus === 'sick' ? 'active' : ''}" onclick="setStudentStatusToday(${user.id}, 'sick')" title="Sakit (S)">S</button>
+                            <button type="button" class="status-btn btn-i ${todayStatus === 'permit' ? 'active' : ''}" onclick="setStudentStatusToday(${user.id}, 'permit')" title="Izin (I)">I</button>
+                            <button type="button" class="status-btn btn-a ${todayStatus === 'alpha' ? 'active' : ''}" onclick="setStudentStatusToday(${user.id}, 'alpha')" title="Alpa (A)">A</button>
+                        </div>
+                    </td>
+                    <td class="col-pct">${weekly}%</td>
+                    <td class="col-pct">${monthly}%</td>
+                    <td class="col-pct">${yearly}%</td>
+                    <td class="col-pct" style="font-weight: 700; color: ${overall >= 80 ? 'var(--secondary)' : 'var(--danger)'}">${overall}%</td>
+                    <td class="admin-only ${currentUser && currentUser.role === 'admin' ? '' : 'hidden'}">
+                        <button class="btn-sm-edit" onclick="editUser(${user.id})">Edit</button>
+                        <button class="btn-sm-danger" onclick="deleteUser(${user.id})">Delete</button>
+                    </td>
+                `;
+                attendanceBody.appendChild(row);
+            });
+        }
 
         if (avgAttendanceSpan) avgAttendanceSpan.textContent = `${users.length > 0 ? (totalPct / users.length).toFixed(1) : 0}%`;
         const statPresentEl = document.getElementById('stat-present-today');
@@ -577,33 +643,35 @@ document.addEventListener('DOMContentLoaded', () => {
     const updateUI = () => {
         if (!authSection || !dashboardSection) return;
         if (!currentUser) {
-            authSection.classList.add('active');
-            dashboardSection.classList.remove('active');
-        } else {
-            authSection.classList.remove('active');
-            dashboardSection.classList.add('active');
-            if (greeting) greeting.textContent = "Selamat mengabsen!";
-            if (currentDaySpan) currentDaySpan.textContent = calculateCurrentDay();
-            if (currentUser.role === 'admin') {
-                if (adminActions) adminActions.classList.remove('hidden');
-                document.querySelectorAll('.admin-only').forEach(el => el.classList.remove('hidden'));
-                if (startDateInput) startDateInput.value = new Date(startDate).toISOString().split('T')[0];
-            } else {
-                if (adminActions) adminActions.classList.add('hidden');
-                document.querySelectorAll('.admin-only').forEach(el => el.classList.add('hidden'));
-            }
-            // Update sync button in navbar
-            if (navSyncBtn) {
-                if (syncCode) {
-                    navSyncBtn.classList.add('connected');
-                    if (navSyncLabel) navSyncLabel.textContent = isCodeHidden ? '••••••••••••' : syncCode;
-                } else {
-                    navSyncBtn.classList.remove('connected');
-                    if (navSyncLabel) navSyncLabel.textContent = 'Sync Kode';
-                }
-            }
-            renderTable();
+            currentUser = { name: 'Pendidik', role: 'admin' };
+            localStorage.setItem('myabsence_user', JSON.stringify(currentUser));
         }
+
+        authSection.classList.remove('active');
+        dashboardSection.classList.add('active');
+        if (greeting) greeting.textContent = "Presensi Kelas";
+        const todayDateDisplay = document.getElementById('today-date-display');
+        if (todayDateDisplay) todayDateDisplay.textContent = formatIndonesianDate(new Date());
+        if (currentDaySpan) currentDaySpan.textContent = calculateCurrentDay();
+        if (currentUser.role === 'admin') {
+            if (adminActions) adminActions.classList.remove('hidden');
+            document.querySelectorAll('.admin-only').forEach(el => el.classList.remove('hidden'));
+            if (startDateInput) startDateInput.value = new Date(startDate).toISOString().split('T')[0];
+        } else {
+            if (adminActions) adminActions.classList.add('hidden');
+            document.querySelectorAll('.admin-only').forEach(el => el.classList.add('hidden'));
+        }
+        // Update sync button in navbar
+        if (navSyncBtn) {
+            if (syncCode) {
+                navSyncBtn.classList.add('connected');
+                if (navSyncLabel) navSyncLabel.textContent = isCodeHidden ? '••••••••••••' : syncCode;
+            } else {
+                navSyncBtn.classList.remove('connected');
+                if (navSyncLabel) navSyncLabel.textContent = 'Sync Kode';
+            }
+        }
+        renderTable();
     };
 
     const SVG_EYE = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>`;
@@ -932,7 +1000,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (logoutBtn) logoutBtn.addEventListener('click', () => {
         currentUser = null;
         localStorage.removeItem('myabsence_user');
-        updateUI();
+        if (authSection && dashboardSection) {
+            authSection.classList.add('active');
+            dashboardSection.classList.remove('active');
+        }
     });
     if (viewMonthSelect) viewMonthSelect.addEventListener('change', (e) => { selectedMonth = parseInt(e.target.value); renderTable(); });
     if (viewYearSelect) viewYearSelect.addEventListener('change', (e) => { selectedYear = parseInt(e.target.value); renderTable(); });
@@ -1073,9 +1144,61 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    const updatePrintMeta = () => {
+        const mode = localStorage.getItem('myabsence_mode') || 'homeroom';
+        const subj = localStorage.getItem('myabsence_subject') || '-';
+        const per = localStorage.getItem('myabsence_period') || '-';
+        const todayStr = formatIndonesianDate(new Date());
+
+        const pDate = document.getElementById('print-date-val');
+        const pRole = document.getElementById('print-role-val');
+        const pSubj = document.getElementById('print-subject-val');
+        const pPer = document.getElementById('print-period-val');
+        const pSignRole = document.getElementById('print-signature-role');
+
+        if (pDate) pDate.textContent = todayStr;
+        if (pRole) pRole.textContent = mode === 'subject' ? 'Guru Mata Pelajaran' : 'Wali Kelas';
+        if (pSubj) pSubj.textContent = mode === 'subject' ? (subj || '-') : 'Presensi Harian Kelas';
+        if (pPer) pPer.textContent = mode === 'subject' ? (per || '-') : 'Seharian';
+        if (pSignRole) pSignRole.textContent = mode === 'subject' ? `Guru Mata Pelajaran (${subj || 'Mapel'})` : 'Wali Kelas';
+    };
+
     if (printSheetBtn) {
         printSheetBtn.addEventListener('click', () => {
+            updatePrintMeta();
             window.print();
+        });
+    }
+    window.addEventListener('beforeprint', updatePrintMeta);
+
+    // Toolbar Listeners: Live Search, Mark All Present, Reset Today
+    const studentSearchInput = document.getElementById('student-search-input');
+    const markAllPresentBtn = document.getElementById('mark-all-present-btn');
+    const resetTodayBtn = document.getElementById('reset-today-btn');
+
+    if (studentSearchInput) {
+        studentSearchInput.addEventListener('input', () => {
+            renderTable();
+        });
+    }
+
+    if (markAllPresentBtn) {
+        markAllPresentBtn.addEventListener('click', () => {
+            window.markAllPresentToday();
+        });
+    }
+
+    if (resetTodayBtn) {
+        resetTodayBtn.addEventListener('click', () => {
+            window.resetAllToday();
+        });
+    }
+
+    if (enterAppBtn) {
+        enterAppBtn.addEventListener('click', () => {
+            currentUser = { name: 'Pendidik', role: 'admin' };
+            localStorage.setItem('myabsence_user', JSON.stringify(currentUser));
+            updateUI();
         });
     }
 

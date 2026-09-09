@@ -23,20 +23,20 @@
 <body>
     <div id="app">
         <!-- Auth / Welcome Section (Entry Gate) -->
-        <section id="auth-section" class="active">
+        <section id="auth-section">
             <div class="glass-card login-card welcome-card">
                 <div class="welcome-badge">
                     <span class="welcome-dot"></span>
-                    <span>Modern Attendance System</span>
+                    <span>Sistem Presensi Pendidik</span>
                 </div>
-                <h1>Welcome to MyAbsence</h1>
-                <p class="welcome-subtitle">Aplikasi pemantauan dan pencatatan absensi harian yang cepat, modern, dan mudah digunakan.</p>
+                <h1>MyAbsence</h1>
+                <p class="welcome-subtitle">Aplikasi pemantauan dan pencatatan presensi kelas yang cepat, tanggap, dan efisien untuk pengajar.</p>
                 <div class="entry-gate">
                     <button type="button" id="enter-app-btn" class="btn-primary gateway-btn enter-btn">
-                        <span>Enter to MyAbsence</span>
+                        <span>Buka Dashboard Presensi</span>
                         <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
                     </button>
-                    <p class="gateway-info">Klik tombol di atas untuk langsung masuk ke dashboard absensi.</p>
+                    <p class="gateway-info">Klik tombol di atas untuk langsung masuk ke dashboard presensi.</p>
                 </div>
             </div>
         </section>
@@ -105,8 +105,9 @@
             <main class="container">
                 <header class="dashboard-header">
                     <div>
-                        <h2 id="greeting">Welcome back!</h2>
-                        <p id="day-counter">Program Day: <span id="current-day">0</span></p>
+                        <div class="today-date-badge" id="today-date-display">Memuat tanggal...</div>
+                        <h2 id="greeting" style="margin-top: 0.35rem;">Presensi Kelas</h2>
+                        <p id="day-counter" style="display: none;">Hari ke: <span id="current-day">0</span></p>
                         
                         <div class="period-selectors">
                             <div class="input-group-inline">
@@ -193,24 +194,68 @@
                     </div>
                 </div>
 
+                <!-- Printable Kop Laporan Presensi (Hanya Muncul Saat Dicetak) -->
+                <div class="print-only print-header">
+                    <div class="print-title">LAPORAN REKAPITULASI PRESENSI SISWA</div>
+                    <div class="print-subtitle">Sistem Manajemen Presensi Kelas & Pendidik</div>
+                    <div class="print-meta-grid">
+                        <div><strong>Tanggal:</strong> <span id="print-date-val">-</span></div>
+                        <div><strong>Peran:</strong> <span id="print-role-val">Wali Kelas</span></div>
+                        <div><strong>Mata Pelajaran:</strong> <span id="print-subject-val">-</span></div>
+                        <div><strong>Jam Pelajaran:</strong> <span id="print-period-val">-</span></div>
+                    </div>
+                </div>
+
+                <!-- Quick Teacher Action Toolbar & Live Search -->
+                <div class="teacher-toolbar">
+                    <div class="toolbar-left">
+                        <div class="search-box-wrapper">
+                            <svg class="search-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                            </svg>
+                            <input type="search" id="student-search-input" class="search-input" placeholder="Cari nama atau no. absen...">
+                        </div>
+                    </div>
+                    <div class="toolbar-right">
+                        <button type="button" id="mark-all-present-btn" class="btn-toolbar btn-toolbar-present" title="Tandai semua siswa hadir hari ini">
+                            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                            <span>Tandai Semua Hadir</span>
+                        </button>
+                        <button type="button" id="reset-today-btn" class="btn-toolbar btn-toolbar-reset" title="Kosongkan status absensi hari ini">
+                            <span>Reset Hari Ini</span>
+                        </button>
+                    </div>
+                </div>
+
                 <div class="table-container glass-card">
                     <table id="attendance-table">
                         <thead>
                             <tr>
-                                <th>#</th>
-                                <th>Name</th>
-                                <th class="admin-only hidden">Today</th>
-                                <th title="Last 7 Days">Weekly %</th>
-                                <th title="Last 30 Days">Monthly %</th>
-                                <th title="Since 1 Year">Yearly %</th>
-                                <th>Overall %</th>
-                                <th class="admin-only hidden">Actions</th>
+                                <th>No</th>
+                                <th>Nama Siswa</th>
+                                <th class="admin-only hidden" style="text-align: center;">Hari Ini (H / S / I / A)</th>
+                                <th title="7 Hari Terakhir">Minggu %</th>
+                                <th title="30 Hari Terakhir">Bulan %</th>
+                                <th title="1 Tahun Terakhir">Tahun %</th>
+                                <th>Total %</th>
+                                <th class="admin-only hidden">Aksi</th>
                             </tr>
                         </thead>
                         <tbody id="attendance-body">
                             <!-- Data will be injected here -->
                         </tbody>
                     </table>
+                </div>
+
+                <!-- Printable Signature Section (Hanya Muncul Saat Dicetak) -->
+                <div class="print-only print-footer">
+                    <div class="print-signature-wrapper">
+                        <p>Mengetahui,</p>
+                        <p class="print-signature-role" id="print-signature-role">Wali Kelas / Guru Pengajar</p>
+                        <div class="print-signature-space"></div>
+                        <p class="print-signature-name">( ............................................................ )</p>
+                    </div>
                 </div>
             </main>
         </section>

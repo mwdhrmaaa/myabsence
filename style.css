@@ -1647,8 +1647,241 @@ input:focus {
     color: #ffffff;
 }
 
+/* --- Modern Human-Crafted Teacher Enhancements --- */
+.today-date-badge {
+    display: inline-block;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--primary);
+    letter-spacing: 0.03em;
+    margin-bottom: 0.25rem;
+}
+
+.teacher-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+}
+
+.search-box-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    min-width: 260px;
+}
+
+.search-icon {
+    position: absolute;
+    left: 0.85rem;
+    color: var(--text-muted);
+    pointer-events: none;
+}
+
+.search-input {
+    width: 100%;
+    padding: 0.55rem 1rem 0.55rem 2.4rem;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--card-border);
+    border-radius: 0.65rem;
+    color: var(--text-main);
+    font-size: 0.85rem;
+    transition: all 0.15s ease;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: var(--primary);
+    background: rgba(255, 255, 255, 0.07);
+    box-shadow: 0 0 0 3px var(--primary-glow);
+}
+
+.toolbar-right {
+    display: flex;
+    gap: 0.6rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.btn-toolbar {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.55rem 0.95rem;
+    font-size: 0.82rem;
+    font-weight: 600;
+    border-radius: 0.65rem;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.btn-toolbar:active {
+    transform: scale(0.97);
+}
+
+.btn-toolbar-present {
+    background: rgba(16, 185, 129, 0.12);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    color: #34d399;
+}
+
+.btn-toolbar-present:hover {
+    background: rgba(16, 185, 129, 0.22);
+    border-color: #10b981;
+}
+
+.btn-toolbar-reset {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--card-border);
+    color: var(--text-muted);
+}
+
+.btn-toolbar-reset:hover {
+    background: rgba(239, 68, 68, 0.1);
+    border-color: rgba(239, 68, 68, 0.3);
+    color: #f87171;
+}
+
+/* Status Pill Buttons in Table Rows */
+.status-btn-group {
+    display: inline-flex;
+    gap: 0.35rem;
+    align-items: center;
+    justify-content: center;
+}
+
+.status-btn {
+    width: 28px;
+    height: 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    cursor: pointer;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--text-muted);
+    transition: all 0.15s ease;
+}
+
+.status-btn:active {
+    transform: scale(0.92);
+}
+
+/* H = Hadir (Emerald) */
+.status-btn.btn-h:hover {
+    background: rgba(16, 185, 129, 0.15);
+    border-color: #10b981;
+    color: #34d399;
+}
+.status-btn.btn-h.active {
+    background: #10b981;
+    border-color: #10b981;
+    color: #ffffff;
+    box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
+}
+
+/* S = Sakit (Sky Blue) */
+.status-btn.btn-s:hover {
+    background: rgba(56, 189, 248, 0.15);
+    border-color: #38bdf8;
+    color: #7dd3fc;
+}
+.status-btn.btn-s.active {
+    background: #0284c7;
+    border-color: #38bdf8;
+    color: #ffffff;
+    box-shadow: 0 0 10px rgba(56, 189, 248, 0.4);
+}
+
+/* I = Izin (Amber) */
+.status-btn.btn-i:hover {
+    background: rgba(245, 158, 11, 0.15);
+    border-color: #f59e0b;
+    color: #fcd34d;
+}
+.status-btn.btn-i.active {
+    background: #d97706;
+    border-color: #f59e0b;
+    color: #ffffff;
+    box-shadow: 0 0 10px rgba(245, 158, 11, 0.4);
+}
+
+/* A = Alpa (Rose Red) */
+.status-btn.btn-a:hover {
+    background: rgba(239, 68, 68, 0.15);
+    border-color: #ef4444;
+    color: #fca5a5;
+}
+.status-btn.btn-a.active {
+    background: #dc2626;
+    border-color: #ef4444;
+    color: #ffffff;
+    box-shadow: 0 0 10px rgba(239, 68, 68, 0.4);
+}
+
+/* Tabular numbers for clean data alignment */
+.col-num, .col-pct, .stat-value {
+    font-variant-numeric: tabular-nums;
+}
+
+/* Printable Official Attendance Sheet Styling */
+.print-only {
+    display: none;
+}
+
 @media print {
-    .glass-nav, .dashboard-header .export-actions, .admin-only, .btn-sm-edit, .btn-sm-danger, #auth-section, #theme-dropdown-container, #nav-sync-btn, .entry-gate {
+    .print-only {
+        display: block !important;
+    }
+    .print-header {
+        text-align: center;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 2px solid #000;
+    }
+    .print-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        color: #000;
+    }
+    .print-subtitle {
+        font-size: 0.85rem;
+        color: #444;
+        margin-top: 0.25rem;
+    }
+    .print-meta-grid {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 0.75rem;
+        font-size: 0.8rem;
+        color: #000;
+    }
+    .print-footer {
+        margin-top: 2.5rem;
+        display: flex;
+        justify-content: flex-end;
+    }
+    .print-signature-wrapper {
+        text-align: center;
+        min-width: 220px;
+        font-size: 0.85rem;
+        color: #000;
+    }
+    .print-signature-role {
+        font-weight: 600;
+        margin-top: 0.25rem;
+    }
+    .print-signature-space {
+        height: 60px;
+    }
+    .glass-nav, .dashboard-header .export-actions, .admin-only, .btn-sm-edit, .btn-sm-danger, #auth-section, #theme-dropdown-container, #nav-sync-btn, .entry-gate, .teacher-toolbar, .journal-box, .stats-grid, .period-selectors {
         display: none !important;
     }
     body {
