@@ -986,6 +986,34 @@ input:focus {
     background: #ffffff;
 }
 
+.btn-share-nav {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    background: transparent;
+    border: 2px solid var(--btn-border);
+    border-radius: 8px;
+    padding: 0.4rem 0.85rem;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--text-main);
+    cursor: pointer;
+    box-shadow: var(--cel-shadow-sm);
+    transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
+    font-family: inherit;
+}
+
+.btn-share-nav:hover {
+    background: #18181b;
+    transform: translate(-1px, -1px);
+    box-shadow: 3px 3px 0px var(--cel-shadow-btn);
+}
+
+.btn-share-nav:active {
+    transform: translate(1px, 1px);
+    box-shadow: none;
+}
+
 .btn-glow {
     position: relative;
     background: var(--primary) !important;
@@ -1756,6 +1784,143 @@ input:focus {
     background: var(--primary);
     color: #ffffff;
     border-color: var(--primary);
+}
+
+/* ================================================
+   Cross-Device Share Link Card & Floating Toast
+   ================================================ */
+.sync-share-card {
+    background: #09090b;
+    border: 1.5px solid var(--card-border);
+    border-radius: 8px;
+    padding: 0.85rem 1rem;
+    margin-top: 1rem;
+    text-align: left;
+}
+
+.sync-share-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-bottom: 0.45rem;
+}
+
+.sync-share-header label {
+    font-size: 0.76rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.badge-network {
+    font-size: 0.68rem;
+    font-weight: 700;
+    padding: 0.15rem 0.5rem;
+    border-radius: 9999px;
+    background: rgba(6, 182, 212, 0.15);
+    color: #67e8f9;
+    border: 1px solid rgba(6, 182, 212, 0.3);
+    white-space: nowrap;
+}
+
+.share-link-group {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.35rem;
+}
+
+.share-link-group input {
+    flex: 1;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 0.84rem;
+    padding: 0.5rem 0.75rem;
+    background: #000000;
+    border: 1.5px solid var(--card-border);
+    border-radius: 6px;
+    color: #38bdf8;
+    cursor: pointer;
+}
+
+.share-link-group input:focus {
+    border-color: var(--btn-border);
+    outline: none;
+}
+
+.btn-copy-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    white-space: nowrap;
+    padding: 0.5rem 0.95rem;
+    font-size: 0.82rem;
+    font-weight: 700;
+}
+
+.share-link-tip {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    line-height: 1.45;
+    margin-top: 0.6rem;
+}
+
+.toast-container {
+    position: fixed;
+    top: 1.5rem;
+    right: 1.5rem;
+    z-index: 10000;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    pointer-events: none;
+}
+
+.toast-item {
+    pointer-events: auto;
+    background: #09090b;
+    color: var(--text-main);
+    border: 2px solid var(--btn-border);
+    box-shadow: 4px 4px 0px var(--cel-shadow-btn);
+    border-radius: 8px;
+    padding: 0.65rem 1rem;
+    font-size: 0.85rem;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    animation: toast-slide-in 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.toast-item.toast-fading {
+    opacity: 0;
+    transform: translateY(-8px);
+}
+
+@keyframes toast-slide-in {
+    from {
+        opacity: 0;
+        transform: translateY(-12px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (max-width: 640px) {
+    .toast-container {
+        top: auto;
+        bottom: 1.5rem;
+        left: 1rem;
+        right: 1rem;
+        align-items: center;
+    }
+    .toast-item {
+        width: 100%;
+        justify-content: center;
+    }
 }
 
 /* Printable Official Attendance Sheet Styling */

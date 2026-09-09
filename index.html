@@ -57,6 +57,10 @@
                             <span class="sync-dot"></span>
                             <span id="nav-sync-label">Sync Kode</span>
                         </button>
+                        <button type="button" id="nav-share-btn" class="btn-share-nav" title="Bagikan Link ke HP / Perangkat Lain">
+                            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg>
+                            <span>Bagikan Link</span>
+                        </button>
                         <button id="logout-btn" class="btn-outline">Logout</button>
                     </div>
                 </div>
@@ -286,53 +290,67 @@
                 <div id="sync-connected-view" class="hidden">
                     <div class="sync-status-box success">
                         <span class="status-indicator online"></span>
-                        <span>Sinkronisasi Aktif (Real-Time)</span>
+                        <span>Sinkronisasi Aktif (Laptop & HP Terhubung)</span>
                     </div>
-                    <div class="sync-code-box">
-                        <label>KODE SINKRONISASI ANDA:</label>
+
+                    <!-- Primary: Direct Share Link Card for Mobile -->
+                    <div class="sync-share-card">
+                        <div class="sync-share-header">
+                            <label for="share-link-input">Link Berbagi (Buka di HP):</label>
+                            <span id="share-link-type-badge" class="badge-network">Jaringan Wi-Fi</span>
+                        </div>
+                        <div class="share-link-group">
+                            <input type="text" id="share-link-input" readonly value="" placeholder="Memuat link berbagi..." title="Klik untuk menyorot link">
+                            <button type="button" id="copy-share-link-btn" class="btn-primary btn-copy-link" title="Salin Link Berbagi">
+                                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                                <span id="copy-share-link-label">Salin Link</span>
+                            </button>
+                        </div>
+                        <p class="share-link-tip">
+                            Salin link di atas lalu buka di browser HP Anda. Semua data yang sedang dibuka di laptop akan langsung tersinkron dan bisa diedit dari HP secara bersamaan.
+                        </p>
+                    </div>
+
+                    <!-- Secondary: Fallback Code Box -->
+                    <div class="sync-code-box" style="margin-top: 1rem;">
+                        <label>KODE SINKRONISASI MANUAL:</label>
                         <div class="code-wrapper">
                             <span id="active-sync-code" class="code-large">ABC123DEF456</span>
                             <button type="button" id="toggle-code-visibility-btn" class="btn-toggle-eye" title="Sembunyikan / Tampilkan Kode">
                                 <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                             </button>
                         </div>
-                        <div class="code-copy-wrapper" style="margin-top: 0.85rem;">
-                            <button type="button" id="copy-code-modal-btn" class="btn-primary btn-copy-code">Salin Kode</button>
+                        <div class="code-copy-wrapper" style="margin-top: 0.65rem;">
+                            <button type="button" id="copy-code-modal-btn" class="btn-outline btn-sm" style="width: 100%;">Salin Kode Saja</button>
                         </div>
                     </div>
-                    <div class="sync-instructions">
-                        <p><strong>Cara Pakai di HP/Device Lain:</strong></p>
-                        <ol>
-                            <li>Buka MyAbsence di HP (bisa pakai paket data atau Wi-Fi apa saja).</li>
-                            <li>Masukkan kode di atas lalu klik <strong>"Masuk dengan Kode"</strong>.</li>
-                        </ol>
-                    </div>
-                    <div class="modal-actions" style="margin-top: 1.5rem;">
-                        <button type="button" id="disconnect-sync-btn" class="btn-outline btn-danger-soft">Ganti / Putuskan Kode</button>
-                        <button type="button" id="close-sync-modal-btn" class="btn-primary">Tutup</button>
+
+                    <div class="modal-actions" style="margin-top: 1.25rem;">
+                        <button type="button" id="disconnect-sync-btn" class="btn-outline btn-danger-soft">Putuskan Sinkronisasi</button>
+                        <button type="button" id="close-sync-modal-btn" class="btn-primary">Selesai</button>
                     </div>
                 </div>
 
                 <!-- View when NOT CONNECTED -->
                 <div id="sync-disconnected-view">
                     <div class="sync-option-card">
-                        <h3>1. Bagikan Data dari Laptop Ini ke HP</h3>
-                        <p>Buat kode baru agar data absensi di laptop ini langsung bisa dibuka dan diedit dari HP secara bersamaan.</p>
+                        <h3>1. Bagikan Data Laptop ke HP via Link</h3>
+                        <p>Buat link berbagi agar data absensi di laptop ini langsung bisa dibuka dan diedit dari HP secara bersamaan.</p>
                         <button type="button" id="modal-generate-code-btn" class="btn-primary" style="width: 100%;">
-                            Buat Kode Baru & Bagikan
+                            Buat Link Berbagi & Bagikan ke HP
                         </button>
                     </div>
 
                     <div class="divider-or"><hr><span>ATAU</span><hr></div>
 
                     <div class="sync-option-card">
-                        <h3>2. Masukkan Kode dari Perangkat Lain</h3>
-                        <p>Jika sudah membuat kode di HP/laptop lain, masukkan di sini:</p>
+                        <h3>2. Hubungkan dengan Link atau Kode</h3>
+                        <p>Jika memiliki link atau kode dari perangkat lain, tempel di sini:</p>
                         <div class="input-group" style="margin-bottom: 0.75rem;">
-                            <input type="text" id="modal-sync-code-input" maxlength="12" placeholder="Contoh: ABC123DEF456" style="text-transform:uppercase; letter-spacing:0.12em; text-align:center; font-size:1.1rem; font-weight:700;">
+                            <input type="text" id="modal-sync-code-input" placeholder="Tempel link atau kode di sini" style="text-align:center; font-size:0.95rem; font-weight:600;">
                         </div>
                         <button type="button" id="modal-connect-code-btn" class="btn-secondary" style="width: 100%;">
-                            Hubungkan dengan Kode
+                            Hubungkan Sesi
                         </button>
                     </div>
 
@@ -407,6 +425,7 @@
             </div>
         </div>
 
+        <div id="toast-container" class="toast-container"></div>
         <input type="file" id="csv-import-input" accept=".csv,text/csv,text/plain" style="display: none;">
         <!-- Firebase SDK for Cloud Multi-Network Real-Time Sync -->
         <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>

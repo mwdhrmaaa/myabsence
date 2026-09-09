@@ -105,9 +105,25 @@ document.addEventListener('DOMContentLoaded', () => {
     let pendingStatusDate = null;
     let historySelectedMonth = new Date().getMonth();
     let syncCode = localStorage.getItem('myabsence_sync_code') || null;
+    let lastSyncUpdatedAt = 0;
     let isDragging = false;
     let dragMode = null; // 'add' or 'remove'
     let isCodeHidden = false;
+
+    // Detect Share Link query param (?sync=... or ?share=... or ?connect=...)
+    let incomingShareCode = null;
+    try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const rawParam = urlParams.get('sync') || urlParams.get('share') || urlParams.get('connect');
+        if (rawParam && /^[A-Z0-9]{12}$/i.test(rawParam.trim())) {
+            incomingShareCode = rawParam.trim().toUpperCase();
+            syncCode = incomingShareCode;
+            localStorage.setItem('myabsence_sync_code', syncCode);
+            // Auto authenticate incoming visitor into the synchronized session
+            currentUser = { name: 'Pendidik', role: 'admin' };
+            localStorage.setItem('myabsence_user', JSON.stringify(currentUser));
+        }
+    } catch (e) {}
 
     // --- 2. Selectors ---
     const authSection = document.getElementById('auth-section');
@@ -166,6 +182,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalGenerateCodeBtn = document.getElementById('modal-generate-code-btn');
     const modalSyncCodeInput = document.getElementById('modal-sync-code-input');
     const modalConnectCodeBtn = document.getElementById('modal-connect-code-btn');
+    const navShareBtn = document.getElementById('nav-share-btn');
+    const shareLinkInput = document.getElementById('share-link-input');
+    const copyShareLinkBtn = document.getElementById('copy-share-link-btn');
+    const copyShareLinkText = document.getElementById('copy-share-link-label');
+    const shareLinkTypeBadge = document.getElementById('share-link-type-badge');
+    const toastContainer = document.getElementById('toast-container');
 
     // Custom Confirmation Modal selectors
     const confirmModal = document.getElementById('confirm-modal');
@@ -510,6 +532,9 @@ document.addEventListener('DOMContentLoaded', () => {
             localStorage.setItem('myabsence_start_date', startDate);
             updated = true;
         }
+        if (data.updatedAt) {
+            lastSyncUpdatedAt = Number(data.updatedAt);
+        }
         if (updated) {
             saveDataLocally();
             if (currentUser) {
@@ -535,7 +560,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const pushSync = async () => {
         if (!syncCode) return;
-        const payload = { users, workdays: activeWorkdays, startDate, updatedAt: Date.now() };
+        const now = Date.now();
+        lastSyncUpdatedAt = now;
+        const payload = { users, workdays: activeWorkdays, startDate, updatedAt: now };
 
         // 1. Cloud Firestore (Bisa sinkron di mana saja, beda Wi-Fi / paket data)
         if (firestoreDb) {
@@ -582,6 +609,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!res.ok) return false;
             const data = await res.json();
             if (data.error) return false;
+            if (data.updatedAt && Number(data.updatedAt) <= lastSyncUpdatedAt) {
+                return true;
+            }
             applySyncData(data);
             return true;
         } catch (e) { console.warn('Sync pull failed:', e); return false; }
@@ -740,6 +770,64 @@ document.addEventListener('DOMContentLoaded', () => {
         success: `<svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`
     };
 
+    const showToast = (message, icon = 'success', duration = 3000) => {
+        if (!toastContainer) return;
+        const toast = document.createElement('div');
+        toast.className = 'toast-item';
+        const iconSvg = icon === 'success'
+            ? `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#22c55e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`
+            : `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#38bdf8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>`;
+        toast.innerHTML = `${iconSvg}<span>${message}</span>`;
+        toastContainer.appendChild(toast);
+
+        setTimeout(() => {
+            toast.classList.add('toast-fading');
+            setTimeout(() => { toast.remove(); }, 250);
+        }, duration);
+    };
+
+    let cachedNetworkInfo = null;
+    const fetchNetworkInfo = async () => {
+        if (cachedNetworkInfo) return cachedNetworkInfo;
+        try {
+            const res = await fetch('/api/system/network-info');
+            if (res.ok) {
+                const json = await res.json();
+                if (json.data) cachedNetworkInfo = json.data;
+            }
+        } catch (e) {}
+        return cachedNetworkInfo;
+    };
+
+    const buildShareUrl = async (code) => {
+        if (!code) return '';
+        const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+        
+        if (isLocal) {
+            const net = await fetchNetworkInfo();
+            if (net && net.networkUrl) {
+                if (shareLinkTypeBadge) shareLinkTypeBadge.textContent = `Wi-Fi / LAN (${net.localIp})`;
+                return `${net.networkUrl}/?sync=${code}`;
+            }
+        }
+
+        if (shareLinkTypeBadge) {
+            shareLinkTypeBadge.textContent = isLocal ? 'Lokal' : 'Online Cloud';
+        }
+        return `${window.location.origin}${window.location.pathname}?sync=${code}`;
+    };
+
+    const updateShareLinkDisplay = async () => {
+        if (!shareLinkInput) return;
+        if (!syncCode) {
+            shareLinkInput.value = '';
+            return;
+        }
+        shareLinkInput.value = 'Menyiapkan link berbagi...';
+        const url = await buildShareUrl(syncCode);
+        shareLinkInput.value = url;
+    };
+
     const renderSyncCodeDisplay = () => {
         if (!activeSyncCode) return;
         if (isCodeHidden) {
@@ -758,6 +846,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (navSyncLabel && syncCode) {
             navSyncLabel.textContent = isCodeHidden ? '••••••••••••' : syncCode;
         }
+        updateShareLinkDisplay();
     };
 
     const openSyncModal = () => {
@@ -766,6 +855,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (syncConnectedView) syncConnectedView.classList.remove('hidden');
             if (syncDisconnectedView) syncDisconnectedView.classList.add('hidden');
             renderSyncCodeDisplay();
+            updateShareLinkDisplay();
         } else {
             if (syncConnectedView) syncConnectedView.classList.add('hidden');
             if (syncDisconnectedView) syncDisconnectedView.classList.remove('hidden');
@@ -946,6 +1036,53 @@ document.addEventListener('DOMContentLoaded', () => {
     if (closeSyncModalBtn) closeSyncModalBtn.addEventListener('click', closeSyncModal);
     if (closeSyncModalBtn2) closeSyncModalBtn2.addEventListener('click', closeSyncModal);
 
+    // Tombol Bagikan Link di Navbar
+    if (navShareBtn) {
+        navShareBtn.addEventListener('click', async () => {
+            if (!syncCode) {
+                syncCode = generateSyncCode();
+                localStorage.setItem('myabsence_sync_code', syncCode);
+                await pushSync();
+                updateUI();
+            }
+            openSyncModal();
+            const url = await buildShareUrl(syncCode);
+            if (url && navigator.clipboard) {
+                navigator.clipboard.writeText(url).then(() => {
+                    showToast('Link Berbagi Berhasil Disalin!');
+                    if (copyShareLinkText) {
+                        copyShareLinkText.textContent = 'Tersalin!';
+                        setTimeout(() => { copyShareLinkText.textContent = 'Salin Link'; }, 2000);
+                    }
+                }).catch(() => {});
+            }
+        });
+    }
+
+    // Salin Link Berbagi untuk HP
+    if (copyShareLinkBtn) {
+        copyShareLinkBtn.addEventListener('click', async () => {
+            const url = shareLinkInput ? shareLinkInput.value : '';
+            if (!url || url.startsWith('Menyiapkan')) return;
+            try {
+                await navigator.clipboard.writeText(url);
+                showToast('Link Berbagi Berhasil Disalin!');
+                if (copyShareLinkText) {
+                    copyShareLinkText.textContent = 'Tersalin!';
+                    setTimeout(() => { copyShareLinkText.textContent = 'Salin Link'; }, 2000);
+                }
+            } catch (e) {
+                prompt('Salin link ini untuk dibuka di HP:', url);
+            }
+        });
+    }
+
+    if (shareLinkInput) {
+        shareLinkInput.addEventListener('click', () => {
+            shareLinkInput.select();
+        });
+    }
+
     // Toggle sembunyikan/tampilkan kode
     if (toggleCodeVisibilityBtn) {
         toggleCodeVisibilityBtn.addEventListener('click', () => {
@@ -959,38 +1096,48 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!syncCode) return;
         navigator.clipboard.writeText(syncCode).then(() => {
             copyCodeModalBtn.textContent = 'Kode Tersalin!';
-            setTimeout(() => { copyCodeModalBtn.textContent = 'Salin Kode'; }, 2000);
+            showToast('Kode Berhasil Disalin!');
+            setTimeout(() => { copyCodeModalBtn.textContent = 'Salin Kode Saja'; }, 2000);
         }).catch(() => {
             prompt('Salin kode ini:', syncCode);
         });
     });
 
     // Buat kode baru dari dalam dashboard
-    if (modalGenerateCodeBtn) modalGenerateCodeBtn.addEventListener('click', () => {
+    if (modalGenerateCodeBtn) modalGenerateCodeBtn.addEventListener('click', async () => {
         const code = generateSyncCode();
         syncCode = code;
         localStorage.setItem('myabsence_sync_code', syncCode);
-        pushSync();
+        await pushSync();
         updateUI();
         openSyncModal();
+        showToast('Link Berbagi Baru Telah Dibuat!');
     });
 
-    // Hubungkan dengan kode dari dalam dashboard
+    // Hubungkan dengan kode atau link dari dalam dashboard
     if (modalConnectCodeBtn) modalConnectCodeBtn.addEventListener('click', async () => {
-        const raw = modalSyncCodeInput ? modalSyncCodeInput.value.trim().toUpperCase() : '';
+        let raw = modalSyncCodeInput ? modalSyncCodeInput.value.trim() : '';
+        // Extract 12-char code if user pasted a full URL
+        const urlMatch = raw.match(/[?&](?:sync|share|connect)=([A-Z0-9]{12})/i);
+        if (urlMatch) {
+            raw = urlMatch[1].toUpperCase();
+        } else {
+            raw = raw.toUpperCase();
+        }
+
         if (!/^[A-Z0-9]{12}$/.test(raw)) {
-            alert('Kode harus tepat 12 karakter (huruf A-Z dan angka 0-9).');
+            alert('Format tidak valid. Masukkan 12 karakter kode atau tempel link berbagi yang lengkap.');
             return;
         }
         modalConnectCodeBtn.textContent = 'Menghubungkan...';
         modalConnectCodeBtn.disabled = true;
         const found = await pullSync(raw);
-        modalConnectCodeBtn.textContent = 'Hubungkan dengan Kode';
+        modalConnectCodeBtn.textContent = 'Hubungkan Sesi';
         modalConnectCodeBtn.disabled = false;
         if (!found) {
             showCustomConfirm({
-                title: 'Kode Belum Terdaftar',
-                message: `Kode "${raw}" belum ada di server. Apakah Anda ingin membuat sesi baru dengan kode ini?`,
+                title: 'Sesi Belum Terdaftar',
+                message: `Sesi dengan kode "${raw}" belum ada di server. Apakah Anda ingin membuat sesi baru dengan kode ini?`,
                 icon: 'key',
                 okText: 'Buat Sesi Baru',
                 onOk: () => {
@@ -999,6 +1146,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     pushSync();
                     updateUI();
                     openSyncModal();
+                    showToast('Sesi Baru Dibuat & Terhubung!');
                 }
             });
             return;
@@ -1008,6 +1156,7 @@ document.addEventListener('DOMContentLoaded', () => {
         pushSync();
         updateUI();
         openSyncModal();
+        showToast('Berhasil Terhubung ke Sesi Presensi!');
     });
 
     // Putuskan sinkronisasi dengan custom confirmation modal
@@ -1377,15 +1526,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Auto-sync on startup if logged in with sync code
     if (currentUser && syncCode) {
-        pullSync(syncCode);
+        pullSync(syncCode).then((success) => {
+            if (success && incomingShareCode) {
+                showToast('Terhubung via Link Berbagi! Data presensi disinkronkan.', 'success', 4000);
+                try {
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                } catch (e) {}
+            }
+        });
     }
 
-    // Periodic auto-sync every 10 seconds for real-time multi-device sync
+    // Periodic auto-sync for real-time multi-device sync (snappy 3.5s for local LAN)
+    const syncIntervalMs = firestoreDb ? 10000 : 3500;
     setInterval(() => {
-        if (currentUser && syncCode) {
+        if (currentUser && syncCode && !document.hidden) {
             pullSync(syncCode);
         }
-    }, 10000);
+    }, syncIntervalMs);
 
     // Sync on tab focus or visibility return
     window.addEventListener('focus', () => {
