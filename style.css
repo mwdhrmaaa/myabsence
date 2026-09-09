@@ -809,16 +809,16 @@ input:focus {
 }
 
 .day-btn.sick {
-    background: #27272a;
+    background: #16a34a;
     border-color: var(--btn-border);
-    color: white;
+    color: #ffffff;
     box-shadow: var(--cel-shadow-sm);
 }
 
 .day-btn.permit {
-    background: #27272a;
+    background: #eab308;
     border-color: var(--btn-border);
-    color: white;
+    color: #000000;
     box-shadow: var(--cel-shadow-sm);
 }
 
@@ -1040,19 +1040,20 @@ input:focus {
 }
 
 .btn-status-sick {
-    background: #27272a;
+    background: #16a34a;
     color: #ffffff;
 }
 .btn-status-sick:hover {
-    background: #3f3f46;
+    background: #15803d;
 }
 
 .btn-status-permit {
-    background: #27272a;
-    color: #ffffff;
+    background: #eab308;
+    color: #000000;
 }
 .btn-status-permit:hover {
-    background: #3f3f46;
+    background: #ca8a04;
+    color: #ffffff;
 }
 
 .btn-status-alpha {
@@ -1577,29 +1578,30 @@ input:focus {
     box-shadow: var(--cel-shadow-sm);
 }
 
-/* S = Sakit (Neutral Zinc) */
+/* S = Sakit (Emerald Green) */
 .status-btn.btn-s:hover {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(22, 163, 74, 0.2);
     border-color: var(--btn-border);
-    color: #e2e8f0;
+    color: #86efac;
 }
 .status-btn.btn-s.active {
-    background: #27272a;
+    background: #16a34a;
     border-color: var(--btn-border);
     color: #ffffff;
     box-shadow: var(--cel-shadow-sm);
 }
 
-/* I = Izin (Neutral Zinc) */
+/* I = Izin (Amber Yellow) */
 .status-btn.btn-i:hover {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(234, 179, 8, 0.2);
     border-color: var(--btn-border);
-    color: #e2e8f0;
+    color: #fde047;
 }
 .status-btn.btn-i.active {
-    background: #27272a;
+    background: #eab308;
     border-color: var(--btn-border);
-    color: #ffffff;
+    color: #000000;
+    font-weight: 800;
     box-shadow: var(--cel-shadow-sm);
 }
 
