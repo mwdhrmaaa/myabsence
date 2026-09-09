@@ -2,9 +2,28 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
+const env = require('./src/core/config/env');
+const { getDatabase, closeDatabase } = require('./src/core/database/connection');
+const { seedDatabase } = require('./src/core/database/seed');
+const { createApiRouter } = require('./src/core/http/routes');
 
-const PORT = 3000;
-const HOST = '0.0.0.0';
+const PUBLIC_DIR = path.join(__dirname, 'public');
+const apiRouter = createApiRouter();
+
+// Initialize DB and Seed Data
+const db = getDatabase();
+seedDatabase(db);
+
+const MIME_TYPES = {
+    '.html': 'text/html; charset=utf-8',
+    '.css': 'text/css; charset=utf-8',
+    '.js': 'application/javascript; charset=utf-8',
+    '.json': 'application/json; charset=utf-8',
+    '.png': 'image/png',
+    '.jpg': 'image/jpeg',
+    '.svg': 'image/svg+xml',
+    '.ico': 'image/x-icon'
+};
 
 function getLocalIP() {
     const interfaces = os.networkInterfaces();
@@ -18,117 +37,76 @@ function getLocalIP() {
     return '127.0.0.1';
 }
 
-// Buat folder data/ jika belum ada
-const DATA_DIR = path.join(__dirname, 'data');
-if (!fs.existsSync(DATA_DIR)) {
-    fs.mkdirSync(DATA_DIR, { recursive: true });
+function handleStaticFile(req, res, urlPath) {
+    let normalized = urlPath === '/' ? '/index.html' : urlPath;
+    const safePath = path.normalize(path.join(PUBLIC_DIR, normalized));
+
+    if (!safePath.startsWith(PUBLIC_DIR)) {
+        res.writeHead(403, { 'Content-Type': 'text/plain' });
+        return res.end('Access Denied');
+    }
+
+    fs.readFile(safePath, (err, content) => {
+        if (err) {
+            if (err.code === 'ENOENT') {
+                const indexPath = path.join(PUBLIC_DIR, 'index.html');
+                fs.readFile(indexPath, (readErr, indexContent) => {
+                    if (readErr) {
+                        res.writeHead(404, { 'Content-Type': 'text/plain' });
+                        return res.end('Not Found');
+                    }
+                    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+                    res.end(indexContent);
+                });
+            } else {
+                res.writeHead(500, { 'Content-Type': 'text/plain' });
+                res.end('Server Error');
+            }
+            return;
+        }
+
+        const ext = path.extname(safePath).toLowerCase();
+        const contentType = MIME_TYPES[ext] || 'application/octet-stream';
+        res.writeHead(200, {
+            'Content-Type': contentType,
+            'Cache-Control': ext === '.html' ? 'no-cache' : 'public, max-age=86400'
+        });
+        res.end(content);
+    });
 }
 
-const MIME_TYPES = {
-    '.html': 'text/html',
-    '.css': 'text/css',
-    '.js': 'text/javascript',
-    '.json': 'application/json',
-    '.png': 'image/png',
-    '.jpg': 'image/jpeg',
-    '.gif': 'image/gif',
-    '.svg': 'image/svg+xml',
-    '.ico': 'image/x-icon'
-};
-
-const setCORSHeaders = (res) => {
+const server = http.createServer(async (req, res) => {
+    // Set Security & CORS Headers
     res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-};
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
-const server = http.createServer((req, res) => {
-    setCORSHeaders(res);
-
-    // Handle preflight
     if (req.method === 'OPTIONS') {
         res.writeHead(204);
-        res.end();
-        return;
+        return res.end();
     }
 
     const urlPath = req.url.split('?')[0];
 
-    // --- API: Sync Code ---
-    const syncMatch = urlPath.match(/^\/api\/sync\/([A-Za-z0-9]{12})$/);
-    if (syncMatch) {
-        const code = syncMatch[1].toUpperCase();
-        const filePath = path.join(DATA_DIR, `${code}.json`);
-
-        if (req.method === 'GET') {
-            if (!fs.existsSync(filePath)) {
-                res.writeHead(404, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify({ error: 'Kode tidak ditemukan di server.' }));
-                return;
-            }
-            fs.readFile(filePath, (err, content) => {
-                if (err) {
-                    res.writeHead(500, { 'Content-Type': 'application/json' });
-                    res.end(JSON.stringify({ error: 'Gagal membaca data.' }));
-                    return;
-                }
-                res.writeHead(200, { 'Content-Type': 'application/json' });
-                res.end(content, 'utf-8');
-            });
-            return;
-        }
-
-        if (req.method === 'POST') {
-            let body = '';
-            req.on('data', chunk => { body += chunk.toString(); });
-            req.on('end', () => {
-                try {
-                    JSON.parse(body); // validasi JSON
-                    fs.writeFile(filePath, body, (err) => {
-                        if (err) {
-                            res.writeHead(500, { 'Content-Type': 'application/json' });
-                            res.end(JSON.stringify({ error: 'Gagal menyimpan data.' }));
-                            return;
-                        }
-                        res.writeHead(200, { 'Content-Type': 'application/json' });
-                        res.end(JSON.stringify({ ok: true }));
-                    });
-                } catch (e) {
-                    res.writeHead(400, { 'Content-Type': 'application/json' });
-                    res.end(JSON.stringify({ error: 'JSON tidak valid.' }));
-                }
-            });
-            return;
-        }
+    if (urlPath.startsWith('/api/')) {
+        return apiRouter.handle(req, res);
     }
 
-    // --- Static Files ---
-    let filePath = '.' + urlPath;
-    if (filePath === './') filePath = './index.html';
-
-    const extname = String(path.extname(filePath)).toLowerCase();
-    const contentType = MIME_TYPES[extname] || 'application/octet-stream';
-
-    fs.readFile(filePath, (error, content) => {
-        if (error) {
-            if (error.code === 'ENOENT') {
-                res.writeHead(404, { 'Content-Type': 'text/html' });
-                res.end('<h1>404 Not Found</h1>', 'utf-8');
-            } else {
-                res.writeHead(500);
-                res.end(`Server Error: ${error.code}\n`);
-            }
-        } else {
-            res.writeHead(200, { 'Content-Type': contentType });
-            res.end(content, 'utf-8');
-        }
-    });
+    handleStaticFile(req, res, urlPath);
 });
 
-server.listen(PORT, HOST, () => {
-    const localIP = getLocalIP();
-    console.log(`\n[MyAbsence Server Online]`);
-    console.log(`- Local Access (Laptop/PC) : http://localhost:${PORT}`);
-    console.log(`- Network Access (HP/Device): http://${localIP}:${PORT}`);
-    console.log(`- Cloud Sync Support       : Firebase Cloud Sync & REST API Ready\n`);
+server.listen(env.port, env.host, () => {
+    const localIp = getLocalIP();
+    console.log(`[MyAbsence v2.0 Platform Ready]`);
+    console.log(`- Local Access   : http://localhost:${env.port}`);
+    console.log(`- Network Access : http://${localIp}:${env.port}`);
+    console.log(`- Environment    : ${env.isDev ? 'Development' : 'Production'}\n`);
 });
+
+process.on('SIGINT', () => {
+    console.log('\n[MyAbsence] Shutting down gracefully...');
+    closeDatabase();
+    server.close(() => process.exit(0));
+});
+
+module.exports = server;
