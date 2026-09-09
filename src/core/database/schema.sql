@@ -101,3 +101,12 @@ CREATE INDEX IF NOT EXISTS idx_students_class ON students(class_id);
 CREATE INDEX IF NOT EXISTS idx_sessions_class_date ON attendance_sessions(class_id, session_date);
 CREATE INDEX IF NOT EXISTS idx_records_session ON attendance_records(session_id);
 CREATE INDEX IF NOT EXISTS idx_records_student ON attendance_records(student_id);
+
+-- Real-time Sync Sessions for Cross-Device Synchronization (Laptop <-> Phone)
+CREATE TABLE IF NOT EXISTS sync_sessions (
+    code TEXT PRIMARY KEY,
+    payload TEXT NOT NULL,
+    updated_at INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_sync_updated_at ON sync_sessions(updated_at);
+

@@ -67,6 +67,31 @@ test('API Integration - Full HTTP Endpoints Pipeline', async (t) => {
     assert.strictEqual(analyticsRes.status, 200);
     assert.ok(typeof analyticsRes.body.data.overallRate === 'number');
 
+    // 5. Cross-Device Sync & Network Share
+    const syncCode = 'INTG99TEST12';
+    const syncPayload = {
+        users: [{ id: 1, name: 'Student 1', attendanceLogs: {} }],
+        workdays: ['2026-09-09'],
+        startDate: '2026-09-01',
+        updatedAt: Date.now()
+    };
+
+    const pushRes = await request(`/api/sync/${syncCode}`, {
+        method: 'POST',
+        body: syncPayload
+    });
+    assert.strictEqual(pushRes.status, 200);
+    assert.strictEqual(pushRes.body.data.code, syncCode);
+
+    const pullRes = await request(`/api/sync/${syncCode}`);
+    assert.strictEqual(pullRes.status, 200);
+    assert.strictEqual(pullRes.body.users[0].name, 'Student 1');
+
+    const netInfoRes = await request(`/api/system/network-info?code=${syncCode}`);
+    assert.strictEqual(netInfoRes.status, 200);
+    assert.ok(netInfoRes.body.data.localIp);
+    assert.ok(netInfoRes.body.data.shareUrl.includes(syncCode));
+
     // Close server when integration tests finish
     server.close();
 });

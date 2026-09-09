@@ -4,6 +4,7 @@ const classes = require('../../features/classes/classes.controller');
 const students = require('../../features/students/students.controller');
 const attendance = require('../../features/attendance/attendance.controller');
 const analytics = require('../../features/analytics/analytics.controller');
+const sync = require('../../features/sync/sync.controller');
 
 function createApiRouter() {
     const router = new Router();
@@ -36,6 +37,11 @@ function createApiRouter() {
     // Analytics
     router.get('/api/analytics/classes/:classId', analytics.handleClassAnalytics);
     router.get('/api/analytics/classes/:classId/warnings', analytics.handleEarlyWarnings);
+
+    // Cross-Device Sync & Network Share
+    router.post('/api/sync/:code', sync.handlePushSync);
+    router.get('/api/sync/:code', sync.handlePullSync);
+    router.get('/api/system/network-info', sync.handleGetNetworkInfo);
 
     return router;
 }

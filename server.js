@@ -3,6 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 const env = require('./src/core/config/env');
+const { getLocalIp } = require('./src/core/network/ip');
 const { getDatabase, closeDatabase } = require('./src/core/database/connection');
 const { seedDatabase } = require('./src/core/database/seed');
 const { createApiRouter } = require('./src/core/http/routes');
@@ -24,18 +25,6 @@ const MIME_TYPES = {
     '.svg': 'image/svg+xml',
     '.ico': 'image/x-icon'
 };
-
-function getLocalIP() {
-    const interfaces = os.networkInterfaces();
-    for (const name of Object.keys(interfaces)) {
-        for (const iface of interfaces[name]) {
-            if (iface.family === 'IPv4' && !iface.internal) {
-                return iface.address;
-            }
-        }
-    }
-    return '127.0.0.1';
-}
 
 function handleStaticFile(req, res, urlPath) {
     let normalized = urlPath === '/' ? '/index.html' : urlPath;
@@ -96,7 +85,7 @@ const server = http.createServer(async (req, res) => {
 });
 
 server.listen(env.port, env.host, () => {
-    const localIp = getLocalIP();
+    const localIp = getLocalIp();
     console.log(`[MyAbsence v2.0 Platform Ready]`);
     console.log(`- Local Access   : http://localhost:${env.port}`);
     console.log(`- Network Access : http://${localIp}:${env.port}`);
