@@ -29,6 +29,7 @@ function createApiRouter() {
 
     // Attendance
     router.get('/api/attendance/session', attendance.handleGetOrCreateSession);
+    router.put('/api/attendance/session/:id', attendance.handleUpdateSessionInfo);
     router.post('/api/attendance/record', attendance.handleRecordSingle);
     router.get('/api/attendance/matrix', attendance.handleGetMonthlyMatrix);
 

@@ -4,15 +4,29 @@ const { sendSuccess, sendBadRequest, sendNotFound } = require('../../core/http/r
 function handleGetOrCreateSession(req, res) {
     const classId = parseInt(req.query.classId, 10);
     const date = req.query.date || new Date().toISOString().split('T')[0];
-    const subjectId = req.query.subjectId ? parseInt(req.query.subjectId, 10) : null;
+    const subjectName = req.query.subjectName || null;
+    const periodInfo = req.query.periodInfo || null;
 
     if (!classId) {
         return sendBadRequest(res, 'classId is required');
     }
 
-    const session = attendanceService.getOrCreateSession(classId, date, subjectId);
+    const session = attendanceService.getOrCreateSession(classId, date, subjectName, periodInfo);
     const sessionDetails = attendanceService.getSessionWithRecords(session.id);
     return sendSuccess(res, sessionDetails);
+}
+
+function handleUpdateSessionInfo(req, res) {
+    const sessionId = parseInt(req.params.id, 10);
+    const { subjectName, periodInfo, lessonNotes } = req.body;
+
+    if (!sessionId) {
+        return sendBadRequest(res, 'Valid sessionId is required');
+    }
+
+    attendanceService.updateSessionInfo(sessionId, { subjectName, periodInfo, lessonNotes });
+    const sessionDetails = attendanceService.getSessionWithRecords(sessionId);
+    return sendSuccess(res, sessionDetails, 'Session details updated');
 }
 
 function handleRecordSingle(req, res) {
@@ -46,6 +60,7 @@ function handleGetMonthlyMatrix(req, res) {
 
 module.exports = {
     handleGetOrCreateSession,
+    handleUpdateSessionInfo,
     handleRecordSingle,
     handleGetMonthlyMatrix
 };

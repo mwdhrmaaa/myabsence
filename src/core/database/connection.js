@@ -30,6 +30,21 @@ function initializeSchema(db) {
         const schema = fs.readFileSync(schemaFile, 'utf-8');
         db.exec(schema);
     }
+
+    try {
+        const columns = db.prepare('PRAGMA table_info(attendance_sessions)').all().map(c => c.name);
+        if (!columns.includes('subject_name')) {
+            db.exec('ALTER TABLE attendance_sessions ADD COLUMN subject_name TEXT;');
+        }
+        if (!columns.includes('period_info')) {
+            db.exec('ALTER TABLE attendance_sessions ADD COLUMN period_info TEXT;');
+        }
+        if (!columns.includes('lesson_notes')) {
+            db.exec('ALTER TABLE attendance_sessions ADD COLUMN lesson_notes TEXT;');
+        }
+    } catch (e) {
+        // Table may not exist yet if schema was empty
+    }
 }
 
 function closeDatabase() {

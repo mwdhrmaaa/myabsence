@@ -1,44 +1,74 @@
 const crypto = require('crypto');
 const { getDatabase } = require('../../core/database/connection');
 
-function getOrCreateSession(classId, sessionDate, subjectId = null, title = null) {
+function getOrCreateSession(classId, sessionDate, subjectName = null, periodInfo = null, lessonNotes = null) {
     const db = getDatabase();
     let session = db.prepare(`
-        SELECT id, class_id as classId, subject_id as subjectId, session_date as sessionDate,
-               title, qr_token as qrToken, is_closed as isClosed, created_at as createdAt
+        SELECT id, class_id as classId, subject_name as subjectName, period_info as periodInfo,
+               lesson_notes as lessonNotes, session_date as sessionDate, title, qr_token as qrToken,
+               is_closed as isClosed, created_at as createdAt
         FROM attendance_sessions
-        WHERE class_id = ? AND session_date = ? AND (subject_id = ? OR (subject_id IS NULL AND ? IS NULL))
-    `).get(classId, sessionDate, subjectId, subjectId);
+        WHERE class_id = ? AND session_date = ?
+    `).get(classId, sessionDate);
 
     if (!session) {
         const qrToken = crypto.randomBytes(16).toString('hex');
+        const cleanSubject = subjectName ? subjectName.trim() : 'Umum';
+        const cleanPeriod = periodInfo ? periodInfo.trim() : 'Jam 1-2';
+
         const result = db.prepare(`
-            INSERT INTO attendance_sessions (class_id, subject_id, session_date, title, qr_token)
-            VALUES (?, ?, ?, ?, ?)
-        `).run(classId, subjectId, sessionDate, title || `Session ${sessionDate}`, qrToken);
+            INSERT INTO attendance_sessions (class_id, subject_name, period_info, lesson_notes, session_date, title, qr_token)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        `).run(classId, cleanSubject, cleanPeriod, lessonNotes || '', sessionDate, `Sesi ${cleanSubject} - ${sessionDate}`, qrToken);
 
         session = db.prepare(`
-            SELECT id, class_id as classId, subject_id as subjectId, session_date as sessionDate,
-                   title, qr_token as qrToken, is_closed as isClosed, created_at as createdAt
+            SELECT id, class_id as classId, subject_name as subjectName, period_info as periodInfo,
+                   lesson_notes as lessonNotes, session_date as sessionDate, title, qr_token as qrToken,
+                   is_closed as isClosed, created_at as createdAt
             FROM attendance_sessions WHERE id = ?
         `).get(result.lastInsertRowid);
+    } else if (subjectName || periodInfo || lessonNotes !== null) {
+        updateSessionInfo(session.id, { subjectName, periodInfo, lessonNotes });
+        session = db.prepare(`
+            SELECT id, class_id as classId, subject_name as subjectName, period_info as periodInfo,
+                   lesson_notes as lessonNotes, session_date as sessionDate, title, qr_token as qrToken,
+                   is_closed as isClosed, created_at as createdAt
+            FROM attendance_sessions WHERE id = ?
+        `).get(session.id);
     }
 
     return session;
 }
 
+function updateSessionInfo(sessionId, { subjectName, periodInfo, lessonNotes }) {
+    const db = getDatabase();
+    db.prepare(`
+        UPDATE attendance_sessions
+        SET subject_name = COALESCE(?, subject_name),
+            period_info = COALESCE(?, period_info),
+            lesson_notes = COALESCE(?, lesson_notes)
+        WHERE id = ?
+    `).run(
+        subjectName !== undefined ? subjectName : null,
+        periodInfo !== undefined ? periodInfo : null,
+        lessonNotes !== undefined ? lessonNotes : null,
+        sessionId
+    );
+}
+
 function getSessionWithRecords(sessionId) {
     const db = getDatabase();
     const session = db.prepare(`
-        SELECT id, class_id as classId, subject_id as subjectId, session_date as sessionDate,
-               title, qr_token as qrToken, is_closed as isClosed
+        SELECT id, class_id as classId, subject_name as subjectName, period_info as periodInfo,
+               lesson_notes as lessonNotes, session_date as sessionDate, title, qr_token as qrToken,
+               is_closed as isClosed
         FROM attendance_sessions WHERE id = ?
     `).get(sessionId);
 
     if (!session) return null;
 
     const students = db.prepare(`
-        SELECT s.id, s.student_number as studentNumber, s.full_name as fullName,
+        SELECT s.id, s.student_number as studentNumber, s.full_name as fullName, s.parent_phone as parentPhone,
                r.status, r.note, r.recorded_at as recordedAt
         FROM students s
         LEFT JOIN attendance_records r ON r.student_id = s.id AND r.session_id = ?
@@ -46,7 +76,13 @@ function getSessionWithRecords(sessionId) {
         ORDER BY CAST(s.student_number AS INTEGER) ASC, s.student_number ASC
     `).all(sessionId, session.classId);
 
-    return { session, students };
+    // Get list of previous subject names used in this class for autocomplete
+    const subjects = db.prepare(`
+        SELECT DISTINCT subject_name as name FROM attendance_sessions
+        WHERE class_id = ? AND subject_name IS NOT NULL AND subject_name != ''
+    `).all(session.classId).map(s => s.name);
+
+    return { session, students, subjects };
 }
 
 function recordAttendance(sessionId, studentId, status, note = null) {
@@ -69,7 +105,7 @@ function getMonthlyMatrix(classId, year, month) {
     const pattern = `${year}-${padMonth}-%`;
 
     const sessions = db.prepare(`
-        SELECT id, session_date as date, title
+        SELECT id, session_date as date, subject_name as subjectName, period_info as periodInfo, title
         FROM attendance_sessions
         WHERE class_id = ? AND session_date LIKE ?
         ORDER BY session_date ASC
@@ -107,6 +143,7 @@ function getMonthlyMatrix(classId, year, month) {
 
 module.exports = {
     getOrCreateSession,
+    updateSessionInfo,
     getSessionWithRecords,
     recordAttendance,
     getMonthlyMatrix
