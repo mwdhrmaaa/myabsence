@@ -110,14 +110,21 @@
                         
                         <div class="period-selectors">
                             <div class="input-group-inline">
-                                <label for="view-month">Month:</label>
+                                <label for="attendance-mode-select">Peran:</label>
+                                <select id="attendance-mode-select" class="glass-select" style="font-weight: 600; color: var(--text-main);">
+                                    <option value="homeroom">Wali Kelas (Harian)</option>
+                                    <option value="subject">Guru Mapel</option>
+                                </select>
+                            </div>
+                            <div class="input-group-inline">
+                                <label for="view-month">Bulan:</label>
                                 <select id="view-month" class="glass-select"></select>
                             </div>
                             <div class="input-group-inline">
-                                <label for="view-year">Year:</label>
+                                <label for="view-year">Tahun:</label>
                                 <select id="view-year" class="glass-select"></select>
                             </div>
-                            <div class="input-group-inline">
+                            <div class="input-group-inline" id="subject-input-group">
                                 <label for="subject-input">Mapel:</label>
                                 <input type="text" id="subject-input" list="subject-datalist" class="glass-select" placeholder="Ketik mapel..." style="min-width: 140px; color: var(--text-main); font-weight: 600;">
                                 <datalist id="subject-datalist">
@@ -134,7 +141,7 @@
                                     <option value="Pendidikan Jasmani"></option>
                                 </datalist>
                             </div>
-                            <div class="input-group-inline">
+                            <div class="input-group-inline" id="period-input-group">
                                 <label for="period-input">Jam:</label>
                                 <input type="text" id="period-input" class="glass-select" placeholder="Jam 1-2" style="width: 85px; color: var(--text-main); font-weight: 600;">
                             </div>
@@ -161,10 +168,10 @@
                 <!-- Jurnal Mengajar & Catatan Materi Guru -->
                 <div class="glass-card journal-box" style="margin-bottom: 1.5rem; padding: 1rem 1.25rem;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                        <label for="lesson-notes-input" style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">Jurnal Mengajar & Catatan Materi</label>
+                        <label id="journal-label" for="lesson-notes-input" style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">Catatan Wali Kelas & Pembinaan Siswa</label>
                         <span id="journal-status" style="font-size: 0.75rem; color: var(--text-muted);">Tersimpan otomatis</span>
                     </div>
-                    <textarea id="lesson-notes-input" class="journal-textarea" placeholder="Tuliskan materi yang dibahas hari ini, tugas yang diberikan, atau kejadian penting di kelas..."></textarea>
+                    <textarea id="lesson-notes-input" class="journal-textarea" placeholder="Catatan pembinaan siswa, informasi wali kelas, kejadian khusus hari ini..."></textarea>
                 </div>
 
                 <div class="stats-grid">

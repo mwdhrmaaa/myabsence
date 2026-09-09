@@ -1010,12 +1010,42 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- Educator Extensions: Custom Mapel, Jam, Jurnal Mengajar, and Print ---
+    // --- Educator Extensions: Role Mode, Custom Mapel, Jam, Jurnal Mengajar, and Print ---
+    const attendanceModeSelect = document.getElementById('attendance-mode-select');
+    const subjectInputGroup = document.getElementById('subject-input-group');
+    const periodInputGroup = document.getElementById('period-input-group');
     const subjectInput = document.getElementById('subject-input');
     const periodInput = document.getElementById('period-input');
     const lessonNotesInput = document.getElementById('lesson-notes-input');
+    const journalLabel = document.getElementById('journal-label');
     const journalStatus = document.getElementById('journal-status');
     const printSheetBtn = document.getElementById('print-sheet-btn');
+
+    function applyAttendanceMode(mode) {
+        if (mode === 'subject') {
+            if (subjectInputGroup) subjectInputGroup.classList.remove('hidden');
+            if (periodInputGroup) periodInputGroup.classList.remove('hidden');
+            if (journalLabel) journalLabel.textContent = 'Jurnal Mengajar & Catatan Materi';
+            if (lessonNotesInput) lessonNotesInput.placeholder = 'Tuliskan materi yang dibahas hari ini, tugas yang diberikan, atau kejadian penting di kelas...';
+        } else {
+            if (subjectInputGroup) subjectInputGroup.classList.add('hidden');
+            if (periodInputGroup) periodInputGroup.classList.add('hidden');
+            if (journalLabel) journalLabel.textContent = 'Catatan Wali Kelas & Pembinaan Siswa';
+            if (lessonNotesInput) lessonNotesInput.placeholder = 'Catatan pembinaan siswa, informasi wali kelas, kejadian khusus hari ini...';
+        }
+    }
+
+    if (attendanceModeSelect) {
+        const savedMode = localStorage.getItem('myabsence_mode') || 'homeroom';
+        attendanceModeSelect.value = savedMode;
+        applyAttendanceMode(savedMode);
+
+        attendanceModeSelect.addEventListener('change', () => {
+            const selectedMode = attendanceModeSelect.value;
+            localStorage.setItem('myabsence_mode', selectedMode);
+            applyAttendanceMode(selectedMode);
+        });
+    }
 
     if (subjectInput) {
         subjectInput.value = localStorage.getItem('myabsence_subject') || '';
