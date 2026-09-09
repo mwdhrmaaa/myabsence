@@ -1,97 +1,27 @@
 /* ================================================
-   1. COLOR HARMONY THEMES
+   1. CORE PALETTE & DESIGN SYSTEM (MAX 3 ACCENT COLORS)
    ================================================ */
 
-/* Theme 1: Indigo Luxe (Default - Apple / Stripe Modern) */
-:root, [data-theme="indigo"] {
-    --theme-name: "Indigo Luxe";
+:root {
     --primary: #6366f1;
     --primary-hover: #4f46e5;
-    --primary-glow: rgba(99, 102, 241, 0.35);
+    --primary-glow: rgba(99, 102, 241, 0.2);
     --secondary: #10b981;
     --secondary-hover: #059669;
     --danger: #ef4444;
-    --bg-gradient: linear-gradient(135deg, #090d16 0%, #111827 50%, #0d1322 100%);
-    --body-bg: #090d16;
-    --card-bg: rgba(255, 255, 255, 0.035);
-    --card-border: rgba(99, 102, 241, 0.15);
-    --card-border-hover: rgba(99, 102, 241, 0.35);
-    --nav-bg: rgba(9, 13, 22, 0.8);
+    --danger-hover: #dc2626;
+    --body-bg: #090a0f;
+    --bg-gradient: #090a0f;
+    --card-bg: #12131a;
+    --card-border: rgba(255, 255, 255, 0.08);
+    --card-border-hover: rgba(255, 255, 255, 0.16);
+    --nav-bg: rgba(9, 10, 15, 0.85);
     --text-main: #f8fafc;
     --text-muted: #94a3b8;
     --glass-blur: blur(16px);
-    --accent-badge: rgba(99, 102, 241, 0.12);
-    --accent-badge-border: rgba(99, 102, 241, 0.3);
-    --accent-badge-text: #c7d2fe;
-}
-
-/* Theme 2: Obsidian Cyan (Linear & Vercel Tech) */
-[data-theme="obsidian"] {
-    --theme-name: "Obsidian Cyan";
-    --primary: #38bdf8;
-    --primary-hover: #0284c7;
-    --primary-glow: rgba(56, 189, 248, 0.35);
-    --secondary: #34d399;
-    --secondary-hover: #10b981;
-    --danger: #f87171;
-    --bg-gradient: linear-gradient(135deg, #08080a 0%, #0f1115 50%, #08090c 100%);
-    --body-bg: #08080a;
-    --card-bg: rgba(255, 255, 255, 0.025);
-    --card-border: rgba(255, 255, 255, 0.08);
-    --card-border-hover: rgba(56, 189, 248, 0.4);
-    --nav-bg: rgba(8, 8, 10, 0.85);
-    --text-main: #ffffff;
-    --text-muted: #8b949e;
-    --glass-blur: blur(16px);
-    --accent-badge: rgba(56, 189, 248, 0.1);
-    --accent-badge-border: rgba(56, 189, 248, 0.28);
-    --accent-badge-text: #bae6fd;
-}
-
-/* Theme 3: Midnight Violet (Royal Velvet Harmony) */
-[data-theme="violet"] {
-    --theme-name: "Midnight Violet";
-    --primary: #a855f7;
-    --primary-hover: #9333ea;
-    --primary-glow: rgba(168, 85, 247, 0.35);
-    --secondary: #2dd4bf;
-    --secondary-hover: #14b8a6;
-    --danger: #f43f5e;
-    --bg-gradient: linear-gradient(135deg, #0a0714 0%, #150e28 50%, #0c0819 100%);
-    --body-bg: #0a0714;
-    --card-bg: rgba(255, 255, 255, 0.035);
-    --card-border: rgba(168, 85, 247, 0.15);
-    --card-border-hover: rgba(168, 85, 247, 0.35);
-    --nav-bg: rgba(10, 7, 20, 0.8);
-    --text-main: #faf5ff;
-    --text-muted: #a1a1aa;
-    --glass-blur: blur(16px);
-    --accent-badge: rgba(168, 85, 247, 0.12);
-    --accent-badge-border: rgba(168, 85, 247, 0.3);
-    --accent-badge-text: #e9d5ff;
-}
-
-/* Theme 4: Opal Snow (Pristine Modern Light) */
-[data-theme="light"] {
-    --theme-name: "Opal Snow (Light)";
-    --primary: #4f46e5;
-    --primary-hover: #4338ca;
-    --primary-glow: rgba(79, 70, 229, 0.2);
-    --secondary: #059669;
-    --secondary-hover: #047857;
-    --danger: #dc2626;
-    --bg-gradient: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #e2e8f0 100%);
-    --body-bg: #f8fafc;
-    --card-bg: rgba(255, 255, 255, 0.85);
-    --card-border: rgba(203, 213, 225, 0.85);
-    --card-border-hover: rgba(79, 70, 229, 0.45);
-    --nav-bg: rgba(255, 255, 255, 0.88);
-    --text-main: #0f172a;
-    --text-muted: #64748b;
-    --glass-blur: blur(16px);
-    --accent-badge: rgba(79, 70, 229, 0.08);
-    --accent-badge-border: rgba(79, 70, 229, 0.25);
-    --accent-badge-text: #4338ca;
+    --accent-badge: rgba(255, 255, 255, 0.04);
+    --accent-badge-border: rgba(255, 255, 255, 0.08);
+    --accent-badge-text: #f8fafc;
 }
 
 * {
@@ -850,175 +780,6 @@ input:focus {
     border-top: 1px solid rgba(255,255,255,0.1);
 }
 
-/* ================================================
-   Theme Dropdown Selector & Navbar Buttons
-   ================================================ */
-.theme-dropdown-container {
-    position: relative;
-    display: inline-block;
-}
-
-.btn-theme-nav {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    background: var(--accent-badge);
-    border: 1px solid var(--accent-badge-border);
-    border-radius: 2rem;
-    padding: 0.4rem 0.85rem;
-    font-size: 0.82rem;
-    font-weight: 600;
-    letter-spacing: 0.03em;
-    color: var(--accent-badge-text);
-    cursor: pointer;
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    font-family: inherit;
-}
-
-.btn-theme-nav:hover {
-    background: rgba(255, 255, 255, 0.08);
-    border-color: var(--primary);
-    color: #ffffff;
-    box-shadow: 0 0 12px var(--primary-glow);
-}
-
-.theme-active-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: var(--primary);
-    box-shadow: 0 0 8px var(--primary);
-    display: inline-block;
-    transition: all 0.3s ease;
-}
-
-.dropdown-arrow {
-    transition: transform 0.2s ease;
-    opacity: 0.7;
-}
-
-.theme-dropdown-container.open .dropdown-arrow {
-    transform: rotate(180deg);
-}
-
-.theme-dropdown-menu {
-    position: absolute;
-    top: calc(100% + 0.6rem);
-    right: 0;
-    width: 240px;
-    padding: 0.5rem;
-    border-radius: 1rem;
-    background: var(--body-bg);
-    border: 1px solid var(--card-border);
-    box-shadow: 0 14px 40px rgba(0, 0, 0, 0.6), 0 0 20px var(--primary-glow);
-    z-index: 1000;
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-    animation: dropdownFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-@keyframes dropdownFadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(-8px) scale(0.97);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
-}
-
-.theme-dropdown-header {
-    font-size: 0.72rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--text-muted);
-    padding: 0.4rem 0.6rem 0.2rem;
-}
-
-.theme-option-btn {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    width: 100%;
-    padding: 0.6rem 0.75rem;
-    background: transparent;
-    border: 1px solid transparent;
-    border-radius: 0.65rem;
-    color: var(--text-main);
-    cursor: pointer;
-    text-align: left;
-    transition: all 0.18s ease;
-}
-
-.theme-option-btn:hover {
-    background: rgba(255, 255, 255, 0.05);
-    border-color: rgba(255, 255, 255, 0.1);
-}
-
-.theme-option-btn.active {
-    background: var(--accent-badge);
-    border-color: var(--accent-badge-border);
-}
-
-.theme-preview-dot {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    flex-shrink: 0;
-}
-
-.theme-preview-dot.dot-indigo {
-    background: #6366f1;
-    box-shadow: 0 0 8px #6366f1;
-}
-
-.theme-preview-dot.dot-obsidian {
-    background: #38bdf8;
-    box-shadow: 0 0 8px #38bdf8;
-}
-
-.theme-preview-dot.dot-violet {
-    background: #a855f7;
-    box-shadow: 0 0 8px #a855f7;
-}
-
-.theme-preview-dot.dot-light {
-    background: #ffffff;
-    border: 2px solid #4f46e5;
-    box-shadow: 0 0 8px rgba(79, 70, 229, 0.4);
-}
-
-.theme-info {
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-}
-
-.theme-title {
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--text-main);
-}
-
-.theme-subtitle {
-    font-size: 0.7rem;
-    color: var(--text-muted);
-}
-
-.theme-check {
-    font-size: 0.85rem;
-    color: var(--primary);
-    opacity: 0;
-    font-weight: 700;
-    transition: opacity 0.2s;
-}
-
-.theme-option-btn.active .theme-check {
-    opacity: 1;
-}
 
 /* ================================================
    Sync Button (Navbar) & Glow Button
@@ -1118,24 +879,24 @@ input:focus {
 }
 
 .btn-status-sick {
-    background: rgba(245, 158, 11, 0.15);
-    border: 1px solid rgba(245, 158, 11, 0.4);
-    color: #fde68a;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    color: #cbd5e1;
 }
 .btn-status-sick:hover {
-    background: rgba(245, 158, 11, 0.28);
-    box-shadow: 0 0 14px rgba(245, 158, 11, 0.3);
+    background: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.08);
     color: #ffffff;
 }
 
 .btn-status-permit {
-    background: rgba(59, 130, 246, 0.15);
-    border: 1px solid rgba(59, 130, 246, 0.4);
-    color: #93c5fd;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    color: #cbd5e1;
 }
 .btn-status-permit:hover {
-    background: rgba(59, 130, 246, 0.28);
-    box-shadow: 0 0 14px rgba(59, 130, 246, 0.3);
+    background: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.08);
     color: #ffffff;
 }
 
@@ -1415,184 +1176,6 @@ input:focus {
     transition: transform 0.05s;
 }
 
-/* ================================================
-   Light Mode (Opal Snow) Specific Overrides
-   ================================================ */
-[data-theme="light"] .glass-card {
-    background: rgba(255, 255, 255, 0.88);
-    border: 1px solid rgba(203, 213, 225, 0.8);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.03);
-}
-
-[data-theme="light"] .login-card h1,
-[data-theme="light"] .brand .logo {
-    background: linear-gradient(135deg, #0f172a 40%, var(--primary) 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
-
-[data-theme="light"] input,
-[data-theme="light"] select,
-[data-theme="light"] .glass-select {
-    background: #ffffff;
-    border: 1px solid #cbd5e1;
-    color: #0f172a;
-}
-
-[data-theme="light"] input:focus,
-[data-theme="light"] select:focus,
-[data-theme="light"] .glass-select:focus {
-    background: #ffffff;
-    border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
-}
-
-[data-theme="light"] th {
-    background: rgba(241, 245, 249, 0.85);
-    color: #475569;
-    border-bottom: 1px solid #e2e8f0;
-}
-
-[data-theme="light"] td {
-    border-top: 1px solid #e2e8f0;
-    color: #0f172a;
-}
-
-[data-theme="light"] tr:hover td {
-    background: rgba(79, 70, 229, 0.03);
-}
-
-[data-theme="light"] .btn-outline {
-    background: #ffffff;
-    border-color: #cbd5e1;
-    color: #334155;
-}
-
-[data-theme="light"] .btn-outline:hover {
-    background: #f1f5f9;
-    color: #0f172a;
-    border-color: #94a3b8;
-}
-
-[data-theme="light"] .btn-checkin {
-    background: rgba(0, 0, 0, 0.03);
-    border: 1px dashed #cbd5e1;
-    color: #64748b;
-}
-
-[data-theme="light"] .btn-checkin:hover {
-    background: rgba(79, 70, 229, 0.08);
-    border-color: var(--primary);
-    color: var(--primary);
-}
-
-[data-theme="light"] .day-btn {
-    background: rgba(0, 0, 0, 0.03);
-    border: 1px solid #e2e8f0;
-    color: #334155;
-}
-
-[data-theme="light"] .day-btn:hover {
-    background: rgba(79, 70, 229, 0.08);
-    border-color: var(--primary);
-}
-
-[data-theme="light"] .day-btn.disabled {
-    opacity: 0.35;
-    background: #f1f5f9;
-}
-
-[data-theme="light"] .modal,
-[data-theme="light"] .modal-overlay {
-    background: rgba(15, 23, 42, 0.45);
-}
-
-[data-theme="light"] .theme-dropdown-menu {
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
-    box-shadow: 0 14px 40px rgba(0, 0, 0, 0.1), 0 0 15px rgba(79, 70, 229, 0.08);
-}
-
-[data-theme="light"] .theme-option-btn:hover {
-    background: #f1f5f9;
-}
-
-[data-theme="light"] .sync-code-box {
-    background: rgba(79, 70, 229, 0.04);
-    border-color: rgba(79, 70, 229, 0.18);
-}
-
-[data-theme="light"] .code-large {
-    color: #4338ca;
-    text-shadow: none;
-}
-
-[data-theme="light"] .btn-toggle-eye {
-    background: #ffffff;
-    border-color: #cbd5e1;
-    color: #4338ca;
-}
-
-[data-theme="light"] .btn-toggle-eye:hover {
-    background: rgba(79, 70, 229, 0.08);
-    border-color: var(--primary);
-    color: var(--primary);
-}
-
-[data-theme="light"] .sync-instructions,
-[data-theme="light"] .sync-option-card {
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
-}
-
-[data-theme="light"] #toggle-rank-btn.active {
-    background: #fef3c7;
-    border-color: #f59e0b;
-    color: #b45309;
-    box-shadow: 0 0 12px rgba(245, 158, 11, 0.25);
-}
-
-[data-theme="light"] .divider-or hr {
-    border-top: 1px solid #e2e8f0;
-}
-
-[data-theme="light"] .divider-or {
-    color: #94a3b8;
-}
-
-[data-theme="light"] .history-toggle-header {
-    background: rgba(0, 0, 0, 0.03);
-    border: 1px solid #e2e8f0;
-}
-
-[data-theme="light"] .history-toggle-header:hover {
-    background: rgba(79, 70, 229, 0.05);
-}
-
-[data-theme="light"] .confirm-modal-icon.warning {
-    background: #fef3c7;
-    color: #d97706;
-    border-color: #fde68a;
-}
-
-[data-theme="light"] .confirm-modal-icon.key {
-    background: #e0e7ff;
-    color: #4f46e5;
-    border-color: #c7d2fe;
-}
-
-[data-theme="light"] .confirm-modal-icon.disconnect {
-    background: #fee2e2;
-    color: #dc2626;
-    border-color: #fecaca;
-}
-
-[data-theme="light"] .confirm-modal-icon.success {
-    background: #d1fae5;
-    color: #059669;
-    border-color: #a7f3d0;
-}
 
 /* --- Educator Extensions: Custom Mapel, Jurnal Mengajar & WhatsApp --- */
 .journal-box {
@@ -1620,11 +1203,6 @@ input:focus {
     box-shadow: 0 0 0 2px var(--primary-glow);
 }
 
-[data-theme="light"] .journal-textarea {
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
-    color: #0f172a;
-}
 
 .wa-btn {
     display: inline-flex;
@@ -1785,30 +1363,30 @@ input:focus {
     box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
 }
 
-/* S = Sakit (Sky Blue) */
+/* S = Sakit (Neutral Slate) */
 .status-btn.btn-s:hover {
-    background: rgba(56, 189, 248, 0.15);
-    border-color: #38bdf8;
-    color: #7dd3fc;
+    background: rgba(255, 255, 255, 0.08);
+    border-color: #64748b;
+    color: #e2e8f0;
 }
 .status-btn.btn-s.active {
-    background: #0284c7;
-    border-color: #38bdf8;
+    background: #475569;
+    border-color: #64748b;
     color: #ffffff;
-    box-shadow: 0 0 10px rgba(56, 189, 248, 0.4);
+    box-shadow: 0 0 8px rgba(100, 116, 139, 0.3);
 }
 
-/* I = Izin (Amber) */
+/* I = Izin (Neutral Slate) */
 .status-btn.btn-i:hover {
-    background: rgba(245, 158, 11, 0.15);
-    border-color: #f59e0b;
-    color: #fcd34d;
+    background: rgba(255, 255, 255, 0.08);
+    border-color: #64748b;
+    color: #e2e8f0;
 }
 .status-btn.btn-i.active {
-    background: #d97706;
-    border-color: #f59e0b;
+    background: #475569;
+    border-color: #64748b;
     color: #ffffff;
-    box-shadow: 0 0 10px rgba(245, 158, 11, 0.4);
+    box-shadow: 0 0 8px rgba(100, 116, 139, 0.3);
 }
 
 /* A = Alpa (Rose Red) */
@@ -1881,7 +1459,7 @@ input:focus {
     .print-signature-space {
         height: 60px;
     }
-    .glass-nav, .dashboard-header .export-actions, .admin-only, .btn-sm-edit, .btn-sm-danger, #auth-section, #theme-dropdown-container, #nav-sync-btn, .entry-gate, .teacher-toolbar, .journal-box, .stats-grid, .period-selectors {
+    .glass-nav, .dashboard-header .export-actions, .admin-only, .btn-sm-edit, .btn-sm-danger, #auth-section, #nav-sync-btn, .entry-gate, .teacher-toolbar, .journal-box, .stats-grid, .period-selectors {
         display: none !important;
     }
     body {

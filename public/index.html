@@ -13,12 +13,6 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" href="icon-192.png">
-    <script>
-        (function() {
-            const savedTheme = localStorage.getItem('myabsence_theme') || 'indigo';
-            document.documentElement.setAttribute('data-theme', savedTheme);
-        })();
-    </script>
 </head>
 <body>
     <div id="app">
@@ -49,50 +43,6 @@
                         <span class="logo">MyAbsence</span>
                     </div>
                     <div class="user-info">
-                        <!-- Theme Mode Switcher -->
-                        <div class="theme-dropdown-container" id="theme-dropdown-container">
-                            <button type="button" id="theme-menu-btn" class="btn-theme-nav" title="Pilih Tema Warna">
-                                <span class="theme-active-dot" id="theme-active-dot"></span>
-                                <span id="theme-current-label">Indigo Luxe</span>
-                                <svg class="dropdown-arrow" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                            </button>
-                            <div id="theme-dropdown-menu" class="theme-dropdown-menu hidden glass-card">
-                                <div class="theme-dropdown-header">Harmoni Tema</div>
-                                <button type="button" class="theme-option-btn active" data-theme="indigo">
-                                    <span class="theme-preview-dot dot-indigo"></span>
-                                    <div class="theme-info">
-                                        <span class="theme-title">Indigo Luxe</span>
-                                        <span class="theme-subtitle">Apple & Stripe Modern</span>
-                                    </div>
-                                    <span class="theme-check">✓</span>
-                                </button>
-                                <button type="button" class="theme-option-btn" data-theme="obsidian">
-                                    <span class="theme-preview-dot dot-obsidian"></span>
-                                    <div class="theme-info">
-                                        <span class="theme-title">Obsidian Cyan</span>
-                                        <span class="theme-subtitle">Linear & Vercel Tech</span>
-                                    </div>
-                                    <span class="theme-check">✓</span>
-                                </button>
-                                <button type="button" class="theme-option-btn" data-theme="violet">
-                                    <span class="theme-preview-dot dot-violet"></span>
-                                    <div class="theme-info">
-                                        <span class="theme-title">Midnight Violet</span>
-                                        <span class="theme-subtitle">Royal Velvet Harmony</span>
-                                    </div>
-                                    <span class="theme-check">✓</span>
-                                </button>
-                                <button type="button" class="theme-option-btn" data-theme="light">
-                                    <span class="theme-preview-dot dot-light"></span>
-                                    <div class="theme-info">
-                                        <span class="theme-title">Opal Snow (Light)</span>
-                                        <span class="theme-subtitle">Pristine Porcelain Minimal</span>
-                                    </div>
-                                    <span class="theme-check">✓</span>
-                                </button>
-                            </div>
-                        </div>
-
                         <button id="nav-sync-btn" class="btn-sync-nav" title="Sinkronisasi Data">
                             <span class="sync-dot"></span>
                             <span id="nav-sync-label">Sync Kode</span>

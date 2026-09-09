@@ -148,42 +148,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const historyMonthSelect = document.getElementById('history-month-select');
     const enterAppBtn = document.getElementById('enter-app-btn');
 
-    // Theme Switcher selectors
-    const themeDropdownContainer = document.getElementById('theme-dropdown-container');
-    const themeMenuBtn = document.getElementById('theme-menu-btn');
-    const themeDropdownMenu = document.getElementById('theme-dropdown-menu');
-    const themeCurrentLabel = document.getElementById('theme-current-label');
-    const themeActiveDot = document.getElementById('theme-active-dot');
-    const themeOptionBtns = document.querySelectorAll('.theme-option-btn');
-
-    const THEMES = {
-        indigo: { name: 'Indigo Luxe', color: '#6366f1' },
-        obsidian: { name: 'Obsidian Cyan', color: '#38bdf8' },
-        violet: { name: 'Midnight Violet', color: '#a855f7' },
-        light: { name: 'Opal Snow (Light)', color: '#4f46e5' }
-    };
-
-    let currentTheme = localStorage.getItem('myabsence_theme') || 'indigo';
-
-    const applyTheme = (themeKey) => {
-        if (!THEMES[themeKey]) themeKey = 'indigo';
-        currentTheme = themeKey;
-        document.documentElement.setAttribute('data-theme', themeKey);
-        localStorage.setItem('myabsence_theme', themeKey);
-
-        if (themeCurrentLabel) themeCurrentLabel.textContent = THEMES[themeKey].name;
-        if (themeActiveDot) themeActiveDot.style.background = THEMES[themeKey].color;
-
-        if (themeOptionBtns) {
-            themeOptionBtns.forEach(btn => {
-                if (btn.dataset.theme === themeKey) {
-                    btn.classList.add('active');
-                } else {
-                    btn.classList.remove('active');
-                }
-            });
-        }
-    };
 
     // Dashboard Sync UI selectors
     const navSyncBtn = document.getElementById('nav-sync-btn');
@@ -884,33 +848,6 @@ document.addEventListener('DOMContentLoaded', () => {
         closeCustomConfirm();
     });
 
-    // --- Theme Switcher Listeners ---
-    if (themeMenuBtn && themeDropdownMenu && themeDropdownContainer) {
-        themeMenuBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            themeDropdownMenu.classList.toggle('hidden');
-            themeDropdownContainer.classList.toggle('open');
-        });
-
-        document.addEventListener('click', (e) => {
-            if (!themeDropdownContainer.contains(e.target)) {
-                themeDropdownMenu.classList.add('hidden');
-                themeDropdownContainer.classList.remove('open');
-            }
-        });
-
-        if (themeOptionBtns) {
-            themeOptionBtns.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const theme = btn.dataset.theme;
-                    applyTheme(theme);
-                    themeDropdownMenu.classList.add('hidden');
-                    themeDropdownContainer.classList.remove('open');
-                });
-            });
-        }
-    }
-
     // --- Sync Modal Event Handlers ---
     if (navSyncBtn) navSyncBtn.addEventListener('click', openSyncModal);
     if (headerSyncBtn) headerSyncBtn.addEventListener('click', openSyncModal);
@@ -1343,7 +1280,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    applyTheme(currentTheme);
     initPeriodSelectors();
     updateUI();
 
