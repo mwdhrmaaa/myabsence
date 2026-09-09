@@ -11,7 +11,7 @@
     --danger-hover: #b91c1c;
     --body-bg: #000000;
     --card-bg: #09090b;
-    --card-border: #27272a;
+    --card-border: #ffffff;
     --card-border-hover: #ffffff;
     --nav-bg: #000000;
     --text-main: #ffffff;
@@ -20,10 +20,10 @@
     --accent-badge-border: #ffffff;
     --accent-badge-text: #ffffff;
     --btn-border: #ffffff;
-    --cel-shadow: 4px 4px 0px #18181b;
-    --cel-shadow-sm: 2px 2px 0px #ffffff;
+    --cel-shadow: none;
+    --cel-shadow-sm: none;
     --cel-shadow-btn: 3px 3px 0px #ffffff;
-    --cel-shadow-lg: 6px 6px 0px #18181b;
+    --cel-shadow-lg: none;
 }
 
 * {
@@ -677,14 +677,9 @@ input:focus {
 
 .btn-checkedin:hover {
     background: #0891b2;
+    border-color: #ffffff;
     transform: translate(-1px, -1px);
     box-shadow: 3px 3px 0px #ffffff;
-}
-
-.btn-checkedin:hover {
-    background: #dc2626;
-    border-color: #b91c1c;
-    color: #ffffff;
 }
 
 .btn-checkedin:active {
@@ -912,7 +907,7 @@ input:focus {
 .divider-or hr {
     flex: 1;
     border: none;
-    border-top: 1px solid rgba(255,255,255,0.1);
+    border-top: 1px solid #ffffff;
 }
 
 
@@ -1071,7 +1066,7 @@ input:focus {
 
 .sync-status-box.success {
     background: rgba(6, 182, 212, 0.18);
-    border-color: #06b6d4;
+    border-color: #ffffff;
     color: #67e8f9;
 }
 
@@ -1256,34 +1251,33 @@ input:focus {
     height: 54px;
     margin: 0 auto 1rem;
     border-radius: 50%;
-    background: rgba(244, 63, 94, 0.18);
-    color: #fca5a5;
-    border: 2px solid rgba(244, 63, 94, 0.4);
-    box-shadow: var(--cel-shadow-sm);
+    background: rgba(2, 132, 199, 0.18);
+    color: #38bdf8;
+    border: 2px solid #ffffff;
 }
 
 .confirm-modal-icon.warning {
     background: rgba(251, 191, 36, 0.18);
     color: #fbbf24;
-    border-color: rgba(251, 191, 36, 0.5);
+    border-color: #ffffff;
 }
 
 .confirm-modal-icon.key {
-    background: rgba(244, 63, 94, 0.18);
-    color: #fca5a5;
-    border-color: rgba(244, 63, 94, 0.5);
+    background: rgba(2, 132, 199, 0.18);
+    color: #38bdf8;
+    border-color: #ffffff;
 }
 
 .confirm-modal-icon.disconnect {
     background: rgba(220, 38, 38, 0.18);
     color: #f87171;
-    border-color: rgba(220, 38, 38, 0.5);
+    border-color: #ffffff;
 }
 
 .confirm-modal-icon.success {
     background: rgba(6, 182, 212, 0.18);
     color: #67e8f9;
-    border-color: rgba(6, 182, 212, 0.5);
+    border-color: #ffffff;
 }
 
 .confirm-modal-content h2 {
