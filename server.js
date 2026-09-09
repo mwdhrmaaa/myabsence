@@ -7,7 +7,7 @@ const { getDatabase, closeDatabase } = require('./src/core/database/connection')
 const { seedDatabase } = require('./src/core/database/seed');
 const { createApiRouter } = require('./src/core/http/routes');
 
-const PUBLIC_DIR = path.join(__dirname, 'public');
+const STATIC_DIR = __dirname;
 const apiRouter = createApiRouter();
 
 // Initialize DB and Seed Data
@@ -39,9 +39,9 @@ function getLocalIP() {
 
 function handleStaticFile(req, res, urlPath) {
     let normalized = urlPath === '/' ? '/index.html' : urlPath;
-    const safePath = path.normalize(path.join(PUBLIC_DIR, normalized));
+    const safePath = path.normalize(path.join(STATIC_DIR, normalized));
 
-    if (!safePath.startsWith(PUBLIC_DIR)) {
+    if (!safePath.startsWith(STATIC_DIR)) {
         res.writeHead(403, { 'Content-Type': 'text/plain' });
         return res.end('Access Denied');
     }
@@ -49,7 +49,7 @@ function handleStaticFile(req, res, urlPath) {
     fs.readFile(safePath, (err, content) => {
         if (err) {
             if (err.code === 'ENOENT') {
-                const indexPath = path.join(PUBLIC_DIR, 'index.html');
+                const indexPath = path.join(STATIC_DIR, 'index.html');
                 fs.readFile(indexPath, (readErr, indexContent) => {
                     if (readErr) {
                         res.writeHead(404, { 'Content-Type': 'text/plain' });
