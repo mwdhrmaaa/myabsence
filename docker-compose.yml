@@ -1,0 +1,20 @@
+services:
+  myabsence:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: myabsence-app
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - HOST=0.0.0.0
+      - JWT_SECRET=production-super-secret-key-myabsence-2026
+    volumes:
+      - myabsence-data:/app/data
+
+volumes:
+  myabsence-data:
+    driver: local
