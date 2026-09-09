@@ -1,4 +1,3 @@
-const url = require('url');
 const { sendNotFound, sendError } = require('./response');
 
 class Router {
@@ -22,11 +21,11 @@ class Router {
     delete(pattern, handler) { this.add('DELETE', pattern, handler); }
 
     async handle(req, res) {
-        const parsedUrl = url.parse(req.url, true);
+        const parsedUrl = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
         const pathname = parsedUrl.pathname;
         const method = req.method.toUpperCase();
 
-        req.query = parsedUrl.query || {};
+        req.query = Object.fromEntries(parsedUrl.searchParams.entries());
 
         if (['POST', 'PUT', 'PATCH'].includes(method)) {
             try {

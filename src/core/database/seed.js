@@ -7,9 +7,8 @@ function hashPassword(password) {
 }
 
 function seedDatabase(db) {
-    // Check if user exists
-    const userCheck = db.prepare('SELECT COUNT(*) as count FROM users').get();
-    if (userCheck.count > 0) return;
+    const existing = db.prepare('SELECT id FROM users WHERE username = ? LIMIT 1').get('teacher');
+    if (existing) return;
 
     // 1. Seed Default Teacher
     const defaultPasswordHash = hashPassword('teacher123');
