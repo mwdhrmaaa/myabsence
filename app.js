@@ -176,6 +176,98 @@ document.addEventListener('DOMContentLoaded', () => {
     const confirmModalOkBtn = document.getElementById('confirm-modal-ok-btn');
     let onConfirmAction = null;
 
+    // --- Theme Mode State & Selectors ---
+    const THEME_STORAGE_KEY = 'myabsence_theme_mode';
+    const themeModal = document.getElementById('theme-modal');
+    const navThemeBtn = document.getElementById('nav-theme-btn');
+    const welcomeThemeToggleBtn = document.getElementById('welcome-theme-toggle-btn');
+    const themeNavLabel = document.getElementById('theme-nav-label');
+    const welcomeThemeLabel = document.getElementById('welcome-theme-label');
+    const closeThemeModalBtn = document.getElementById('close-theme-modal-btn');
+    const closeThemeModalBtn2 = document.getElementById('close-theme-modal-btn2');
+    const themeCardWhite = document.getElementById('theme-card-white');
+    const themeCardGrey = document.getElementById('theme-card-grey');
+    const badgeWhite = document.getElementById('badge-white');
+    const badgeGrey = document.getElementById('badge-grey');
+
+    function getActiveTheme() {
+        return localStorage.getItem(THEME_STORAGE_KEY) || 'white';
+    }
+
+    function applyTheme(themeName) {
+        if (themeName !== 'calm-grey') {
+            themeName = 'white';
+        }
+        document.documentElement.setAttribute('data-theme', themeName);
+        localStorage.setItem(THEME_STORAGE_KEY, themeName);
+        updateThemeUI(themeName);
+    }
+
+    function updateThemeUI(themeName) {
+        const isCalm = themeName === 'calm-grey';
+        const labelText = isCalm ? 'Garis Abu' : 'Garis Putih';
+        
+        if (themeNavLabel) themeNavLabel.textContent = labelText;
+        if (welcomeThemeLabel) welcomeThemeLabel.textContent = labelText;
+
+        if (themeCardWhite && themeCardGrey) {
+            if (isCalm) {
+                themeCardWhite.classList.remove('active');
+                themeCardGrey.classList.add('active');
+                if (badgeWhite) badgeWhite.textContent = 'Pilih';
+                if (badgeGrey) badgeGrey.textContent = 'Aktif';
+            } else {
+                themeCardWhite.classList.add('active');
+                themeCardGrey.classList.remove('active');
+                if (badgeWhite) badgeWhite.textContent = 'Aktif';
+                if (badgeGrey) badgeGrey.textContent = 'Pilih';
+            }
+        }
+    }
+
+    function openThemeModal() {
+        if (!themeModal) return;
+        updateThemeUI(getActiveTheme());
+        themeModal.classList.remove('hidden');
+    }
+
+    function closeThemeModal() {
+        if (themeModal) themeModal.classList.add('hidden');
+    }
+
+    if (navThemeBtn) {
+        navThemeBtn.addEventListener('click', openThemeModal);
+    }
+    if (welcomeThemeToggleBtn) {
+        welcomeThemeToggleBtn.addEventListener('click', openThemeModal);
+    }
+    if (closeThemeModalBtn) {
+        closeThemeModalBtn.addEventListener('click', closeThemeModal);
+    }
+    if (closeThemeModalBtn2) {
+        closeThemeModalBtn2.addEventListener('click', closeThemeModal);
+    }
+    if (themeModal) {
+        themeModal.addEventListener('click', (e) => {
+            if (e.target === themeModal) closeThemeModal();
+        });
+    }
+    if (themeCardWhite) {
+        themeCardWhite.addEventListener('click', () => {
+            applyTheme('white');
+            closeThemeModal();
+        });
+    }
+    if (themeCardGrey) {
+        themeCardGrey.addEventListener('click', () => {
+            applyTheme('calm-grey');
+            closeThemeModal();
+        });
+    }
+
+    // Initialize theme immediately on script boot
+    applyTheme(getActiveTheme());
+
     // --- 3. Global Actions ---
 
     window.setStudentStatusToday = (userId, status) => {

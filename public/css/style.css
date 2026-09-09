@@ -2,7 +2,7 @@
    1. PITCH BLACK & WHITE OUTLINE DESIGN SYSTEM
    ================================================ */
 
-:root {
+:root, [data-theme="white"] {
     --primary: #0284c7;
     --primary-hover: #0369a1;
     --secondary: #06b6d4;
@@ -26,6 +26,30 @@
     --cel-shadow-lg: none;
 }
 
+[data-theme="calm-grey"] {
+    --primary: #0284c7;
+    --primary-hover: #0369a1;
+    --secondary: #06b6d4;
+    --secondary-hover: #0891b2;
+    --danger: #dc2626;
+    --danger-hover: #b91c1c;
+    --body-bg: #000000;
+    --card-bg: #09090b;
+    --card-border: #3f3f46;
+    --card-border-hover: #71717a;
+    --nav-bg: #000000;
+    --text-main: #f4f4f5;
+    --text-muted: #71717a;
+    --accent-badge: #121215;
+    --accent-badge-border: #3f3f46;
+    --accent-badge-text: #e4e4e7;
+    --btn-border: #3f3f46;
+    --cel-shadow: none;
+    --cel-shadow-sm: none;
+    --cel-shadow-btn: 3px 3px 0px #3f3f46;
+    --cel-shadow-lg: none;
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -42,7 +66,7 @@ body {
 
 button {
     font-family: inherit;
-    border: 2px solid #ffffff;
+    border: 2px solid var(--btn-border);
 }
 
 .hidden {
@@ -115,7 +139,7 @@ button {
     gap: 0.5rem;
     padding: 0.35rem 0.85rem;
     background: var(--accent-badge);
-    border: 2px solid #ffffff;
+    border: 2px solid var(--accent-badge-border);
     border-radius: 6px;
     box-shadow: var(--cel-shadow-sm);
     font-size: 0.78rem;
@@ -149,7 +173,7 @@ button {
     letter-spacing: 0.02em;
     background: var(--primary);
     color: #ffffff;
-    border: 2px solid #ffffff;
+    border: 2px solid var(--btn-border);
     box-shadow: var(--cel-shadow-btn);
     border-radius: 8px;
     transition: transform 0.12s ease, box-shadow 0.12s ease;
@@ -158,12 +182,12 @@ button {
 .enter-btn:hover {
     background: var(--primary-hover);
     transform: translate(-1px, -1px);
-    box-shadow: 4px 4px 0px #ffffff;
+    box-shadow: 4px 4px 0px var(--cel-shadow-btn);
 }
 
 .enter-btn:active {
     transform: translate(2px, 2px);
-    box-shadow: 1px 1px 0px #ffffff;
+    box-shadow: 1px 1px 0px var(--cel-shadow-btn);
 }
 
 .gateway-btn {
@@ -173,7 +197,7 @@ button {
     padding: 0.9rem;
     background: var(--primary);
     color: #ffffff;
-    border: 2px solid #ffffff;
+    border: 2px solid var(--btn-border);
     box-shadow: var(--cel-shadow-btn);
     border-radius: 8px;
     cursor: pointer;
@@ -184,12 +208,12 @@ button {
 .gateway-btn:hover {
     background: var(--primary-hover);
     transform: translate(-1px, -1px);
-    box-shadow: 4px 4px 0px #ffffff;
+    box-shadow: 4px 4px 0px var(--cel-shadow-btn);
 }
 
 .gateway-btn:active {
     transform: translate(2px, 2px);
-    box-shadow: 1px 1px 0px #ffffff;
+    box-shadow: 1px 1px 0px var(--cel-shadow-btn);
 }
 
 .gateway-info {
@@ -274,7 +298,7 @@ button {
 
 #toggle-rank-btn.active {
     background: #d97706;
-    border: 2px solid #ffffff;
+    border: 2px solid var(--btn-border);
     box-shadow: var(--cel-shadow-sm);
     color: #ffffff;
 }
@@ -403,7 +427,7 @@ input:focus {
 .btn-primary {
     background: var(--primary);
     color: #ffffff;
-    border: 2px solid #ffffff;
+    border: 2px solid var(--btn-border);
     padding: 0.75rem 1.5rem;
     border-radius: 8px;
     font-weight: 700;
@@ -415,18 +439,18 @@ input:focus {
 .btn-primary:hover {
     background: var(--primary-hover);
     transform: translate(-1px, -1px);
-    box-shadow: 4px 4px 0px #ffffff;
+    box-shadow: 4px 4px 0px var(--cel-shadow-btn);
 }
 
 .btn-primary:active {
     transform: translate(2px, 2px);
-    box-shadow: 1px 1px 0px #ffffff;
+    box-shadow: 1px 1px 0px var(--cel-shadow-btn);
 }
 
 .btn-secondary {
     background: var(--secondary);
     color: #ffffff;
-    border: 2px solid #ffffff;
+    border: 2px solid var(--btn-border);
     padding: 0.75rem 1.5rem;
     border-radius: 8px;
     font-weight: 700;
@@ -438,17 +462,17 @@ input:focus {
 .btn-secondary:hover {
     background: var(--secondary-hover);
     transform: translate(-1px, -1px);
-    box-shadow: 4px 4px 0px #ffffff;
+    box-shadow: 4px 4px 0px var(--cel-shadow-btn);
 }
 
 .btn-secondary:active {
     transform: translate(2px, 2px);
-    box-shadow: 1px 1px 0px #ffffff;
+    box-shadow: 1px 1px 0px var(--cel-shadow-btn);
 }
 
 .btn-outline {
     background: #000000;
-    border: 2px solid #ffffff;
+    border: 2px solid var(--btn-border);
     color: #ffffff;
     padding: 0.75rem 1.5rem;
     border-radius: 8px;
@@ -461,18 +485,18 @@ input:focus {
 .btn-outline:hover {
     background: #18181b;
     transform: translate(-1px, -1px);
-    box-shadow: 4px 4px 0px #ffffff;
+    box-shadow: 4px 4px 0px var(--cel-shadow-btn);
 }
 
 .btn-outline:active {
     transform: translate(2px, 2px);
-    box-shadow: 1px 1px 0px #ffffff;
+    box-shadow: 1px 1px 0px var(--cel-shadow-btn);
 }
 
 .btn-sm-danger {
     background: #dc2626;
     color: #ffffff;
-    border: 2px solid #ffffff;
+    border: 2px solid var(--btn-border);
     padding: 0.45rem 0.75rem;
     border-radius: 6px;
     font-weight: 700;
@@ -485,7 +509,7 @@ input:focus {
 .btn-sm-danger:hover {
     background: #b91c1c;
     transform: translate(-1px, -1px);
-    box-shadow: 3px 3px 0px #ffffff;
+    box-shadow: 3px 3px 0px var(--cel-shadow-btn);
 }
 
 .btn-sm-danger:active {
@@ -496,7 +520,7 @@ input:focus {
 .btn-sm-edit {
     background: var(--primary);
     color: #ffffff;
-    border: 2px solid #ffffff;
+    border: 2px solid var(--btn-border);
     padding: 0.45rem 0.75rem;
     border-radius: 6px;
     font-weight: 700;
@@ -510,7 +534,7 @@ input:focus {
 .btn-sm-edit:hover {
     background: var(--primary-hover);
     transform: translate(-1px, -1px);
-    box-shadow: 3px 3px 0px #ffffff;
+    box-shadow: 3px 3px 0px var(--cel-shadow-btn);
 }
 
 .btn-sm-edit:active {
@@ -621,7 +645,7 @@ input:focus {
 .btn-sm {
     background: var(--primary);
     color: #ffffff;
-    border: 2px solid #ffffff;
+    border: 2px solid var(--btn-border);
     padding: 0.4rem 0.8rem;
     border-radius: 6px;
     font-weight: 700;
@@ -634,7 +658,7 @@ input:focus {
 .btn-sm:hover {
     background: var(--primary-hover);
     transform: translate(-1px, -1px);
-    box-shadow: 3px 3px 0px #ffffff;
+    box-shadow: 3px 3px 0px var(--cel-shadow-btn);
 }
 
 .btn-sm:active {
@@ -644,7 +668,7 @@ input:focus {
 
 .btn-checkin {
     background: #000000;
-    border: 2px dashed #ffffff;
+    border: 2px dashed var(--btn-border);
     color: #ffffff;
     padding: 0.4rem 0.8rem;
     border-radius: 6px;
@@ -658,12 +682,13 @@ input:focus {
 .btn-checkin:hover {
     background: #18181b;
     border-style: solid;
+    border-color: var(--btn-border);
     color: var(--primary);
 }
 
 .btn-checkedin {
     background: var(--secondary);
-    border: 2px solid #ffffff;
+    border: 2px solid var(--btn-border);
     color: #ffffff;
     padding: 0.4rem 0.8rem;
     border-radius: 6px;
@@ -677,9 +702,9 @@ input:focus {
 
 .btn-checkedin:hover {
     background: #0891b2;
-    border-color: #ffffff;
+    border-color: var(--btn-border);
     transform: translate(-1px, -1px);
-    box-shadow: 3px 3px 0px #ffffff;
+    box-shadow: 3px 3px 0px var(--cel-shadow-btn);
 }
 
 .btn-checkedin:active {
@@ -761,7 +786,7 @@ input:focus {
     align-items: center;
     justify-content: center;
     background: #09090b;
-    border: 2px solid #ffffff;
+    border: 2px solid var(--btn-border);
     border-radius: 6px;
     color: var(--text-main);
     font-size: 0.8rem;
@@ -772,47 +797,47 @@ input:focus {
 
 .day-btn:hover {
     background: #18181b;
-    border-color: #ffffff;
-    box-shadow: 2px 2px 0px #ffffff;
+    border-color: var(--card-border-hover);
+    box-shadow: 2px 2px 0px var(--cel-shadow-btn);
 }
 
 .day-btn.active {
     background: var(--secondary);
-    border-color: #ffffff;
+    border-color: var(--btn-border);
     color: white;
     box-shadow: var(--cel-shadow-sm);
 }
 
 .day-btn.sick {
     background: #27272a;
-    border-color: #ffffff;
+    border-color: var(--btn-border);
     color: white;
     box-shadow: var(--cel-shadow-sm);
 }
 
 .day-btn.permit {
     background: #27272a;
-    border-color: #ffffff;
+    border-color: var(--btn-border);
     color: white;
     box-shadow: var(--cel-shadow-sm);
 }
 
 .day-btn.alpha {
     background: #dc2626;
-    border-color: #ffffff;
+    border-color: var(--btn-border);
     color: white;
     box-shadow: var(--cel-shadow-sm);
 }
 
 .day-btn.future {
     opacity: 0.6;
-    border: 2px dashed #ffffff;
+    border: 2px dashed var(--btn-border);
     cursor: pointer;
 }
 
 .day-btn.future.active {
     background: rgba(6, 182, 212, 0.25);
-    border: 2px dashed #ffffff;
+    border: 2px dashed var(--btn-border);
     color: white;
     opacity: 1;
 }
@@ -907,7 +932,7 @@ input:focus {
 .divider-or hr {
     flex: 1;
     border: none;
-    border-top: 1px solid #ffffff;
+    border-top: 1px solid var(--card-border);
 }
 
 
@@ -919,7 +944,7 @@ input:focus {
     align-items: center;
     gap: 0.55rem;
     background: var(--accent-badge);
-    border: 2px solid #ffffff;
+    border: 2px solid var(--btn-border);
     border-radius: 8px;
     padding: 0.4rem 0.95rem;
     font-size: 0.82rem;
@@ -943,7 +968,7 @@ input:focus {
 .btn-sync-nav:hover {
     background: #18181b;
     transform: translate(-1px, -1px);
-    box-shadow: 3px 3px 0px #ffffff;
+    box-shadow: 3px 3px 0px var(--cel-shadow-btn);
 }
 
 .btn-sync-nav:active {
@@ -953,7 +978,7 @@ input:focus {
 
 .btn-sync-nav.connected {
     background: var(--secondary);
-    border-color: #ffffff;
+    border-color: var(--btn-border);
     color: #ffffff;
 }
 
@@ -964,7 +989,7 @@ input:focus {
 .btn-glow {
     position: relative;
     background: var(--primary) !important;
-    border: 2px solid #ffffff !important;
+    border: 2px solid var(--btn-border) !important;
     box-shadow: var(--cel-shadow-btn) !important;
     font-weight: 700 !important;
     transition: transform 0.12s ease, box-shadow 0.12s ease;
@@ -973,12 +998,12 @@ input:focus {
 .btn-glow:hover {
     background: var(--primary-hover) !important;
     transform: translate(-1px, -1px);
-    box-shadow: 4px 4px 0px #ffffff !important;
+    box-shadow: 4px 4px 0px var(--cel-shadow-btn) !important;
 }
 
 .btn-glow:active {
     transform: translate(2px, 2px);
-    box-shadow: 1px 1px 0px #ffffff !important;
+    box-shadow: 1px 1px 0px var(--cel-shadow-btn) !important;
 }
 
 /* ================================================
@@ -990,7 +1015,7 @@ input:focus {
     font-weight: 700;
     cursor: pointer;
     font-size: 0.95rem;
-    border: 2px solid #ffffff;
+    border: 2px solid var(--btn-border);
     box-shadow: var(--cel-shadow-btn);
     transition: transform 0.12s ease, box-shadow 0.12s ease;
     font-family: inherit;
@@ -998,12 +1023,12 @@ input:focus {
 
 .btn-status-option:hover {
     transform: translate(-1px, -1px);
-    box-shadow: 4px 4px 0px #ffffff;
+    box-shadow: 4px 4px 0px var(--cel-shadow-btn);
 }
 
 .btn-status-option:active {
     transform: translate(2px, 2px);
-    box-shadow: 1px 1px 0px #ffffff;
+    box-shadow: 1px 1px 0px var(--cel-shadow-btn);
 }
 
 .btn-status-present {
@@ -1130,7 +1155,7 @@ input:focus {
     align-items: center;
     justify-content: center;
     background: #121215;
-    border: 2px solid #ffffff;
+    border: 2px solid var(--btn-border);
     color: var(--text-main);
     padding: 0.45rem 0.6rem;
     border-radius: 6px;
@@ -1142,8 +1167,8 @@ input:focus {
 
 .btn-toggle-eye:hover {
     background: #18181b;
-    border-color: #ffffff;
-    box-shadow: 3px 3px 0px #ffffff;
+    border-color: var(--btn-border);
+    box-shadow: 3px 3px 0px var(--cel-shadow-btn);
 }
 
 .btn-toggle-eye:active {
@@ -1207,7 +1232,7 @@ input:focus {
 }
 
 .btn-danger-soft {
-    border: 2px solid #ffffff;
+    border: 2px solid var(--btn-border);
     color: #fca5a5;
     background: #121215;
     box-shadow: var(--cel-shadow-sm);
@@ -1219,8 +1244,8 @@ input:focus {
 
 .btn-danger-soft:hover {
     background: rgba(220, 38, 38, 0.2);
-    border-color: #ffffff;
-    box-shadow: 3px 3px 0px #ffffff;
+    border-color: var(--btn-border);
+    box-shadow: 3px 3px 0px var(--cel-shadow-btn);
 }
 
 .btn-danger-soft:active {
@@ -1307,7 +1332,7 @@ input:focus {
 .btn-danger-solid {
     background: #ef4444 !important;
     color: white !important;
-    border: 2px solid #ffffff !important;
+    border: 2px solid var(--btn-border) !important;
     font-weight: 700 !important;
     box-shadow: var(--cel-shadow-btn) !important;
     border-radius: 8px;
@@ -1318,12 +1343,12 @@ input:focus {
 .btn-danger-solid:hover {
     background: #dc2626 !important;
     transform: translate(-1px, -1px);
-    box-shadow: 4px 4px 0px #ffffff !important;
+    box-shadow: 4px 4px 0px var(--cel-shadow-btn) !important;
 }
 
 .btn-danger-solid:active {
     transform: translate(2px, 2px);
-    box-shadow: 1px 1px 0px #ffffff !important;
+    box-shadow: 1px 1px 0px var(--cel-shadow-btn) !important;
 }
 
 /* ================================================
@@ -1335,7 +1360,7 @@ input:focus {
 }
 
 .day-btn.dragging {
-    outline: 2px solid white;
+    outline: 2px solid var(--btn-border);
     outline-offset: 1px;
     transform: scale(1.05);
     transition: transform 0.05s;
@@ -1382,7 +1407,7 @@ input:focus {
     padding: 4px 9px;
     border-radius: 6px;
     background: rgba(6, 182, 212, 0.15);
-    border: 2px solid #ffffff;
+    border: 2px solid var(--btn-border);
     box-shadow: var(--cel-shadow-sm);
     transition: transform 0.12s ease, box-shadow 0.12s ease;
 }
@@ -1391,7 +1416,7 @@ input:focus {
     background: #06b6d4;
     color: #ffffff;
     transform: translate(-1px, -1px);
-    box-shadow: 3px 3px 0px #ffffff;
+    box-shadow: 3px 3px 0px var(--cel-shadow-btn);
 }
 
 .wa-btn:active {
@@ -1467,14 +1492,14 @@ input:focus {
     font-weight: 700;
     border-radius: 6px;
     cursor: pointer;
-    border: 2px solid #ffffff;
+    border: 2px solid var(--btn-border);
     box-shadow: var(--cel-shadow-sm);
     transition: transform 0.12s ease, box-shadow 0.12s ease;
 }
 
 .btn-toolbar:hover {
     transform: translate(-1px, -1px);
-    box-shadow: 3px 3px 0px #ffffff;
+    box-shadow: 3px 3px 0px var(--cel-shadow-btn);
 }
 
 .btn-toolbar:active {
@@ -1484,7 +1509,7 @@ input:focus {
 
 .btn-toolbar-present {
     background: rgba(6, 182, 212, 0.18);
-    border: 2px solid #ffffff;
+    border: 2px solid var(--btn-border);
     color: #67e8f9;
 }
 
@@ -1495,13 +1520,13 @@ input:focus {
 
 .btn-toolbar-reset {
     background: #121215;
-    border: 2px solid #ffffff;
+    border: 2px solid var(--btn-border);
     color: var(--text-muted);
 }
 
 .btn-toolbar-reset:hover {
     background: rgba(220, 38, 38, 0.2);
-    border-color: #ffffff;
+    border-color: var(--btn-border);
     color: #f87171;
 }
 
@@ -1523,14 +1548,14 @@ input:focus {
     font-size: 0.8rem;
     font-weight: 800;
     cursor: pointer;
-    border: 2px solid #ffffff;
+    border: 2px solid var(--btn-border);
     background: #09090b;
     color: var(--text-muted);
     transition: transform 0.1s ease, box-shadow 0.1s ease;
 }
 
 .status-btn:hover {
-    box-shadow: 2px 2px 0px #ffffff;
+    box-shadow: 2px 2px 0px var(--cel-shadow-btn);
     transform: translate(-1px, -1px);
 }
 
@@ -1542,12 +1567,12 @@ input:focus {
 /* H = Hadir (Elemental Ice Cyan) */
 .status-btn.btn-h:hover {
     background: rgba(6, 182, 212, 0.2);
-    border-color: #ffffff;
+    border-color: var(--btn-border);
     color: #67e8f9;
 }
 .status-btn.btn-h.active {
     background: #06b6d4;
-    border-color: #ffffff;
+    border-color: var(--btn-border);
     color: #ffffff;
     box-shadow: var(--cel-shadow-sm);
 }
@@ -1555,12 +1580,12 @@ input:focus {
 /* S = Sakit (Neutral Zinc) */
 .status-btn.btn-s:hover {
     background: rgba(255, 255, 255, 0.1);
-    border-color: #ffffff;
+    border-color: var(--btn-border);
     color: #e2e8f0;
 }
 .status-btn.btn-s.active {
     background: #27272a;
-    border-color: #ffffff;
+    border-color: var(--btn-border);
     color: #ffffff;
     box-shadow: var(--cel-shadow-sm);
 }
@@ -1568,12 +1593,12 @@ input:focus {
 /* I = Izin (Neutral Zinc) */
 .status-btn.btn-i:hover {
     background: rgba(255, 255, 255, 0.1);
-    border-color: #ffffff;
+    border-color: var(--btn-border);
     color: #e2e8f0;
 }
 .status-btn.btn-i.active {
     background: #27272a;
-    border-color: #ffffff;
+    border-color: var(--btn-border);
     color: #ffffff;
     box-shadow: var(--cel-shadow-sm);
 }
@@ -1581,12 +1606,12 @@ input:focus {
 /* A = Alpa (Crimson Red) */
 .status-btn.btn-a:hover {
     background: rgba(220, 38, 38, 0.2);
-    border-color: #ffffff;
+    border-color: var(--btn-border);
     color: #fca5a5;
 }
 .status-btn.btn-a.active {
     background: #dc2626;
-    border-color: #ffffff;
+    border-color: var(--btn-border);
     color: #ffffff;
     box-shadow: var(--cel-shadow-sm);
 }
@@ -1594,6 +1619,141 @@ input:focus {
 /* Tabular numbers for clean data alignment */
 .col-num, .col-pct, .stat-value {
     font-variant-numeric: tabular-nums;
+}
+
+/* ================================================
+   Theme Mode Settings & Modal
+   ================================================ */
+.btn-theme-nav {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.4rem 0.85rem;
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+    border: 2px solid var(--btn-border);
+    background: transparent;
+    color: var(--text-main);
+    border-radius: 8px;
+    box-shadow: var(--cel-shadow-sm);
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.btn-theme-nav:hover {
+    background: #18181b;
+    transform: translate(-1px, -1px);
+    box-shadow: 3px 3px 0px var(--cel-shadow-btn);
+}
+
+.btn-theme-nav:active {
+    transform: translate(1px, 1px);
+    box-shadow: none;
+}
+
+.theme-modal-content {
+    max-width: 440px;
+    width: 90%;
+    text-align: left;
+    padding: 1.75rem 1.5rem;
+    background: var(--card-bg);
+    border: 2px solid var(--card-border);
+    border-radius: 12px;
+    animation: fadeIn 0.15s ease-out;
+}
+
+.theme-options-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    margin-top: 1.25rem;
+}
+
+.theme-option-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.95rem 1.1rem;
+    background: #121215;
+    border: 2px solid var(--card-border);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.12s ease, border-color 0.12s ease, box-shadow 0.12s ease;
+}
+
+.theme-option-card:hover {
+    transform: translate(-1px, -1px);
+    box-shadow: 3px 3px 0px var(--cel-shadow-btn);
+}
+
+.theme-option-card.active {
+    border-color: var(--primary);
+    background: rgba(2, 132, 199, 0.12);
+}
+
+.theme-preview-swatch {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: #000000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.theme-preview-swatch.swatch-white {
+    border: 2px solid #ffffff;
+}
+
+.theme-preview-swatch.swatch-grey {
+    border: 2px solid #3f3f46;
+}
+
+.theme-preview-inner-line {
+    width: 14px;
+    height: 2px;
+    border-radius: 1px;
+}
+
+.swatch-white .theme-preview-inner-line {
+    background: #ffffff;
+}
+
+.swatch-grey .theme-preview-inner-line {
+    background: #3f3f46;
+}
+
+.theme-option-info {
+    flex: 1;
+}
+
+.theme-option-name {
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: var(--text-main);
+    margin-bottom: 0.2rem;
+}
+
+.theme-option-desc {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+}
+
+.theme-check-pill {
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 0.25rem 0.55rem;
+    border-radius: 4px;
+    border: 1px solid var(--card-border);
+    color: var(--text-muted);
+}
+
+.theme-option-card.active .theme-check-pill {
+    background: var(--primary);
+    color: #ffffff;
+    border-color: var(--primary);
 }
 
 /* Printable Official Attendance Sheet Styling */

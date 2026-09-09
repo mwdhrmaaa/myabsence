@@ -17,7 +17,13 @@
 <body>
     <div id="app">
         <!-- Auth / Welcome Section (Entry Gate) -->
-        <section id="auth-section">
+        <section id="auth-section" style="position: relative;">
+            <div style="position: absolute; top: 1.25rem; right: 1.5rem; z-index: 50;">
+                <button type="button" id="welcome-theme-toggle-btn" class="btn-theme-nav" title="Atur Model Garis Tema">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 3v18"></path></svg>
+                    <span id="welcome-theme-label">Garis Putih</span>
+                </button>
+            </div>
             <div class="glass-card login-card welcome-card">
                 <div class="welcome-badge">
                     <span class="welcome-dot"></span>
@@ -43,6 +49,10 @@
                         <span class="logo">MyAbsence</span>
                     </div>
                     <div class="user-info">
+                        <button type="button" id="nav-theme-btn" class="btn-theme-nav" title="Atur Model Garis Tema">
+                            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 3v18"></path></svg>
+                            <span id="theme-nav-label">Garis Putih</span>
+                        </button>
                         <button id="nav-sync-btn" class="btn-sync-nav" title="Sinkronisasi Data">
                             <span class="sync-dot"></span>
                             <span id="nav-sync-label">Sync Kode</span>
@@ -357,6 +367,42 @@
                 <div class="modal-actions confirm-modal-actions">
                     <button type="button" id="confirm-modal-cancel-btn" class="btn-outline">Batal</button>
                     <button type="button" id="confirm-modal-ok-btn" class="btn-primary btn-danger-solid">Ya, Putuskan</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal for Theme Mode Selection -->
+        <div id="theme-modal" class="modal-overlay hidden">
+            <div class="modal-content glass-card theme-modal-content">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                    <h2 style="font-size: 1.25rem; font-weight: 800;">Model Garis & Tema</h2>
+                    <button type="button" id="close-theme-modal-btn" class="btn-outline" style="padding: 0.35rem 0.65rem; font-size: 0.8rem; line-height: 1;" title="Tutup Modal">✕</button>
+                </div>
+                <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.4;">Sesuaikan kenyamanan visual tampilan presensi kelas:</p>
+                <div class="theme-options-list">
+                    <div class="theme-option-card active" id="theme-card-white" data-theme-target="white">
+                        <div class="theme-preview-swatch swatch-white">
+                            <span class="theme-preview-inner-line"></span>
+                        </div>
+                        <div class="theme-option-info">
+                            <div class="theme-option-name">Garis Putih Tegas</div>
+                            <div class="theme-option-desc">Latar hitam pekat dengan outline putih solid dan kontras tajam.</div>
+                        </div>
+                        <span class="theme-check-pill" id="badge-white">Aktif</span>
+                    </div>
+                    <div class="theme-option-card" id="theme-card-grey" data-theme-target="calm-grey">
+                        <div class="theme-preview-swatch swatch-grey">
+                            <span class="theme-preview-inner-line"></span>
+                        </div>
+                        <div class="theme-option-info">
+                            <div class="theme-option-name">Garis Abu Kalem</div>
+                            <div class="theme-option-desc">Latar hitam pekat dengan outline abu-abu netral yang teduh dan nyaman di mata.</div>
+                        </div>
+                        <span class="theme-check-pill" id="badge-grey">Pilih</span>
+                    </div>
+                </div>
+                <div class="modal-actions" style="margin-top: 1.5rem; justify-content: flex-end;">
+                    <button type="button" id="close-theme-modal-btn2" class="btn-outline" style="width: 100%;">Tutup</button>
                 </div>
             </div>
         </div>
