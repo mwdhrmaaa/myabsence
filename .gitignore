@@ -1,1 +1,23 @@
+# Dependencies
+node_modules/
+
+# Local databases & persistent state
 data/
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+
+# Environment & credentials
+.env
+.env.local
+
+# Operating System
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs & temp
+*.log
+tmp/
+scratch/

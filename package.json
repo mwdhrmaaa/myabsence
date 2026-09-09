@@ -1,0 +1,23 @@
+{
+  "name": "myabsence",
+  "version": "2.0.0",
+  "description": "Production-grade attendance tracking system for global educators",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "test": "node --test tests/**/*.test.js"
+  },
+  "keywords": [
+    "attendance",
+    "education",
+    "teachers",
+    "school-management",
+    "pwa"
+  ],
+  "author": "Mahendra Wira Dharma <mwdhrmaaa@users.noreply.github.com>",
+  "license": "MIT",
+  "engines": {
+    "node": ">=22.0.0"
+  }
+}
