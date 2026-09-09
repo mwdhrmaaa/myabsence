@@ -205,7 +205,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function updateThemeUI(themeName) {
         const isCalm = themeName === 'calm-grey';
-        const labelText = isCalm ? 'Garis Abu' : 'Garis Putih';
+        const labelText = isCalm ? 'Stealth Slate' : 'Manga Cel';
         
         if (themeNavLabel) themeNavLabel.textContent = labelText;
         if (welcomeThemeLabel) welcomeThemeLabel.textContent = labelText;
