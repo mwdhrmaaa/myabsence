@@ -509,13 +509,17 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!data) return false;
         let updated = false;
         if (data.users && Array.isArray(data.users)) {
-            users = data.users.map(u => {
-                if (!u.attendanceLogs) u.attendanceLogs = {};
-                u.presenceDates = Object.keys(u.attendanceLogs).filter(d => u.attendanceLogs[d] === 'present');
-                u.name = sanitizeStudentName(u.name);
-                return u;
-            });
-            updated = true;
+            const currentHasReal = users && users.length > 0 && !hasOnlyDummyStudents(users);
+            const incomingHasOnlyDummy = hasOnlyDummyStudents(data.users);
+            if (!currentHasReal || !incomingHasOnlyDummy) {
+                users = data.users.map(u => {
+                    if (!u.attendanceLogs) u.attendanceLogs = {};
+                    u.presenceDates = Object.keys(u.attendanceLogs).filter(d => u.attendanceLogs[d] === 'present');
+                    u.name = sanitizeStudentName(u.name);
+                    return u;
+                });
+                updated = true;
+            }
         }
         if (data.workdays && Array.isArray(data.workdays)) {
             activeWorkdays = data.workdays;
@@ -721,13 +725,13 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const updateUI = () => {
-        if (!authSection || !dashboardSection) return;
+        if (!dashboardSection) return;
         if (!currentUser) {
             currentUser = { name: 'Pendidik', role: 'admin' };
             localStorage.setItem('myabsence_user', JSON.stringify(currentUser));
         }
 
-        authSection.classList.remove('active');
+        if (authSection) authSection.classList.remove('active');
         dashboardSection.classList.add('active');
         if (greeting) greeting.textContent = "Presensi Kelas";
         const todayDateDisplay = document.getElementById('today-date-display');

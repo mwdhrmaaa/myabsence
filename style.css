@@ -91,14 +91,14 @@ button {
 
 /* Auth Section */
 #auth-section {
-    display: none;
+    display: none !important;
     height: 100vh;
     align-items: center;
     justify-content: center;
 }
 
 #auth-section.active {
-    display: flex;
+    display: none !important;
 }
 
 .login-card {
@@ -230,7 +230,7 @@ button {
 
 /* Dashboard Section */
 #dashboard-section {
-    display: none;
+    display: block;
 }
 
 #dashboard-section.active {

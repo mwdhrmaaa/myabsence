@@ -13,36 +13,19 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" href="icon-192.png">
+    <script>
+        (function() {
+            try {
+                var theme = localStorage.getItem('myabsence_theme_mode') || 'white';
+                document.documentElement.setAttribute('data-theme', theme);
+            } catch (e) {}
+        })();
+    </script>
 </head>
 <body>
     <div id="app">
-        <!-- Auth / Welcome Section (Entry Gate) -->
-        <section id="auth-section" style="position: relative;">
-            <div style="position: absolute; top: 1.25rem; right: 1.5rem; z-index: 50;">
-                <button type="button" id="welcome-theme-toggle-btn" class="btn-theme-nav" title="Pilih Model Tampilan Tema">
-                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 3v18"></path></svg>
-                    <span id="welcome-theme-label">Manga Cel</span>
-                </button>
-            </div>
-            <div class="glass-card login-card welcome-card">
-                <div class="welcome-badge">
-                    <span class="welcome-dot"></span>
-                    <span>Sistem Presensi Pendidik</span>
-                </div>
-                <h1>MyAbsence</h1>
-                <p class="welcome-subtitle">Aplikasi pemantauan dan pencatatan presensi kelas yang cepat, tanggap, dan efisien untuk pengajar.</p>
-                <div class="entry-gate">
-                    <button type="button" id="enter-app-btn" class="btn-primary gateway-btn enter-btn">
-                        <span>Buka Dashboard Presensi</span>
-                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-                    </button>
-                    <p class="gateway-info">Klik tombol di atas untuk langsung masuk ke dashboard presensi.</p>
-                </div>
-            </div>
-        </section>
-
         <!-- Dashboard Section -->
-        <section id="dashboard-section">
+        <section id="dashboard-section" class="active">
             <nav class="glass-nav">
                 <div class="nav-content">
                     <div class="brand">
@@ -58,7 +41,6 @@
                             <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg>
                             <span id="nav-share-label">Bagikan Link</span>
                         </button>
-                        <button id="logout-btn" class="btn-outline">Logout</button>
                     </div>
                 </div>
             </nav>
