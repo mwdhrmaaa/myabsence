@@ -108,7 +108,6 @@ document.addEventListener('DOMContentLoaded', () => {
     let lastSyncUpdatedAt = 0;
     let isDragging = false;
     let dragMode = null; // 'add' or 'remove'
-    let isCodeHidden = false;
 
     // Detect Share Link query param (?sync=... or ?share=... or ?connect=...)
     let incomingShareCode = null;
@@ -166,23 +165,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // Dashboard Sync UI selectors
-    const navSyncBtn = document.getElementById('nav-sync-btn');
-    const navSyncIcon = document.getElementById('nav-sync-icon');
-    const navSyncLabel = document.getElementById('nav-sync-label');
+    const navShareBtn = document.getElementById('nav-share-btn') || document.getElementById('nav-sync-btn');
+    const navShareLabel = document.getElementById('nav-share-label') || document.getElementById('nav-sync-label');
     const headerSyncBtn = document.getElementById('header-sync-btn');
     const syncModal = document.getElementById('sync-modal');
     const syncConnectedView = document.getElementById('sync-connected-view');
     const syncDisconnectedView = document.getElementById('sync-disconnected-view');
-    const activeSyncCode = document.getElementById('active-sync-code');
-    const toggleCodeVisibilityBtn = document.getElementById('toggle-code-visibility-btn');
-    const copyCodeModalBtn = document.getElementById('copy-code-modal-btn');
     const disconnectSyncBtn = document.getElementById('disconnect-sync-btn');
     const closeSyncModalBtn = document.getElementById('close-sync-modal-btn');
     const closeSyncModalBtn2 = document.getElementById('close-sync-modal-btn2');
     const modalGenerateCodeBtn = document.getElementById('modal-generate-code-btn');
     const modalSyncCodeInput = document.getElementById('modal-sync-code-input');
     const modalConnectCodeBtn = document.getElementById('modal-connect-code-btn');
-    const navShareBtn = document.getElementById('nav-share-btn');
     const shareLinkInput = document.getElementById('share-link-input');
     const copyShareLinkBtn = document.getElementById('copy-share-link-btn');
     const copyShareLinkText = document.getElementById('copy-share-link-label');
@@ -747,21 +741,20 @@ document.addEventListener('DOMContentLoaded', () => {
             if (adminActions) adminActions.classList.add('hidden');
             document.querySelectorAll('.admin-only').forEach(el => el.classList.add('hidden'));
         }
-        // Update sync button in navbar
-        if (navSyncBtn) {
+        // Update share link button in navbar
+        const shareBtn = navShareBtn || document.getElementById('nav-share-btn');
+        const shareLabel = navShareLabel || document.getElementById('nav-share-label');
+        if (shareBtn) {
             if (syncCode) {
-                navSyncBtn.classList.add('connected');
-                if (navSyncLabel) navSyncLabel.textContent = isCodeHidden ? '••••••••••••' : syncCode;
+                shareBtn.classList.add('connected');
+                if (shareLabel) shareLabel.textContent = 'Link Terhubung';
             } else {
-                navSyncBtn.classList.remove('connected');
-                if (navSyncLabel) navSyncLabel.textContent = 'Sync Kode';
+                shareBtn.classList.remove('connected');
+                if (shareLabel) shareLabel.textContent = 'Bagikan Link';
             }
         }
         renderTable();
     };
-
-    const SVG_EYE = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>`;
-    const SVG_EYE_OFF = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>`;
 
     const CONFIRM_ICONS = {
         warning: `<svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>`,
@@ -828,33 +821,11 @@ document.addEventListener('DOMContentLoaded', () => {
         shareLinkInput.value = url;
     };
 
-    const renderSyncCodeDisplay = () => {
-        if (!activeSyncCode) return;
-        if (isCodeHidden) {
-            activeSyncCode.textContent = '••••••••••••';
-            if (toggleCodeVisibilityBtn) {
-                toggleCodeVisibilityBtn.innerHTML = SVG_EYE;
-                toggleCodeVisibilityBtn.title = 'Tampilkan Kode';
-            }
-        } else {
-            activeSyncCode.textContent = syncCode || '';
-            if (toggleCodeVisibilityBtn) {
-                toggleCodeVisibilityBtn.innerHTML = SVG_EYE_OFF;
-                toggleCodeVisibilityBtn.title = 'Sembunyikan Kode';
-            }
-        }
-        if (navSyncLabel && syncCode) {
-            navSyncLabel.textContent = isCodeHidden ? '••••••••••••' : syncCode;
-        }
-        updateShareLinkDisplay();
-    };
-
     const openSyncModal = () => {
         if (!syncModal) return;
         if (syncCode) {
             if (syncConnectedView) syncConnectedView.classList.remove('hidden');
             if (syncDisconnectedView) syncDisconnectedView.classList.add('hidden');
-            renderSyncCodeDisplay();
             updateShareLinkDisplay();
         } else {
             if (syncConnectedView) syncConnectedView.classList.add('hidden');
@@ -1083,27 +1054,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Toggle sembunyikan/tampilkan kode
-    if (toggleCodeVisibilityBtn) {
-        toggleCodeVisibilityBtn.addEventListener('click', () => {
-            isCodeHidden = !isCodeHidden;
-            renderSyncCodeDisplay();
-        });
-    }
-
-    // Salin kode di dalam modal
-    if (copyCodeModalBtn) copyCodeModalBtn.addEventListener('click', () => {
-        if (!syncCode) return;
-        navigator.clipboard.writeText(syncCode).then(() => {
-            copyCodeModalBtn.textContent = 'Kode Tersalin!';
-            showToast('Kode Berhasil Disalin!');
-            setTimeout(() => { copyCodeModalBtn.textContent = 'Salin Kode Saja'; }, 2000);
-        }).catch(() => {
-            prompt('Salin kode ini:', syncCode);
-        });
-    });
-
-    // Buat kode baru dari dalam dashboard
+    // Buat link berbagi baru dari dalam dashboard
     if (modalGenerateCodeBtn) modalGenerateCodeBtn.addEventListener('click', async () => {
         const code = generateSyncCode();
         syncCode = code;
@@ -1114,34 +1065,29 @@ document.addEventListener('DOMContentLoaded', () => {
         showToast('Link Berbagi Baru Telah Dibuat!');
     });
 
-    // Hubungkan dengan kode atau link dari dalam dashboard
+    // Hubungkan via Link Berbagi
     if (modalConnectCodeBtn) modalConnectCodeBtn.addEventListener('click', async () => {
         let raw = modalSyncCodeInput ? modalSyncCodeInput.value.trim() : '';
-        // Extract 12-char code if user pasted a full URL
-        const urlMatch = raw.match(/[?&](?:sync|share|connect)=([A-Z0-9]{12})/i);
-        if (urlMatch) {
-            raw = urlMatch[1].toUpperCase();
-        } else {
-            raw = raw.toUpperCase();
-        }
-
-        if (!/^[A-Z0-9]{12}$/.test(raw)) {
-            alert('Format tidak valid. Masukkan 12 karakter kode atau tempel link berbagi yang lengkap.');
+        const urlMatch = raw.match(/[?&](?:sync|share|connect)=([A-Z0-9]{12})/i) || raw.match(/([A-Z0-9]{12})/i);
+        if (!urlMatch) {
+            alert('Link tidak valid. Pastikan Anda menempelkan link berbagi yang lengkap (contoh: http://192.168.x.x:3000/?sync=...).');
             return;
         }
+        const token = urlMatch[1].toUpperCase();
+
         modalConnectCodeBtn.textContent = 'Menghubungkan...';
         modalConnectCodeBtn.disabled = true;
-        const found = await pullSync(raw);
-        modalConnectCodeBtn.textContent = 'Hubungkan Sesi';
+        const found = await pullSync(token);
+        modalConnectCodeBtn.textContent = 'Buka & Hubungkan Link';
         modalConnectCodeBtn.disabled = false;
         if (!found) {
             showCustomConfirm({
-                title: 'Sesi Belum Terdaftar',
-                message: `Sesi dengan kode "${raw}" belum ada di server. Apakah Anda ingin membuat sesi baru dengan kode ini?`,
+                title: 'Sesi Tidak Ditemukan',
+                message: `Sesi dari link ini belum terdaftar di server. Apakah ingin membuat sesi baru dengan link ini?`,
                 icon: 'key',
                 okText: 'Buat Sesi Baru',
                 onOk: () => {
-                    syncCode = raw;
+                    syncCode = token;
                     localStorage.setItem('myabsence_sync_code', syncCode);
                     pushSync();
                     updateUI();
@@ -1151,19 +1097,19 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             return;
         }
-        syncCode = raw;
+        syncCode = token;
         localStorage.setItem('myabsence_sync_code', syncCode);
         pushSync();
         updateUI();
         openSyncModal();
-        showToast('Berhasil Terhubung ke Sesi Presensi!');
+        showToast('Berhasil Terhubung via Link!');
     });
 
     // Putuskan sinkronisasi dengan custom confirmation modal
     if (disconnectSyncBtn) disconnectSyncBtn.addEventListener('click', () => {
         showCustomConfirm({
-            title: 'Putuskan Sinkronisasi?',
-            message: 'Data di perangkat ini tetap aman, tapi tidak akan tersinkron lagi dengan perangkat lain sampai dihubungkan kembali.',
+            title: 'Putuskan Link Sesi?',
+            message: 'Data di perangkat ini tetap aman, tapi tidak akan lagi tersinkron dengan HP sampai link dihubungkan kembali.',
             icon: 'disconnect',
             okText: 'Ya, Putuskan',
             onOk: () => {
@@ -1171,6 +1117,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 localStorage.removeItem('myabsence_sync_code');
                 updateUI();
                 openSyncModal();
+                showToast('Link sesi berhasil diputuskan.');
             }
         });
     });

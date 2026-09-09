@@ -53,13 +53,10 @@
                             <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 3v18"></path></svg>
                             <span id="theme-nav-label">Manga Cel</span>
                         </button>
-                        <button id="nav-sync-btn" class="btn-sync-nav" title="Sinkronisasi Data">
+                        <button type="button" id="nav-share-btn" class="btn-sync-nav" title="Bagikan Link Presensi ke HP">
                             <span class="sync-dot"></span>
-                            <span id="nav-sync-label">Sync Kode</span>
-                        </button>
-                        <button type="button" id="nav-share-btn" class="btn-share-nav" title="Bagikan Link ke HP / Perangkat Lain">
                             <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg>
-                            <span>Bagikan Link</span>
+                            <span id="nav-share-label">Bagikan Link</span>
                         </button>
                         <button id="logout-btn" class="btn-outline">Logout</button>
                     </div>
@@ -280,23 +277,23 @@
                 </div>
             </div>
         </div>
-        <!-- Modal for Sync & Share Code -->
+        <!-- Modal for Sync & Share Link -->
         <div id="sync-modal" class="modal hidden">
             <div class="modal-content glass-card sync-modal-content">
-                <h2>Sinkronisasi Data</h2>
-                <p class="history-info">Hubungkan data absensi antar HP dan Laptop secara real-time.</p>
+                <h2>Bagikan Presensi</h2>
+                <p class="history-info">Akses dan pantau data absensi kelas secara real-time dari HP melalui link berbagi.</p>
 
                 <!-- View when ALREADY CONNECTED -->
                 <div id="sync-connected-view" class="hidden">
                     <div class="sync-status-box success">
                         <span class="status-indicator online"></span>
-                        <span>Sinkronisasi Aktif (Laptop & HP Terhubung)</span>
+                        <span>Sesi Terhubung (Laptop & HP Real-Time)</span>
                     </div>
 
                     <!-- Primary: Direct Share Link Card for Mobile -->
                     <div class="sync-share-card">
                         <div class="sync-share-header">
-                            <label for="share-link-input">Link Berbagi (Buka di HP):</label>
+                            <label for="share-link-input">Link Akses untuk HP:</label>
                             <span id="share-link-type-badge" class="badge-network">Jaringan Wi-Fi</span>
                         </div>
                         <div class="share-link-group">
@@ -307,26 +304,12 @@
                             </button>
                         </div>
                         <p class="share-link-tip">
-                            Salin link di atas lalu buka di browser HP Anda. Semua data yang sedang dibuka di laptop akan langsung tersinkron dan bisa diedit dari HP secara bersamaan.
+                            Salin link di atas lalu buka di browser HP Anda. Semua data yang sedang dibuka di laptop akan otomatis tersinkron dan langsung dapat diedit dari HP secara bersamaan.
                         </p>
                     </div>
 
-                    <!-- Secondary: Fallback Code Box -->
-                    <div class="sync-code-box" style="margin-top: 1rem;">
-                        <label>KODE SINKRONISASI MANUAL:</label>
-                        <div class="code-wrapper">
-                            <span id="active-sync-code" class="code-large">ABC123DEF456</span>
-                            <button type="button" id="toggle-code-visibility-btn" class="btn-toggle-eye" title="Sembunyikan / Tampilkan Kode">
-                                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-                            </button>
-                        </div>
-                        <div class="code-copy-wrapper" style="margin-top: 0.65rem;">
-                            <button type="button" id="copy-code-modal-btn" class="btn-outline btn-sm" style="width: 100%;">Salin Kode Saja</button>
-                        </div>
-                    </div>
-
-                    <div class="modal-actions" style="margin-top: 1.25rem;">
-                        <button type="button" id="disconnect-sync-btn" class="btn-outline btn-danger-soft">Putuskan Sinkronisasi</button>
+                    <div class="modal-actions" style="margin-top: 1.5rem;">
+                        <button type="button" id="disconnect-sync-btn" class="btn-outline btn-danger-soft">Putuskan Link Sesi</button>
                         <button type="button" id="close-sync-modal-btn" class="btn-primary">Selesai</button>
                     </div>
                 </div>
@@ -334,23 +317,23 @@
                 <!-- View when NOT CONNECTED -->
                 <div id="sync-disconnected-view">
                     <div class="sync-option-card">
-                        <h3>1. Bagikan Data Laptop ke HP via Link</h3>
+                        <h3>1. Bagikan Data Laptop ke HP</h3>
                         <p>Buat link berbagi agar data absensi di laptop ini langsung bisa dibuka dan diedit dari HP secara bersamaan.</p>
                         <button type="button" id="modal-generate-code-btn" class="btn-primary" style="width: 100%;">
-                            Buat Link Berbagi & Bagikan ke HP
+                            Buat Link Berbagi
                         </button>
                     </div>
 
                     <div class="divider-or"><hr><span>ATAU</span><hr></div>
 
                     <div class="sync-option-card">
-                        <h3>2. Hubungkan dengan Link atau Kode</h3>
-                        <p>Jika memiliki link atau kode dari perangkat lain, tempel di sini:</p>
+                        <h3>2. Hubungkan dengan Link</h3>
+                        <p>Jika memiliki link berbagi dari perangkat lain, tempel di sini:</p>
                         <div class="input-group" style="margin-bottom: 0.75rem;">
-                            <input type="text" id="modal-sync-code-input" placeholder="Tempel link atau kode di sini" style="text-align:center; font-size:0.95rem; font-weight:600;">
+                            <input type="text" id="modal-sync-code-input" placeholder="Tempel link berbagi di sini (http://...)" style="text-align:center; font-size:0.92rem; font-weight:600;">
                         </div>
                         <button type="button" id="modal-connect-code-btn" class="btn-secondary" style="width: 100%;">
-                            Hubungkan Sesi
+                            Buka & Hubungkan Link
                         </button>
                     </div>
 
