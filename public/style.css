@@ -2027,8 +2027,8 @@ input:focus {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 1rem;
-    padding: 0.85rem 1.25rem;
+    gap: 0.75rem;
+    padding: 0.65rem 1rem;
     margin-bottom: 1.25rem;
     flex-wrap: wrap;
 }
@@ -2036,7 +2036,7 @@ input:focus {
 .date-nav-left {
     display: flex;
     align-items: center;
-    gap: 0.65rem;
+    gap: 0.5rem;
     flex-wrap: wrap;
 }
 
@@ -2059,12 +2059,12 @@ input:focus {
 .date-display-trigger {
     display: flex;
     align-items: center;
-    gap: 0.55rem;
-    padding: 0.5rem 1rem;
+    gap: 0.45rem;
+    padding: 0.38rem 0.75rem;
     background: #121215;
     border: 2px solid var(--card-border);
-    border-radius: 8px;
-    font-size: 0.88rem;
+    border-radius: 6px;
+    font-size: 0.82rem;
     font-weight: 700;
     color: var(--text-main);
     box-shadow: var(--cel-shadow-sm);
@@ -2076,8 +2076,8 @@ input:focus {
 }
 
 .date-badge-pill {
-    padding: 0.15rem 0.5rem;
-    font-size: 0.72rem;
+    padding: 0.1rem 0.4rem;
+    font-size: 0.7rem;
     font-weight: 700;
     border-radius: 4px;
     text-transform: uppercase;
@@ -2106,19 +2106,34 @@ input:focus {
 .date-nav-right {
     display: flex;
     align-items: center;
-    gap: 0.65rem;
+    gap: 0.5rem;
     flex-wrap: wrap;
 }
 
+.date-navigator-bar .btn-nav-pill,
 .btn-nav-pill {
     display: inline-flex;
     align-items: center;
-    gap: 0.45rem;
-    padding: 0.5rem 0.95rem;
-    font-size: 0.82rem;
+    gap: 0.35rem;
+    padding: 0.38rem 0.75rem !important;
+    font-size: 0.8rem !important;
     font-weight: 700;
-    border-radius: 8px;
+    border-radius: 6px !important;
     cursor: pointer;
+    box-shadow: var(--cel-shadow-sm);
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.date-navigator-bar .btn-nav-pill:hover,
+.btn-nav-pill:hover {
+    transform: translate(-1px, -1px);
+    box-shadow: 2px 2px 0px var(--cel-shadow-btn);
+}
+
+.date-navigator-bar .btn-nav-pill:active,
+.btn-nav-pill:active {
+    transform: translate(1px, 1px);
+    box-shadow: none;
 }
 
 /* --- Attendance History Modal --- */
