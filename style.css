@@ -287,23 +287,51 @@ html[data-session="active"] #dashboard-section {
 }
 
 /* Header & Stats */
-.dashboard-header {
+.dashboard-header,
+.dashboard-header-structured {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 2.5rem;
-    gap: 1.5rem;
+    margin-bottom: 1.25rem;
+    gap: 1rem;
     flex-wrap: wrap;
 }
 
-.dashboard-header h2 {
-    font-size: 2rem;
-    margin-bottom: 0.25rem;
+.dashboard-header h2,
+.dashboard-header-structured h2 {
+    font-size: 1.85rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin: 0;
+    color: var(--text-main);
+}
+
+.dashboard-header-structured .header-identity {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+}
+
+.dashboard-header-structured .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    flex-wrap: wrap;
 }
 
 .export-actions {
     display: flex;
-    gap: 0.75rem;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.export-actions button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+    padding: 0.45rem 0.8rem;
 }
 
 #toggle-rank-btn.active {
@@ -316,6 +344,80 @@ html[data-session="active"] #dashboard-section {
 #day-counter {
     color: var(--text-muted);
     font-size: 1rem;
+}
+
+/* Stats Pulse Strip (Modern Linear-grade Compact KPI Bar) */
+.stats-pulse-strip {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.85rem;
+    margin-bottom: 1.25rem;
+}
+
+.stat-pulse-card {
+    padding: 0.75rem 1.15rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.35rem;
+    border-radius: 10px;
+    background: var(--card-bg);
+    border: 2px solid var(--card-border);
+    box-shadow: var(--cel-shadow-sm);
+    transition: transform 0.12s ease, border-color 0.12s ease;
+}
+
+.stat-pulse-card:hover {
+    transform: translateY(-1px);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.stat-pulse-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.stat-pulse-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+}
+
+.stat-pulse-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.stat-pulse-dot.dot-rate {
+    background: #60a5fa;
+    box-shadow: 0 0 6px rgba(96, 165, 250, 0.7);
+}
+
+.stat-pulse-dot.dot-present {
+    background: #22c55e;
+    box-shadow: 0 0 6px rgba(34, 197, 94, 0.7);
+}
+
+.stat-pulse-dot.dot-excused {
+    background: #eab308;
+    box-shadow: 0 0 6px rgba(234, 179, 8, 0.7);
+}
+
+.stat-pulse-dot.dot-alpha {
+    background: #ef4444;
+    box-shadow: 0 0 6px rgba(239, 68, 68, 0.7);
+}
+
+.stat-pulse-value {
+    font-size: 1.45rem;
+    font-weight: 800;
+    line-height: 1.1;
+    color: var(--text-main);
 }
 
 .stats-grid {
@@ -593,15 +695,53 @@ input:focus {
 }
 
 /* Responsive */
+@media (max-width: 900px) {
+    .stats-pulse-strip {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .deck-top-row, .deck-bottom-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .deck-date-cluster, .deck-context-cluster, .deck-actions-toolbar {
+        justify-content: flex-start;
+        width: 100%;
+    }
+    .deck-search {
+        max-width: 100%;
+        width: 100%;
+    }
+}
+
 @media (max-width: 768px) {
-    .dashboard-header {
+    .dashboard-header,
+    .dashboard-header-structured {
         flex-direction: column;
         align-items: flex-start;
-        gap: 1.5rem;
+        gap: 1rem;
     }
     
-    .dashboard-header div {
+    .dashboard-header div,
+    .dashboard-header-structured .header-identity,
+    .dashboard-header-structured .header-actions {
         width: 100%;
+    }
+}
+
+@media (max-width: 580px) {
+    .stats-pulse-strip {
+        grid-template-columns: 1fr;
+    }
+    .export-actions button {
+        flex: 1 1 calc(50% - 0.5rem);
+        justify-content: center;
+    }
+    .deck-date-cluster {
+        gap: 0.4rem;
+    }
+    .date-display-trigger {
+        width: 100%;
+        justify-content: space-between;
     }
 }
 
@@ -1569,6 +1709,195 @@ input:focus {
     color: #f87171;
 }
 
+.btn-toolbar-journal {
+    background: #121215;
+    border: 2px solid var(--btn-border);
+    color: var(--text-main);
+    position: relative;
+}
+
+.btn-toolbar-journal:hover {
+    background: rgba(99, 102, 241, 0.18);
+    border-color: var(--btn-border);
+    color: #a5b4fc;
+}
+
+.btn-toolbar-journal.active {
+    background: rgba(99, 102, 241, 0.25);
+    border-color: #6366f1;
+    color: #ffffff;
+}
+
+.journal-has-content-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #38bdf8;
+    box-shadow: 0 0 6px #38bdf8;
+    margin-left: 3px;
+    display: inline-block;
+}
+
+/* Master Control Deck - Unified Linear-Grade Glass Controller */
+.master-control-deck {
+    margin-bottom: 1.25rem;
+    padding: 1rem 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+    border-radius: 12px;
+    background: var(--card-bg);
+    border: 2px solid var(--card-border);
+    box-shadow: var(--cel-shadow);
+}
+
+.deck-top-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    padding-bottom: 0.85rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.deck-date-cluster {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.deck-context-cluster {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    flex-wrap: wrap;
+}
+
+.deck-context-cluster .input-group-inline {
+    margin-bottom: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.deck-context-cluster label {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--text-muted);
+}
+
+.deck-select {
+    padding: 0.42rem 0.75rem;
+    font-size: 0.82rem;
+    font-weight: 600;
+    background: #09090b;
+    border: 2px solid var(--card-border);
+    border-radius: 7px;
+    color: var(--text-main);
+    box-shadow: var(--cel-shadow-sm);
+    outline: none;
+    transition: border-color 0.12s ease;
+}
+
+.deck-select:focus {
+    border-color: var(--primary);
+}
+
+.deck-select.sm {
+    padding: 0.38rem 0.6rem;
+    font-size: 0.8rem;
+}
+
+.deck-input {
+    padding: 0.42rem 0.75rem;
+    font-size: 0.82rem;
+    font-weight: 600;
+    background: #09090b;
+    border: 2px solid var(--card-border);
+    border-radius: 7px;
+    color: var(--text-main);
+    min-width: 140px;
+    box-shadow: var(--cel-shadow-sm);
+    outline: none;
+    transition: border-color 0.12s ease;
+}
+
+.deck-input:focus {
+    border-color: var(--primary);
+}
+
+.deck-input.period-sm {
+    min-width: 80px;
+    width: 85px;
+}
+
+.deck-bottom-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.deck-search {
+    min-width: 280px;
+    flex: 1;
+    max-width: 440px;
+}
+
+.deck-actions-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    flex-wrap: wrap;
+}
+
+.deck-journal-drawer {
+    margin-top: 0.25rem;
+    padding-top: 0.85rem;
+    border-top: 1px dashed rgba(255, 255, 255, 0.12);
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    animation: fadeInDrawer 0.15s ease-out;
+}
+
+.deck-journal-drawer.hidden {
+    display: none !important;
+}
+
+@keyframes fadeInDrawer {
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.journal-drawer-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.journal-drawer-header label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.journal-drawer-header span {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
 /* Status Pill Buttons in Table Rows */
 .status-btn-group {
     display: inline-flex;
@@ -2252,7 +2581,7 @@ input:focus {
 }
 
 @media print {
-    .glass-nav, .dashboard-header .export-actions, .admin-only, .btn-sm-edit, .btn-sm-danger, #auth-section, #nav-sync-btn, .entry-gate, .teacher-toolbar, .journal-box, .stats-grid, .period-selectors, .date-navigator-bar, #history-modal {
+    .glass-nav, .dashboard-header .export-actions, .dashboard-header-structured .export-actions, .admin-only, .btn-sm-edit, .btn-sm-danger, #auth-section, #nav-sync-btn, .entry-gate, .teacher-toolbar, .journal-box, .stats-grid, .stats-pulse-strip, .master-control-deck, .period-selectors, .date-navigator-bar, #history-modal {
         display: none !important;
     }
     body {
