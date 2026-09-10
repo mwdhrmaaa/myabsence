@@ -612,18 +612,20 @@ input:focus {
 
     .date-nav-left {
         width: 100%;
-        flex-direction: column;
-        align-items: stretch;
+        display: flex;
+        align-items: center;
         gap: 0.5rem;
+        flex-wrap: wrap;
     }
 
-    .date-stepper-group {
-        width: 100%;
-        display: flex;
+    .date-nav-left .btn-nav-pill {
+        flex: 1;
+        justify-content: center;
     }
 
     .date-picker-container {
-        flex: 1;
+        width: 100%;
+        order: -1;
     }
 
     .date-display-trigger {
@@ -2020,13 +2022,13 @@ input:focus {
         font-weight: 600;
         margin-top: 0.25rem;
     }
-/* --- Attendance Date Navigator Bar (Structured & Segmented) --- */
+/* --- Attendance Date Navigator Bar --- */
 .date-navigator-bar {
     display: flex;
     justify-content: space-between;
     align-items: center;
     gap: 1rem;
-    padding: 0.75rem 1.15rem;
+    padding: 0.85rem 1.25rem;
     margin-bottom: 1.25rem;
     flex-wrap: wrap;
 }
@@ -2034,73 +2036,13 @@ input:focus {
 .date-nav-left {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
+    gap: 0.65rem;
     flex-wrap: wrap;
-}
-
-.date-nav-title {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-    font-size: 0.8rem;
-    font-weight: 700;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-}
-
-.date-stepper-group {
-    display: inline-flex;
-    align-items: stretch;
-    border-radius: 8px;
-    box-shadow: var(--cel-shadow-sm);
-    background: #09090b;
-}
-
-.btn-stepper-arrow,
-.btn-nav-arrow {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-    padding: 0.48rem 0.85rem;
-    background: #09090b;
-    border: 2px solid var(--card-border);
-    color: var(--text-main);
-    font-size: 0.82rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background-color 0.12s ease, border-color 0.12s ease, color 0.12s ease;
-}
-
-.btn-stepper-arrow.prev {
-    border-top-left-radius: 8px;
-    border-bottom-left-radius: 8px;
-    border-right: none;
-}
-
-.btn-stepper-arrow.next {
-    border-top-right-radius: 8px;
-    border-bottom-right-radius: 8px;
-    border-left: none;
-}
-
-.btn-stepper-arrow:hover,
-.btn-nav-arrow:hover {
-    background: #18181f;
-    border-color: var(--primary);
-    color: #ffffff;
-}
-
-.btn-stepper-arrow:active,
-.btn-nav-arrow:active {
-    background: #272732;
 }
 
 .date-picker-container {
     position: relative;
     cursor: pointer;
-    display: flex;
-    align-items: stretch;
 }
 
 .date-hidden-input {
@@ -2117,22 +2059,20 @@ input:focus {
 .date-display-trigger {
     display: flex;
     align-items: center;
-    gap: 0.65rem;
-    padding: 0.48rem 1rem;
+    gap: 0.55rem;
+    padding: 0.5rem 1rem;
     background: #121215;
-    border-top: 2px solid var(--card-border);
-    border-bottom: 2px solid var(--card-border);
-    border-left: 2px solid var(--card-border);
-    border-right: 2px solid var(--card-border);
+    border: 2px solid var(--card-border);
+    border-radius: 8px;
     font-size: 0.88rem;
     font-weight: 700;
     color: var(--text-main);
-    transition: border-color 0.12s ease, background-color 0.12s ease;
+    box-shadow: var(--cel-shadow-sm);
+    transition: border-color 0.12s ease;
 }
 
 .date-picker-container:hover .date-display-trigger {
     border-color: var(--primary);
-    background: #18181f;
 }
 
 .date-badge-pill {
@@ -2167,6 +2107,7 @@ input:focus {
     display: flex;
     align-items: center;
     gap: 0.65rem;
+    flex-wrap: wrap;
 }
 
 .btn-nav-pill {
@@ -2178,18 +2119,6 @@ input:focus {
     font-weight: 700;
     border-radius: 8px;
     cursor: pointer;
-    box-shadow: var(--cel-shadow-sm);
-    transition: transform 0.12s ease, box-shadow 0.12s ease;
-}
-
-.btn-nav-pill:hover {
-    transform: translate(-1px, -1px);
-    box-shadow: 3px 3px 0px var(--cel-shadow-btn);
-}
-
-.btn-nav-pill:active {
-    transform: translate(1px, 1px);
-    box-shadow: none;
 }
 
 /* --- Attendance History Modal --- */
