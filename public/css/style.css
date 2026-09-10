@@ -100,15 +100,15 @@ button {
 }
 
 #auth-section.active {
-    display: flex !important;
+    display: flex;
 }
 
 html[data-session="active"] #auth-section {
-    display: none !important;
+    display: none;
 }
 
 html[data-session="active"] #dashboard-section {
-    display: block !important;
+    display: block;
 }
 
 .login-card {
@@ -244,7 +244,7 @@ html[data-session="active"] #dashboard-section {
 }
 
 #dashboard-section.active {
-    display: block !important;
+    display: block;
 }
 
 .glass-nav {
@@ -602,6 +602,44 @@ input:focus {
     
     .dashboard-header div {
         width: 100%;
+    }
+
+    .date-navigator-bar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.85rem;
+    }
+
+    .date-nav-left {
+        width: 100%;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.5rem;
+    }
+
+    .date-stepper-group {
+        width: 100%;
+        display: flex;
+    }
+
+    .date-picker-container {
+        flex: 1;
+    }
+
+    .date-display-trigger {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .date-nav-right {
+        width: 100%;
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .date-nav-right .btn-nav-pill {
+        flex: 1;
+        justify-content: center;
     }
 }
 
@@ -1982,10 +2020,353 @@ input:focus {
         font-weight: 600;
         margin-top: 0.25rem;
     }
-    .print-signature-space {
-        height: 60px;
-    }
-    .glass-nav, .dashboard-header .export-actions, .admin-only, .btn-sm-edit, .btn-sm-danger, #auth-section, #nav-sync-btn, .entry-gate, .teacher-toolbar, .journal-box, .stats-grid, .period-selectors {
+/* --- Attendance Date Navigator Bar (Structured & Segmented) --- */
+.date-navigator-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem 1.15rem;
+    margin-bottom: 1.25rem;
+    flex-wrap: wrap;
+}
+
+.date-nav-left {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.date-nav-title {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.date-stepper-group {
+    display: inline-flex;
+    align-items: stretch;
+    border-radius: 8px;
+    box-shadow: var(--cel-shadow-sm);
+    background: #09090b;
+}
+
+.btn-stepper-arrow,
+.btn-nav-arrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.48rem 0.85rem;
+    background: #09090b;
+    border: 2px solid var(--card-border);
+    color: var(--text-main);
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.12s ease, border-color 0.12s ease, color 0.12s ease;
+}
+
+.btn-stepper-arrow.prev {
+    border-top-left-radius: 8px;
+    border-bottom-left-radius: 8px;
+    border-right: none;
+}
+
+.btn-stepper-arrow.next {
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
+    border-left: none;
+}
+
+.btn-stepper-arrow:hover,
+.btn-nav-arrow:hover {
+    background: #18181f;
+    border-color: var(--primary);
+    color: #ffffff;
+}
+
+.btn-stepper-arrow:active,
+.btn-nav-arrow:active {
+    background: #272732;
+}
+
+.date-picker-container {
+    position: relative;
+    cursor: pointer;
+    display: flex;
+    align-items: stretch;
+}
+
+.date-hidden-input {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+    z-index: 2;
+}
+
+.date-display-trigger {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    padding: 0.48rem 1rem;
+    background: #121215;
+    border-top: 2px solid var(--card-border);
+    border-bottom: 2px solid var(--card-border);
+    border-left: 2px solid var(--card-border);
+    border-right: 2px solid var(--card-border);
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--text-main);
+    transition: border-color 0.12s ease, background-color 0.12s ease;
+}
+
+.date-picker-container:hover .date-display-trigger {
+    border-color: var(--primary);
+    background: #18181f;
+}
+
+.date-badge-pill {
+    padding: 0.15rem 0.5rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    border: 1px solid transparent;
+}
+
+.date-badge-pill.today {
+    background: rgba(34, 197, 94, 0.15);
+    color: #4ade80;
+    border-color: rgba(34, 197, 94, 0.35);
+}
+
+.date-badge-pill.past {
+    background: rgba(245, 158, 11, 0.15);
+    color: #fbbf24;
+    border-color: rgba(245, 158, 11, 0.35);
+}
+
+.date-badge-pill.future {
+    background: rgba(56, 189, 248, 0.15);
+    color: #38bdf8;
+    border-color: rgba(56, 189, 248, 0.35);
+}
+
+.date-nav-right {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+}
+
+.btn-nav-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.5rem 0.95rem;
+    font-size: 0.82rem;
+    font-weight: 700;
+    border-radius: 8px;
+    cursor: pointer;
+    box-shadow: var(--cel-shadow-sm);
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.btn-nav-pill:hover {
+    transform: translate(-1px, -1px);
+    box-shadow: 3px 3px 0px var(--cel-shadow-btn);
+}
+
+.btn-nav-pill:active {
+    transform: translate(1px, 1px);
+    box-shadow: none;
+}
+
+/* --- Attendance History Modal --- */
+.history-modal-content {
+    max-width: 620px;
+    width: 95%;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    padding: 1.5rem;
+}
+
+.history-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1.25rem;
+    padding-bottom: 0.85rem;
+    border-bottom: 1px solid var(--card-border);
+}
+
+.history-modal-header h2 {
+    font-size: 1.3rem;
+    font-weight: 800;
+    margin-bottom: 0.25rem;
+}
+
+.history-modal-sub {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+}
+
+.modal-close-btn {
+    padding: 0.35rem 0.65rem;
+    font-size: 0.8rem;
+    line-height: 1;
+}
+
+.history-modal-filter {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+    padding: 0.75rem 1rem;
+    background: #09090b;
+    border: 1px solid var(--card-border);
+    border-radius: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.history-modal-filter .input-group-inline {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0;
+}
+
+.history-modal-filter label {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--text-muted);
+}
+
+.history-records-container {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding-right: 0.35rem;
+    min-height: 180px;
+    max-height: 380px;
+}
+
+.history-record-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.85rem 1.15rem;
+    background: #09090b;
+    border: 2px solid var(--card-border);
+    border-radius: 8px;
+    transition: border-color 0.12s ease, transform 0.12s ease, box-shadow 0.12s ease;
+    cursor: pointer;
+}
+
+.history-record-card:hover {
+    border-color: var(--primary);
+    transform: translateY(-1px);
+    box-shadow: 2px 2px 0px var(--cel-shadow-btn);
+}
+
+.history-record-card.active-selected {
+    border-color: var(--primary);
+    background: #14141e;
+    box-shadow: var(--cel-shadow-sm);
+}
+
+.history-card-left {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.history-card-date {
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.history-card-stats {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.78rem;
+    flex-wrap: wrap;
+}
+
+.stat-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.15rem 0.5rem;
+    border-radius: 4px;
+    font-weight: 700;
+    border: 1px solid transparent;
+}
+
+.stat-pill.h {
+    background: rgba(6, 182, 212, 0.15);
+    color: #67e8f9;
+    border-color: rgba(6, 182, 212, 0.3);
+}
+
+.stat-pill.s {
+    background: rgba(22, 163, 74, 0.15);
+    color: #86efac;
+    border-color: rgba(22, 163, 74, 0.3);
+}
+
+.stat-pill.i {
+    background: rgba(234, 179, 8, 0.15);
+    color: #fde047;
+    border-color: rgba(234, 179, 8, 0.3);
+}
+
+.stat-pill.a {
+    background: rgba(220, 38, 38, 0.15);
+    color: #fca5a5;
+    border-color: rgba(220, 38, 38, 0.3);
+}
+
+.history-card-right {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+}
+
+.history-rate-badge {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: #4ade80;
+    min-width: 45px;
+    text-align: right;
+}
+
+.history-empty-state {
+    text-align: center;
+    padding: 2.5rem 1rem;
+    color: var(--text-muted);
+    font-size: 0.88rem;
+}
+
+@media print {
+    .glass-nav, .dashboard-header .export-actions, .admin-only, .btn-sm-edit, .btn-sm-danger, #auth-section, #nav-sync-btn, .entry-gate, .teacher-toolbar, .journal-box, .stats-grid, .period-selectors, .date-navigator-bar, #history-modal {
         display: none !important;
     }
     body {

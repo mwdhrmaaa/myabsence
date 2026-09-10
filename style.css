@@ -603,6 +603,44 @@ input:focus {
     .dashboard-header div {
         width: 100%;
     }
+
+    .date-navigator-bar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.85rem;
+    }
+
+    .date-nav-left {
+        width: 100%;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.5rem;
+    }
+
+    .date-stepper-group {
+        width: 100%;
+        display: flex;
+    }
+
+    .date-picker-container {
+        flex: 1;
+    }
+
+    .date-display-trigger {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .date-nav-right {
+        width: 100%;
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .date-nav-right .btn-nav-pill {
+        flex: 1;
+        justify-content: center;
+    }
 }
 
 .glass-container {
@@ -1982,13 +2020,13 @@ input:focus {
         font-weight: 600;
         margin-top: 0.25rem;
     }
-/* --- Attendance Date Navigator Bar --- */
+/* --- Attendance Date Navigator Bar (Structured & Segmented) --- */
 .date-navigator-bar {
     display: flex;
     justify-content: space-between;
     align-items: center;
     gap: 1rem;
-    padding: 0.85rem 1.25rem;
+    padding: 0.75rem 1.15rem;
     margin-bottom: 1.25rem;
     flex-wrap: wrap;
 }
@@ -1996,44 +2034,73 @@ input:focus {
 .date-nav-left {
     display: flex;
     align-items: center;
-    gap: 0.65rem;
+    gap: 0.75rem;
     flex-wrap: wrap;
 }
 
-.date-nav-right {
-    display: flex;
+.date-nav-title {
+    display: inline-flex;
     align-items: center;
-    gap: 0.65rem;
+    gap: 0.4rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
+.date-stepper-group {
+    display: inline-flex;
+    align-items: stretch;
+    border-radius: 8px;
+    box-shadow: var(--cel-shadow-sm);
+    background: #09090b;
+}
+
+.btn-stepper-arrow,
 .btn-nav-arrow {
     display: inline-flex;
     align-items: center;
     gap: 0.35rem;
-    padding: 0.45rem 0.85rem;
+    padding: 0.48rem 0.85rem;
     background: #09090b;
     border: 2px solid var(--card-border);
-    border-radius: 8px;
     color: var(--text-main);
     font-size: 0.82rem;
     font-weight: 600;
     cursor: pointer;
-    box-shadow: var(--cel-shadow-sm);
-    transition: transform 0.1s ease, border-color 0.1s ease;
+    transition: background-color 0.12s ease, border-color 0.12s ease, color 0.12s ease;
 }
 
+.btn-stepper-arrow.prev {
+    border-top-left-radius: 8px;
+    border-bottom-left-radius: 8px;
+    border-right: none;
+}
+
+.btn-stepper-arrow.next {
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
+    border-left: none;
+}
+
+.btn-stepper-arrow:hover,
 .btn-nav-arrow:hover {
+    background: #18181f;
     border-color: var(--primary);
-    transform: translate(-1px, -1px);
+    color: #ffffff;
 }
 
+.btn-stepper-arrow:active,
 .btn-nav-arrow:active {
-    transform: translate(1px, 1px);
+    background: #272732;
 }
 
 .date-picker-container {
     position: relative;
     cursor: pointer;
+    display: flex;
+    align-items: stretch;
 }
 
 .date-hidden-input {
@@ -2050,20 +2117,22 @@ input:focus {
 .date-display-trigger {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    padding: 0.45rem 0.95rem;
+    gap: 0.65rem;
+    padding: 0.48rem 1rem;
     background: #121215;
-    border: 2px solid var(--card-border);
-    border-radius: 8px;
+    border-top: 2px solid var(--card-border);
+    border-bottom: 2px solid var(--card-border);
+    border-left: 2px solid var(--card-border);
+    border-right: 2px solid var(--card-border);
     font-size: 0.88rem;
     font-weight: 700;
     color: var(--text-main);
-    box-shadow: var(--cel-shadow-sm);
-    transition: border-color 0.12s ease;
+    transition: border-color 0.12s ease, background-color 0.12s ease;
 }
 
 .date-picker-container:hover .date-display-trigger {
     border-color: var(--primary);
+    background: #18181f;
 }
 
 .date-badge-pill {
@@ -2094,20 +2163,38 @@ input:focus {
     border-color: rgba(56, 189, 248, 0.35);
 }
 
+.date-nav-right {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+}
+
 .btn-nav-pill {
     display: inline-flex;
     align-items: center;
-    gap: 0.4rem;
-    padding: 0.45rem 0.85rem;
+    gap: 0.45rem;
+    padding: 0.5rem 0.95rem;
     font-size: 0.82rem;
-    font-weight: 600;
+    font-weight: 700;
     border-radius: 8px;
     cursor: pointer;
+    box-shadow: var(--cel-shadow-sm);
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.btn-nav-pill:hover {
+    transform: translate(-1px, -1px);
+    box-shadow: 3px 3px 0px var(--cel-shadow-btn);
+}
+
+.btn-nav-pill:active {
+    transform: translate(1px, 1px);
+    box-shadow: none;
 }
 
 /* --- Attendance History Modal --- */
 .history-modal-content {
-    max-width: 600px;
+    max-width: 620px;
     width: 95%;
     max-height: 85vh;
     display: flex;
@@ -2144,8 +2231,26 @@ input:focus {
 .history-modal-filter {
     display: flex;
     gap: 1rem;
-    margin-bottom: 1rem;
+    margin-bottom: 1.25rem;
+    padding: 0.75rem 1rem;
+    background: #09090b;
+    border: 1px solid var(--card-border);
+    border-radius: 8px;
+    align-items: center;
     flex-wrap: wrap;
+}
+
+.history-modal-filter .input-group-inline {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0;
+}
+
+.history-modal-filter label {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--text-muted);
 }
 
 .history-records-container {
@@ -2163,22 +2268,24 @@ input:focus {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0.85rem 1rem;
+    padding: 0.85rem 1.15rem;
     background: #09090b;
     border: 2px solid var(--card-border);
     border-radius: 8px;
-    transition: border-color 0.12s ease, transform 0.12s ease;
+    transition: border-color 0.12s ease, transform 0.12s ease, box-shadow 0.12s ease;
     cursor: pointer;
 }
 
 .history-record-card:hover {
     border-color: var(--primary);
     transform: translateY(-1px);
+    box-shadow: 2px 2px 0px var(--cel-shadow-btn);
 }
 
 .history-record-card.active-selected {
     border-color: var(--primary);
-    background: #121218;
+    background: #14141e;
+    box-shadow: var(--cel-shadow-sm);
 }
 
 .history-card-left {
@@ -2189,7 +2296,7 @@ input:focus {
 
 .history-card-date {
     font-weight: 700;
-    font-size: 0.92rem;
+    font-size: 0.95rem;
     color: var(--text-main);
     display: flex;
     align-items: center;
@@ -2207,41 +2314,48 @@ input:focus {
 .stat-pill {
     display: inline-flex;
     align-items: center;
-    padding: 0.1rem 0.4rem;
+    padding: 0.15rem 0.5rem;
     border-radius: 4px;
-    font-weight: 600;
+    font-weight: 700;
+    border: 1px solid transparent;
 }
 
 .stat-pill.h {
-    background: rgba(34, 197, 94, 0.15);
-    color: #4ade80;
+    background: rgba(6, 182, 212, 0.15);
+    color: #67e8f9;
+    border-color: rgba(6, 182, 212, 0.3);
 }
 
 .stat-pill.s {
-    background: rgba(2, 132, 199, 0.15);
-    color: #38bdf8;
+    background: rgba(22, 163, 74, 0.15);
+    color: #86efac;
+    border-color: rgba(22, 163, 74, 0.3);
 }
 
 .stat-pill.i {
-    background: rgba(245, 158, 11, 0.15);
-    color: #fbbf24;
+    background: rgba(234, 179, 8, 0.15);
+    color: #fde047;
+    border-color: rgba(234, 179, 8, 0.3);
 }
 
 .stat-pill.a {
-    background: rgba(239, 68, 68, 0.15);
-    color: #f87171;
+    background: rgba(220, 38, 38, 0.15);
+    color: #fca5a5;
+    border-color: rgba(220, 38, 38, 0.3);
 }
 
 .history-card-right {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
+    gap: 0.85rem;
 }
 
 .history-rate-badge {
-    font-size: 1.05rem;
+    font-size: 1.1rem;
     font-weight: 800;
     color: #4ade80;
+    min-width: 45px;
+    text-align: right;
 }
 
 .history-empty-state {

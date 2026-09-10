@@ -13,6 +13,17 @@ document.addEventListener('DOMContentLoaded', () => {
         return `${days[date.getDay()]}, ${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`;
     }
 
+    function formatShortDate(date) {
+        const d = date.getDate().toString().padStart(2, '0');
+        const m = (date.getMonth() + 1).toString().padStart(2, '0');
+        return `${d}/${m}`;
+    }
+
+    let activeAttendanceDate = new Date();
+    function getActiveDateStr() {
+        return toLocalISO(activeAttendanceDate);
+    }
+
     // --- 1. Configuration & State ---
     let startDate = localStorage.getItem('myabsence_start_date') ? parseInt(localStorage.getItem('myabsence_start_date')) : new Date('2026-01-12').getTime();
     let currentUser = JSON.parse(localStorage.getItem('myabsence_user')) || { name: 'Pendidik', role: 'admin' };
@@ -164,11 +175,29 @@ document.addEventListener('DOMContentLoaded', () => {
     const historyMonthSelect = document.getElementById('history-month-select');
     const enterAppBtn = document.getElementById('enter-app-btn');
 
+    // Date Navigator & Attendance History Selectors
+    const prevDateBtn = document.getElementById('prev-date-btn');
+    const nextDateBtn = document.getElementById('next-date-btn');
+    const activeDateInput = document.getElementById('active-date-input');
+    const activeDateText = document.getElementById('active-date-text');
+    const activeDateBadge = document.getElementById('active-date-badge');
+    const dateDisplayTrigger = document.getElementById('date-display-trigger');
+    const goTodayBtn = document.getElementById('go-today-btn');
+    const openHistoryModalBtn = document.getElementById('open-history-modal-btn');
+    const tableDateColumnHeader = document.getElementById('table-date-column-header');
+
+    // History Modal Selectors
+    const historyModal = document.getElementById('history-modal');
+    const closeHistoryModalBtn = document.getElementById('close-history-modal-btn');
+    const closeHistoryModalBtn2 = document.getElementById('close-history-modal-btn2');
+    const historyFilterMonth = document.getElementById('history-filter-month');
+    const historyFilterYear = document.getElementById('history-filter-year');
+    const historyRecordsList = document.getElementById('history-records-list');
+
 
     // Dashboard Sync UI selectors
     const navShareBtn = document.getElementById('nav-share-btn') || document.getElementById('nav-sync-btn');
     const navShareLabel = document.getElementById('nav-share-label') || document.getElementById('nav-sync-label');
-    const headerSyncBtn = document.getElementById('header-sync-btn');
     const syncModal = document.getElementById('sync-modal');
     const syncConnectedView = document.getElementById('sync-connected-view');
     const syncDisconnectedView = document.getElementById('sync-disconnected-view');
@@ -285,21 +314,80 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize theme immediately on script boot
     applyTheme(getActiveTheme());
 
-    // --- 3. Global Actions ---
+    // --- 3. Global Actions & Date Navigation State ---
+
+    function setActiveAttendanceDate(newDate) {
+        if (!newDate || isNaN(newDate.getTime())) newDate = new Date();
+        activeAttendanceDate = new Date(newDate);
+        const activeDateStr = getActiveDateStr();
+        const todayStr = toLocalISO(new Date());
+
+        if (activeDateInput) activeDateInput.value = activeDateStr;
+        if (activeDateText) activeDateText.textContent = formatIndonesianDate(activeAttendanceDate);
+
+        if (activeDateBadge) {
+            activeDateBadge.className = 'date-badge-pill';
+            if (activeDateStr === todayStr) {
+                activeDateBadge.classList.add('today');
+                activeDateBadge.textContent = 'Hari Ini';
+            } else if (activeDateStr < todayStr) {
+                activeDateBadge.classList.add('past');
+                activeDateBadge.textContent = 'Riwayat Lampau';
+            } else {
+                activeDateBadge.classList.add('future');
+                activeDateBadge.textContent = 'Mendatang';
+            }
+        }
+
+        if (tableDateColumnHeader) {
+            if (activeDateStr === todayStr) {
+                tableDateColumnHeader.textContent = 'Hari Ini (H / S / I / A)';
+            } else {
+                tableDateColumnHeader.textContent = `Riwayat: ${formatShortDate(activeAttendanceDate)} (H / S / I / A)`;
+            }
+        }
+
+        const resetBtn = document.getElementById('reset-today-btn');
+        if (resetBtn) {
+            resetBtn.title = activeDateStr === todayStr 
+                ? 'Kosongkan status absensi hari ini' 
+                : `Kosongkan status absensi tanggal ${formatShortDate(activeAttendanceDate)}`;
+            const resetSpan = resetBtn.querySelector('span');
+            if (resetSpan) {
+                resetSpan.textContent = activeDateStr === todayStr 
+                    ? 'Reset Hari Ini' 
+                    : `Reset (${formatShortDate(activeAttendanceDate)})`;
+            }
+        }
+
+        const markBtn = document.getElementById('mark-all-present-btn');
+        if (markBtn) {
+            markBtn.title = activeDateStr === todayStr
+                ? 'Tandai semua siswa hadir hari ini'
+                : `Tandai semua siswa hadir pada tanggal ${formatShortDate(activeAttendanceDate)}`;
+        }
+
+        // Sync journal for active date
+        if (lessonNotesInput) {
+            lessonNotesInput.value = localStorage.getItem('myabsence_journal_' + activeDateStr) || '';
+        }
+
+        updateUI();
+    }
 
     window.setStudentStatusToday = (userId, status) => {
         const user = users.find(u => u.id === userId);
         if (!user) return;
-        const todayStr = toLocalISO(new Date());
-        if (!activeWorkdays.includes(todayStr)) {
-            activeWorkdays.push(todayStr);
+        const targetDateStr = getActiveDateStr();
+        if (!activeWorkdays.includes(targetDateStr)) {
+            activeWorkdays.push(targetDateStr);
             localStorage.setItem('myabsence_workdays', JSON.stringify(activeWorkdays));
         }
         
-        if (user.attendanceLogs[todayStr] === status) {
-            delete user.attendanceLogs[todayStr];
+        if (user.attendanceLogs[targetDateStr] === status) {
+            delete user.attendanceLogs[targetDateStr];
         } else {
-            user.attendanceLogs[todayStr] = status;
+            user.attendanceLogs[targetDateStr] = status;
         }
         user.presenceDates = Object.keys(user.attendanceLogs).filter(dStr => user.attendanceLogs[dStr] === 'present');
         user.updatedAt = Date.now();
@@ -312,14 +400,14 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     window.markAllPresentToday = () => {
-        const todayStr = toLocalISO(new Date());
-        if (!activeWorkdays.includes(todayStr)) {
-            activeWorkdays.push(todayStr);
+        const targetDateStr = getActiveDateStr();
+        if (!activeWorkdays.includes(targetDateStr)) {
+            activeWorkdays.push(targetDateStr);
             localStorage.setItem('myabsence_workdays', JSON.stringify(activeWorkdays));
         }
         const now = Date.now();
         users.forEach(user => {
-            user.attendanceLogs[todayStr] = 'present';
+            user.attendanceLogs[targetDateStr] = 'present';
             user.presenceDates = Object.keys(user.attendanceLogs).filter(dStr => user.attendanceLogs[dStr] === 'present');
             user.updatedAt = now;
         });
@@ -328,16 +416,17 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     window.resetAllToday = () => {
+        const targetDateStr = getActiveDateStr();
+        const formattedDate = formatIndonesianDate(activeAttendanceDate);
         showCustomConfirm({
-            title: 'Reset Absensi Hari Ini?',
-            message: 'Status kehadiran seluruh siswa untuk tanggal hari ini akan dikosongkan kembali.',
+            title: `Reset Absensi ${targetDateStr === toLocalISO(new Date()) ? 'Hari Ini' : formattedDate}?`,
+            message: `Status kehadiran seluruh siswa untuk tanggal ${formattedDate} akan dikosongkan kembali.`,
             icon: 'warning',
             okText: 'Ya, Kosongkan',
             onOk: () => {
-                const todayStr = toLocalISO(new Date());
                 const now = Date.now();
                 users.forEach(user => {
-                    delete user.attendanceLogs[todayStr];
+                    delete user.attendanceLogs[targetDateStr];
                     user.presenceDates = Object.keys(user.attendanceLogs).filter(dStr => user.attendanceLogs[dStr] === 'present');
                     user.updatedAt = now;
                 });
@@ -767,7 +856,9 @@ document.addEventListener('DOMContentLoaded', () => {
         let countPresentToday = 0;
         let countExcusedToday = 0;
         let countAlphaToday = 0;
-        const todayStr = toLocalISO(new Date());
+        const targetDateStr = getActiveDateStr();
+        const isViewingToday = (targetDateStr === toLocalISO(new Date()));
+        const shortDateLabel = formatShortDate(activeAttendanceDate);
 
         if (displayUsers.length === 0) {
             const emptyRow = document.createElement('tr');
@@ -785,7 +876,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const overall = getPeriodPercentage(user.attendanceLogs, 'overall');
                 totalPct += parseFloat(overall);
 
-                const todayStatus = user.attendanceLogs[todayStr];
+                const todayStatus = user.attendanceLogs[targetDateStr];
                 if (todayStatus === 'present') countPresentToday++;
                 else if (todayStatus === 'sick' || todayStatus === 'permit') countExcusedToday++;
                 else if (todayStatus === 'alpha') countAlphaToday++;
@@ -819,9 +910,21 @@ document.addEventListener('DOMContentLoaded', () => {
         const statPresentEl = document.getElementById('stat-present-today');
         const statExcusedEl = document.getElementById('stat-excused-today');
         const statAlphaEl = document.getElementById('stat-alpha-today');
-        if (statPresentEl) statPresentEl.textContent = countPresentToday;
-        if (statExcusedEl) statExcusedEl.textContent = countExcusedToday;
-        if (statAlphaEl) statAlphaEl.textContent = countAlphaToday;
+        if (statPresentEl) {
+            statPresentEl.textContent = countPresentToday;
+            const h3 = statPresentEl.parentElement ? statPresentEl.parentElement.querySelector('h3') : null;
+            if (h3) h3.textContent = isViewingToday ? 'Hadir Hari Ini' : `Hadir (${shortDateLabel})`;
+        }
+        if (statExcusedEl) {
+            statExcusedEl.textContent = countExcusedToday;
+            const h3 = statExcusedEl.parentElement ? statExcusedEl.parentElement.querySelector('h3') : null;
+            if (h3) h3.textContent = isViewingToday ? 'Sakit / Izin' : `Sakit/Izin (${shortDateLabel})`;
+        }
+        if (statAlphaEl) {
+            statAlphaEl.textContent = countAlphaToday;
+            const h3 = statAlphaEl.parentElement ? statAlphaEl.parentElement.querySelector('h3') : null;
+            if (h3) h3.textContent = isViewingToday ? 'Alpa' : `Alpa (${shortDateLabel})`;
+        }
 
         const adminCols = document.querySelectorAll('.admin-only');
         if (currentUser && currentUser.role === 'admin') adminCols.forEach(el => el.classList.remove('hidden'));
@@ -835,9 +938,20 @@ document.addEventListener('DOMContentLoaded', () => {
             localStorage.setItem('myabsence_user', JSON.stringify(currentUser));
         }
 
-        if (greeting) greeting.textContent = "Presensi Kelas";
+        const activeStr = getActiveDateStr();
+        const todayStr = toLocalISO(new Date());
+
+        if (greeting) {
+            greeting.textContent = (activeStr === todayStr)
+                ? 'Presensi Kelas'
+                : `Riwayat Presensi (${formatShortDate(activeAttendanceDate)})`;
+        }
         const todayDateDisplay = document.getElementById('today-date-display');
-        if (todayDateDisplay) todayDateDisplay.textContent = formatIndonesianDate(new Date());
+        if (todayDateDisplay) {
+            todayDateDisplay.textContent = (activeStr === todayStr)
+                ? formatIndonesianDate(new Date())
+                : `${formatIndonesianDate(activeAttendanceDate)} (Riwayat)`;
+        }
         if (currentDaySpan) currentDaySpan.textContent = calculateCurrentDay();
         if (currentUser.role === 'admin') {
             if (adminActions) adminActions.classList.remove('hidden');
@@ -1112,8 +1226,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // --- Sync Modal Event Handlers ---
-    if (navSyncBtn) navSyncBtn.addEventListener('click', openSyncModal);
-    if (headerSyncBtn) headerSyncBtn.addEventListener('click', openSyncModal);
     if (closeSyncModalBtn) closeSyncModalBtn.addEventListener('click', closeSyncModal);
     if (closeSyncModalBtn2) closeSyncModalBtn2.addEventListener('click', closeSyncModal);
 
@@ -1234,21 +1346,182 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (logoutBtn) {
         logoutBtn.addEventListener('click', () => {
-            showCustomConfirm({
-                title: 'Keluar ke Tampilan Awal?',
-                message: 'Anda akan kembali ke halaman pembuka presensi. Seluruh data tetap tersimpan aman di perangkat ini.',
-                icon: 'info',
-                okText: 'Ya, Keluar',
-                onOk: () => {
-                    localStorage.setItem('myabsence_session_active', 'false');
-                    document.documentElement.removeAttribute('data-session');
-                    if (authSection) authSection.classList.add('active');
-                    if (dashboardSection) dashboardSection.classList.remove('active');
-                    showToast('Berhasil keluar ke tampilan awal.', 'info');
+            localStorage.setItem('myabsence_session_active', 'false');
+            document.documentElement.removeAttribute('data-session');
+            try {
+                if (window.history.replaceState) {
+                    window.history.replaceState({}, document.title, window.location.pathname);
                 }
-            });
+            } catch (e) {}
+            if (dashboardSection) dashboardSection.classList.remove('active');
+            if (authSection) authSection.classList.add('active');
         });
     }
+
+    // --- Date Navigator & Attendance History Event Handlers ---
+    if (prevDateBtn) {
+        prevDateBtn.addEventListener('click', () => {
+            const prev = new Date(activeAttendanceDate);
+            prev.setDate(prev.getDate() - 1);
+            setActiveAttendanceDate(prev);
+        });
+    }
+
+    if (nextDateBtn) {
+        nextDateBtn.addEventListener('click', () => {
+            const next = new Date(activeAttendanceDate);
+            next.setDate(next.getDate() + 1);
+            setActiveAttendanceDate(next);
+        });
+    }
+
+    if (activeDateInput) {
+        activeDateInput.addEventListener('change', (e) => {
+            if (e.target.value) {
+                const parts = e.target.value.split('-').map(Number);
+                const chosen = new Date(parts[0], parts[1] - 1, parts[2]);
+                setActiveAttendanceDate(chosen);
+            }
+        });
+    }
+
+    if (dateDisplayTrigger && activeDateInput) {
+        dateDisplayTrigger.addEventListener('click', () => {
+            if (typeof activeDateInput.showPicker === 'function') {
+                try { activeDateInput.showPicker(); } catch (err) { activeDateInput.focus(); }
+            } else {
+                activeDateInput.focus();
+            }
+        });
+    }
+
+    if (goTodayBtn) {
+        goTodayBtn.addEventListener('click', () => {
+            setActiveAttendanceDate(new Date());
+            showToast('Kembali ke presensi hari ini.');
+        });
+    }
+
+    function openHistoryModal() {
+        if (!historyModal) return;
+        initHistoryModalFilters();
+        renderHistoryModalList();
+        historyModal.classList.remove('hidden');
+    }
+
+    function closeHistoryModal() {
+        if (historyModal) historyModal.classList.add('hidden');
+    }
+
+    function initHistoryModalFilters() {
+        if (historyFilterMonth && historyFilterMonth.options.length === 0) {
+            const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+            historyFilterMonth.innerHTML = months.map((m, i) => `<option value="${i}" ${i === activeAttendanceDate.getMonth() ? 'selected' : ''}>${m}</option>`).join('');
+        }
+        if (historyFilterYear && historyFilterYear.options.length === 0) {
+            const currentYear = new Date().getFullYear();
+            const years = [currentYear - 1, currentYear, currentYear + 1];
+            historyFilterYear.innerHTML = years.map(y => `<option value="${y}" ${y === activeAttendanceDate.getFullYear() ? 'selected' : ''}>${y}</option>`).join('');
+        }
+    }
+
+    function renderHistoryModalList() {
+        if (!historyRecordsList) return;
+        historyRecordsList.innerHTML = '';
+
+        const year = historyFilterYear ? parseInt(historyFilterYear.value) || activeAttendanceDate.getFullYear() : activeAttendanceDate.getFullYear();
+        const month = historyFilterMonth ? parseInt(historyFilterMonth.value) || activeAttendanceDate.getMonth() : activeAttendanceDate.getMonth();
+
+        const allDates = new Set();
+        users.forEach(u => {
+            Object.keys(u.attendanceLogs || {}).forEach(d => {
+                if (/^\d{4}-\d{2}-\d{2}$/.test(d)) allDates.add(d);
+            });
+        });
+        activeWorkdays.forEach(d => {
+            if (/^\d{4}-\d{2}-\d{2}$/.test(d)) allDates.add(d);
+        });
+
+        const monthStr = (month + 1).toString().padStart(2, '0');
+        const prefix = `${year}-${monthStr}-`;
+        const matchedDates = Array.from(allDates)
+            .filter(d => d.startsWith(prefix))
+            .sort((a, b) => b.localeCompare(a));
+
+        if (matchedDates.length === 0) {
+            const empty = document.createElement('div');
+            empty.className = 'history-empty-state';
+            empty.innerHTML = `
+                <p>Belum ada riwayat kehadiran tercatat pada bulan ini.</p>
+                <button type="button" class="btn-primary" style="margin-top: 0.85rem;" id="history-start-month-btn">
+                    Mulai Presensi pada Bulan Ini
+                </button>
+            `;
+            historyRecordsList.appendChild(empty);
+            const startBtn = document.getElementById('history-start-month-btn');
+            if (startBtn) {
+                startBtn.addEventListener('click', () => {
+                    const target = new Date(year, month, 1);
+                    setActiveAttendanceDate(target);
+                    closeHistoryModal();
+                });
+            }
+            return;
+        }
+
+        matchedDates.forEach(dateStr => {
+            let present = 0, sick = 0, permit = 0, alpha = 0;
+            users.forEach(u => {
+                const s = (u.attendanceLogs || {})[dateStr];
+                if (s === 'present') present++;
+                else if (s === 'sick') sick++;
+                else if (s === 'permit') permit++;
+                else if (s === 'alpha' || s === 'absent') alpha++;
+            });
+
+            const total = users.length;
+            const rate = total > 0 ? ((present / total) * 100).toFixed(0) : '0';
+            const isActive = (dateStr === getActiveDateStr());
+
+            const card = document.createElement('div');
+            card.className = `history-record-card ${isActive ? 'active-selected' : ''}`;
+            card.innerHTML = `
+                <div class="history-card-left">
+                    <div class="history-card-date">
+                        <span>${formatIndonesianDate(new Date(dateStr + 'T00:00:00'))}</span>
+                        ${isActive ? '<span class="date-badge-pill today">Sedang Dibuka</span>' : ''}
+                    </div>
+                    <div class="history-card-stats">
+                        <span class="stat-pill h">${present} Hadir</span>
+                        <span class="stat-pill s">${sick} Sakit</span>
+                        <span class="stat-pill i">${permit} Izin</span>
+                        <span class="stat-pill a">${alpha} Alpa</span>
+                    </div>
+                </div>
+                <div class="history-card-right">
+                    <span class="history-rate-badge">${rate}%</span>
+                    <button type="button" class="btn-sm btn-outline">Buka</button>
+                </div>
+            `;
+            card.addEventListener('click', () => {
+                setActiveAttendanceDate(new Date(dateStr + 'T00:00:00'));
+                closeHistoryModal();
+                showToast(`Menampilkan riwayat: ${formatIndonesianDate(new Date(dateStr + 'T00:00:00'))}`);
+            });
+            historyRecordsList.appendChild(card);
+        });
+    }
+
+    if (openHistoryModalBtn) openHistoryModalBtn.addEventListener('click', openHistoryModal);
+    if (closeHistoryModalBtn) closeHistoryModalBtn.addEventListener('click', closeHistoryModal);
+    if (closeHistoryModalBtn2) closeHistoryModalBtn2.addEventListener('click', closeHistoryModal);
+    if (historyModal) {
+        historyModal.addEventListener('click', (e) => {
+            if (e.target === historyModal) closeHistoryModal();
+        });
+    }
+    if (historyFilterMonth) historyFilterMonth.addEventListener('change', renderHistoryModalList);
+    if (historyFilterYear) historyFilterYear.addEventListener('change', renderHistoryModalList);
     if (viewMonthSelect) viewMonthSelect.addEventListener('change', (e) => { selectedMonth = parseInt(e.target.value); renderTable(); });
     if (viewYearSelect) viewYearSelect.addEventListener('change', (e) => { selectedYear = parseInt(e.target.value); renderTable(); });
     if (historyToggle) historyToggle.addEventListener('click', () => {
@@ -1377,13 +1650,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (lessonNotesInput) {
-        const todayKey = toLocalISO(new Date());
-        lessonNotesInput.value = localStorage.getItem('myabsence_journal_' + todayKey) || '';
+        lessonNotesInput.value = localStorage.getItem('myabsence_journal_' + getActiveDateStr()) || '';
         lessonNotesInput.addEventListener('input', () => {
             if (journalStatus) journalStatus.textContent = 'Mengetik...';
         });
         lessonNotesInput.addEventListener('blur', () => {
-            localStorage.setItem('myabsence_journal_' + todayKey, lessonNotesInput.value.trim());
+            localStorage.setItem('myabsence_journal_' + getActiveDateStr(), lessonNotesInput.value.trim());
             if (journalStatus) journalStatus.textContent = 'Tersimpan otomatis';
         });
     }
@@ -1392,7 +1664,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const mode = localStorage.getItem('myabsence_mode') || 'homeroom';
         const subj = localStorage.getItem('myabsence_subject') || '-';
         const per = localStorage.getItem('myabsence_period') || '-';
-        const todayStr = formatIndonesianDate(new Date());
+        const todayStr = formatIndonesianDate(activeAttendanceDate);
 
         const pDate = document.getElementById('print-date-val');
         const pRole = document.getElementById('print-role-val');
@@ -1685,16 +1957,20 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     initPeriodSelectors();
+    setActiveAttendanceDate(new Date());
 
     const isSessionActive = () => localStorage.getItem('myabsence_session_active') === 'true';
 
-    // Jika URL membawa kode sync (link berbagi ke HP) atau sesi aktif, masuk langsung ke dashboard
+    // Jika URL membawa link berbagi ke HP atau sesi aktif, masuk langsung ke dashboard
     if (incomingShareCode || isSessionActive()) {
         localStorage.setItem('myabsence_session_active', 'true');
+        document.documentElement.setAttribute('data-session', 'active');
         if (authSection) authSection.classList.remove('active');
         if (dashboardSection) dashboardSection.classList.add('active');
         updateUI();
     } else {
+        localStorage.setItem('myabsence_session_active', 'false');
+        document.documentElement.removeAttribute('data-session');
         if (authSection) authSection.classList.add('active');
         if (dashboardSection) dashboardSection.classList.remove('active');
     }
