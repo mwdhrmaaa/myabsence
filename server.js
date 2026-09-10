@@ -7,6 +7,7 @@ const { getLocalIp } = require('./src/core/network/ip');
 const { getDatabase, closeDatabase } = require('./src/core/database/connection');
 const { seedDatabase } = require('./src/core/database/seed');
 const { createApiRouter } = require('./src/core/http/routes');
+const syncService = require('./src/features/sync/sync.service');
 
 const STATIC_DIR = __dirname;
 const apiRouter = createApiRouter();
@@ -14,6 +15,22 @@ const apiRouter = createApiRouter();
 // Initialize DB and Seed Data
 const db = getDatabase();
 seedDatabase(db);
+
+// Automated TTL pruning for sync sessions (>7 days)
+try {
+    const pruned = syncService.pruneSessions();
+    if (pruned > 0) {
+        console.log(`[MyAbsence] Pruned ${pruned} expired sync sessions on startup.`);
+    }
+} catch (e) {
+    console.warn('[MyAbsence] Sync prune error:', e.message);
+}
+const pruneTimer = setInterval(() => {
+    try {
+        syncService.pruneSessions();
+    } catch (_) {}
+}, 24 * 60 * 60 * 1000);
+pruneTimer.unref();
 
 const MIME_TYPES = {
     '.html': 'text/html; charset=utf-8',

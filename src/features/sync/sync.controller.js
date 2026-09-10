@@ -45,8 +45,20 @@ function handleGetNetworkInfo(req, res) {
     return sendSuccess(res, info, 'Network share info retrieved');
 }
 
+function handlePruneSync(req, res) {
+    try {
+        const days = req.query && req.query.days ? parseFloat(req.query.days) : 7;
+        const maxAgeMs = days * 24 * 60 * 60 * 1000;
+        const deletedCount = syncService.pruneSessions(maxAgeMs);
+        return sendSuccess(res, { deletedCount, days }, `Successfully pruned ${deletedCount} expired sync sessions`);
+    } catch (err) {
+        return sendBadRequest(res, err.message);
+    }
+}
+
 module.exports = {
     handlePushSync,
     handlePullSync,
-    handleGetNetworkInfo
+    handleGetNetworkInfo,
+    handlePruneSync
 };

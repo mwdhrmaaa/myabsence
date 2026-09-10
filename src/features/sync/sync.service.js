@@ -29,6 +29,10 @@ class SyncService {
             localShareUrl: cleanCode ? `${netInfo.localUrl}/?sync=${cleanCode}` : netInfo.localUrl
         };
     }
+
+    pruneSessions(maxAgeMs) {
+        return syncRepository.pruneExpiredSessions(maxAgeMs);
+    }
 }
 
 module.exports = new SyncService();

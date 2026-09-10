@@ -43,6 +43,13 @@ class SyncRepository {
         const result = stmt.run(code);
         return result.changes > 0;
     }
+
+    pruneExpiredSessions(maxAgeMs = 7 * 24 * 60 * 60 * 1000) {
+        const cutoff = Date.now() - maxAgeMs;
+        const stmt = this.db.prepare('DELETE FROM sync_sessions WHERE updated_at < ?');
+        const result = stmt.run(cutoff);
+        return result.changes;
+    }
 }
 
 module.exports = new SyncRepository();

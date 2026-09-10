@@ -39,6 +39,7 @@ function createApiRouter() {
     router.get('/api/analytics/classes/:classId/warnings', analytics.handleEarlyWarnings);
 
     // Cross-Device Sync & Network Share
+    router.post('/api/sync/prune', sync.handlePruneSync);
     router.post('/api/sync/:code', sync.handlePushSync);
     router.get('/api/sync/:code', sync.handlePullSync);
     router.get('/api/system/network-info', sync.handleGetNetworkInfo);
