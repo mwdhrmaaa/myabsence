@@ -2022,6 +2022,8 @@ input:focus {
         font-weight: 600;
         margin-top: 0.25rem;
     }
+}
+
 /* --- Attendance Date Navigator Bar --- */
 .date-navigator-bar {
     display: flex;
@@ -2128,13 +2130,15 @@ input:focus {
 
 #prev-date-btn,
 #next-date-btn {
-    padding: 0.26rem 0.52rem !important;
-    font-size: 0.75rem !important;
-    gap: 0.28rem;
+    padding: 0.22rem 0.5rem !important;
+    font-size: 0.74rem !important;
+    gap: 0.25rem !important;
     line-height: 1.15;
     width: auto !important;
+    min-width: unset !important;
+    max-width: fit-content !important;
     flex: 0 0 auto !important;
-    white-space: nowrap;
+    white-space: nowrap !important;
 }
 
 .date-navigator-bar .btn-nav-pill:hover,
