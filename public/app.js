@@ -186,25 +186,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const openHistoryModalBtn = document.getElementById('open-history-modal-btn');
     const tableDateColumnHeader = document.getElementById('table-date-column-header');
 
-    // Master Control Deck & Teaching Journal Selectors
-    const toggleJournalBtn = document.getElementById('toggle-journal-btn');
-    const journalDrawer = document.getElementById('journal-drawer');
-    const journalDot = document.getElementById('journal-dot');
-    const lessonNotesInput = document.getElementById('lesson-notes-input');
-    const journalLabel = document.getElementById('journal-label');
-    const journalStatus = document.getElementById('journal-status');
-
-    function updateJournalBadge() {
-        const val = localStorage.getItem('myabsence_journal_' + getActiveDateStr()) || '';
-        if (journalDot) {
-            if (val.trim().length > 0) {
-                journalDot.classList.remove('hidden');
-            } else {
-                journalDot.classList.add('hidden');
-            }
-        }
-    }
-
     // History Modal Selectors
     const historyModal = document.getElementById('history-modal');
     const closeHistoryModalBtn = document.getElementById('close-history-modal-btn');
@@ -390,7 +371,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (lessonNotesInput) {
             lessonNotesInput.value = localStorage.getItem('myabsence_journal_' + activeDateStr) || '';
         }
-        updateJournalBadge();
 
         updateUI();
     }
@@ -1624,6 +1604,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const periodInputGroup = document.getElementById('period-input-group');
     const subjectInput = document.getElementById('subject-input');
     const periodInput = document.getElementById('period-input');
+    const lessonNotesInput = document.getElementById('lesson-notes-input');
+    const journalLabel = document.getElementById('journal-label');
+    const journalStatus = document.getElementById('journal-status');
     const printSheetBtn = document.getElementById('print-sheet-btn');
 
     function applyAttendanceMode(mode) {
@@ -1666,27 +1649,14 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    if (toggleJournalBtn && journalDrawer) {
-        toggleJournalBtn.addEventListener('click', () => {
-            const isHidden = journalDrawer.classList.toggle('hidden');
-            toggleJournalBtn.classList.toggle('active', !isHidden);
-            if (!isHidden && lessonNotesInput) {
-                lessonNotesInput.focus();
-            }
-        });
-    }
-
     if (lessonNotesInput) {
         lessonNotesInput.value = localStorage.getItem('myabsence_journal_' + getActiveDateStr()) || '';
-        updateJournalBadge();
         lessonNotesInput.addEventListener('input', () => {
             if (journalStatus) journalStatus.textContent = 'Mengetik...';
-            updateJournalBadge();
         });
         lessonNotesInput.addEventListener('blur', () => {
             localStorage.setItem('myabsence_journal_' + getActiveDateStr(), lessonNotesInput.value.trim());
             if (journalStatus) journalStatus.textContent = 'Tersimpan otomatis';
-            updateJournalBadge();
         });
     }
 
