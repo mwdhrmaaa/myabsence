@@ -19,8 +19,8 @@
                 var theme = localStorage.getItem('myabsence_theme_mode') || 'white';
                 document.documentElement.setAttribute('data-theme', theme);
                 var isSync = window.location.search.indexOf('sync=') !== -1;
-                var isActive = localStorage.getItem('myabsence_session_active') === 'true';
-                if (isActive || isSync) {
+                var isActive = localStorage.getItem('myabsence_session_active');
+                if (isActive === 'true' || (isActive !== 'false' && isSync)) {
                     document.documentElement.setAttribute('data-session', 'active');
                 }
             } catch (e) {}
@@ -137,7 +137,6 @@
                     <div class="export-actions">
                         <button id="print-sheet-btn" class="btn-secondary">Cetak Presensi</button>
                         <button id="export-matrix-btn" class="btn-secondary" title="Unduh Format Rekap Matriks Kehadiran Bulanan (Excel/CSV)">Rekap Bulanan</button>
-                        <button id="header-sync-btn" class="btn-primary btn-glow">Sync Kode</button>
                         <button id="toggle-rank-btn" class="btn-secondary">Rank</button>
                         <button id="import-csv-btn" class="btn-outline">Import CSV</button>
                         <button id="download-csv-btn" class="btn-secondary">Download CSV</button>
@@ -297,8 +296,8 @@
         <!-- Modal for Sync & Share Link -->
         <div id="sync-modal" class="modal hidden">
             <div class="modal-content glass-card sync-modal-content">
-                <h2>Bagikan Presensi</h2>
-                <p class="history-info">Akses dan pantau data absensi kelas secara real-time dari HP melalui link berbagi.</p>
+                <h2>Bagikan & Hubungkan Link</h2>
+                <p class="history-info">Akses dan pantau data absensi kelas secara real-time antar-perangkat melalui tautan berbagi.</p>
 
                 <!-- View when ALREADY CONNECTED -->
                 <div id="sync-connected-view" class="hidden">
@@ -334,7 +333,7 @@
                 <!-- View when NOT CONNECTED -->
                 <div id="sync-disconnected-view">
                     <div class="sync-option-card">
-                        <h3>1. Bagikan Data Laptop ke HP</h3>
+                        <h3>1. Bagikan Data ke HP</h3>
                         <p>Buat link berbagi agar data absensi di laptop ini langsung bisa dibuka dan diedit dari HP secara bersamaan.</p>
                         <button type="button" id="modal-generate-code-btn" class="btn-primary" style="width: 100%;">
                             Buat Link Berbagi
