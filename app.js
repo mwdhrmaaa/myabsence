@@ -135,6 +135,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const adminActions = document.getElementById('admin-actions');
     const addUserBtn = document.getElementById('add-user-btn');
     const downloadCsvBtn = document.getElementById('download-csv-btn');
+    const exportMatrixBtn = document.getElementById('export-matrix-btn');
     const toggleRankBtn = document.getElementById('toggle-rank-btn');
     const importCsvBtn = document.getElementById('import-csv-btn');
     const csvImportInput = document.getElementById('csv-import-input');
@@ -301,6 +302,7 @@ document.addEventListener('DOMContentLoaded', () => {
             user.attendanceLogs[todayStr] = status;
         }
         user.presenceDates = Object.keys(user.attendanceLogs).filter(dStr => user.attendanceLogs[dStr] === 'present');
+        user.updatedAt = Date.now();
         saveData();
         renderTable();
     };
@@ -315,9 +317,11 @@ document.addEventListener('DOMContentLoaded', () => {
             activeWorkdays.push(todayStr);
             localStorage.setItem('myabsence_workdays', JSON.stringify(activeWorkdays));
         }
+        const now = Date.now();
         users.forEach(user => {
             user.attendanceLogs[todayStr] = 'present';
             user.presenceDates = Object.keys(user.attendanceLogs).filter(dStr => user.attendanceLogs[dStr] === 'present');
+            user.updatedAt = now;
         });
         saveData();
         renderTable();
@@ -331,9 +335,11 @@ document.addEventListener('DOMContentLoaded', () => {
             okText: 'Ya, Kosongkan',
             onOk: () => {
                 const todayStr = toLocalISO(new Date());
+                const now = Date.now();
                 users.forEach(user => {
                     delete user.attendanceLogs[todayStr];
                     user.presenceDates = Object.keys(user.attendanceLogs).filter(dStr => user.attendanceLogs[dStr] === 'present');
+                    user.updatedAt = now;
                 });
                 saveData();
                 renderTable();
@@ -505,6 +511,106 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    const mergeStudentRecords = (currentList, incomingList) => {
+        if (!Array.isArray(incomingList) || incomingList.length === 0) return currentList || [];
+        if (!Array.isArray(currentList) || currentList.length === 0) {
+            return incomingList.map(u => ({
+                ...u,
+                name: sanitizeStudentName(u.name),
+                attendanceLogs: { ...(u.attendanceLogs || {}) },
+                presenceDates: Object.keys(u.attendanceLogs || {}).filter(d => u.attendanceLogs[d] === 'present'),
+                updatedAt: Number(u.updatedAt) || Date.now()
+            }));
+        }
+
+        const currentHasReal = !hasOnlyDummyStudents(currentList);
+        const incomingHasReal = !hasOnlyDummyStudents(incomingList);
+
+        if (!currentHasReal && incomingHasReal) {
+            return incomingList.map(u => ({
+                ...u,
+                name: sanitizeStudentName(u.name),
+                attendanceLogs: { ...(u.attendanceLogs || {}) },
+                presenceDates: Object.keys(u.attendanceLogs || {}).filter(d => u.attendanceLogs[d] === 'present'),
+                updatedAt: Number(u.updatedAt) || Date.now()
+            }));
+        }
+
+        const result = currentList.map(u => ({
+            ...u,
+            attendanceLogs: { ...(u.attendanceLogs || {}) },
+            presenceDates: Object.keys(u.attendanceLogs || {}).filter(d => u.attendanceLogs[d] === 'present'),
+            updatedAt: Number(u.updatedAt) || 0
+        }));
+
+        const studentMap = new Map();
+
+        result.forEach((u, idx) => {
+            if (u.absence_number) {
+                studentMap.set(`num_${u.absence_number.toString().trim().toLowerCase()}`, idx);
+            }
+            studentMap.set(`id_${u.id}`, idx);
+            if (u.name) {
+                studentMap.set(`name_${u.name.trim().toLowerCase()}`, idx);
+            }
+        });
+
+        incomingList.forEach(incUser => {
+            const numKey = incUser.absence_number ? `num_${incUser.absence_number.toString().trim().toLowerCase()}` : null;
+            const idKey = `id_${incUser.id}`;
+            const nameKey = incUser.name ? `name_${incUser.name.trim().toLowerCase()}` : null;
+
+            let targetIdx = -1;
+            if (numKey && studentMap.has(numKey)) targetIdx = studentMap.get(numKey);
+            else if (studentMap.has(idKey)) targetIdx = studentMap.get(idKey);
+            else if (nameKey && studentMap.has(nameKey)) targetIdx = studentMap.get(nameKey);
+
+            const incLogs = incUser.attendanceLogs || {};
+            const incUpdated = Number(incUser.updatedAt) || 0;
+
+            if (targetIdx !== -1) {
+                const target = result[targetIdx];
+                const targetUpdated = Number(target.updatedAt) || 0;
+                const mergedLogs = { ...(target.attendanceLogs || {}) };
+
+                for (const [dateStr, status] of Object.entries(incLogs)) {
+                    if (!mergedLogs[dateStr] || incUpdated >= targetUpdated) {
+                        mergedLogs[dateStr] = status;
+                    }
+                }
+
+                result[targetIdx] = {
+                    ...target,
+                    name: (incUpdated > targetUpdated && incUser.name) ? sanitizeStudentName(incUser.name) : sanitizeStudentName(target.name),
+                    absence_number: (incUpdated > targetUpdated && incUser.absence_number) ? incUser.absence_number : target.absence_number,
+                    attendanceLogs: mergedLogs,
+                    presenceDates: Object.keys(mergedLogs).filter(d => mergedLogs[d] === 'present'),
+                    updatedAt: Math.max(targetUpdated, incUpdated)
+                };
+            } else if (!isDummyStudent(incUser)) {
+                const cleanUser = {
+                    ...incUser,
+                    name: sanitizeStudentName(incUser.name),
+                    absence_number: incUser.absence_number || String(result.length + 1).padStart(2, '0'),
+                    attendanceLogs: { ...incLogs },
+                    presenceDates: Object.keys(incLogs).filter(d => incLogs[d] === 'present'),
+                    updatedAt: incUpdated || Date.now()
+                };
+                result.push(cleanUser);
+                const newIdx = result.length - 1;
+                if (cleanUser.absence_number) {
+                    studentMap.set(`num_${cleanUser.absence_number.toString().trim().toLowerCase()}`, newIdx);
+                }
+                studentMap.set(`id_${cleanUser.id}`, newIdx);
+                if (cleanUser.name) {
+                    studentMap.set(`name_${cleanUser.name.trim().toLowerCase()}`, newIdx);
+                }
+            }
+        });
+
+        return result;
+    };
+
     const applySyncData = (data) => {
         if (!data) return false;
         let updated = false;
@@ -512,18 +618,16 @@ document.addEventListener('DOMContentLoaded', () => {
             const currentHasReal = users && users.length > 0 && !hasOnlyDummyStudents(users);
             const incomingHasOnlyDummy = hasOnlyDummyStudents(data.users);
             if (!currentHasReal || !incomingHasOnlyDummy) {
-                users = data.users.map(u => {
-                    if (!u.attendanceLogs) u.attendanceLogs = {};
-                    u.presenceDates = Object.keys(u.attendanceLogs).filter(d => u.attendanceLogs[d] === 'present');
-                    u.name = sanitizeStudentName(u.name);
-                    return u;
-                });
+                users = mergeStudentRecords(users, data.users);
                 updated = true;
             }
         }
         if (data.workdays && Array.isArray(data.workdays)) {
-            activeWorkdays = data.workdays;
-            updated = true;
+            const combined = Array.from(new Set([...(activeWorkdays || []), ...data.workdays])).sort();
+            if (combined.length !== (activeWorkdays || []).length) {
+                activeWorkdays = combined;
+                updated = true;
+            }
         }
         if (data.startDate) {
             startDate = data.startDate;
@@ -1175,7 +1279,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const absence_number = document.getElementById('user-absence-number').value;
         if (id) {
             const idx = users.findIndex(u => u.id == id);
-            if (idx !== -1) users[idx] = { ...users[idx], name, absence_number, attendanceLogs: modalLogs };
+            if (idx !== -1) users[idx] = { ...users[idx], name, absence_number, attendanceLogs: modalLogs, updatedAt: Date.now() };
         } else {
             // Jika daftar saat ini hanya berisi dummy siswa default (Student 1, 2, 3 atau John Doe dll),
             // hapus otomatis data dummy tersebut sehingga siswa baru yang diinput menjadi siswa pertama
@@ -1184,7 +1288,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             const newId = users.length > 0 ? Math.max(...users.map(u => u.id)) + 1 : 1;
             const finalAbsNum = absence_number ? absence_number.trim() : String(newId).padStart(2, '0');
-            users.push({ id: newId, name, absence_number: finalAbsNum, attendanceLogs: modalLogs });
+            users.push({ id: newId, name, absence_number: finalAbsNum, attendanceLogs: modalLogs, updatedAt: Date.now() });
         }
         // Sync presenceDates for legacy compatibility
         users.forEach(u => u.presenceDates = Object.keys(u.attendanceLogs || {}).filter(dStr => u.attendanceLogs[dStr] === 'present'));
@@ -1381,9 +1485,76 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    if (exportMatrixBtn) {
+        exportMatrixBtn.addEventListener('click', () => {
+            if (!users || users.length === 0) {
+                showToast('Belum ada data siswa untuk diekspor.', 'warning');
+                return;
+            }
+
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = now.getMonth();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const monthStr = (month + 1).toString().padStart(2, '0');
+            const monthNames = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+            const monthName = monthNames[month];
+
+            const dateHeaders = [];
+            for (let d = 1; d <= daysInMonth; d++) {
+                dateHeaders.push(`${year}-${monthStr}-${d.toString().padStart(2, '0')}`);
+            }
+
+            let sortedUsers = [...users];
+            sortedUsers.sort((a, b) => (parseInt(a.absence_number) || 999) - (parseInt(b.absence_number) || 999));
+
+            let csv = '\uFEFF';
+            csv += 'LAPORAN REKAPITULASI PRESENSI BULANAN\n';
+            csv += `Bulan:;${monthName} ${year}\n`;
+            csv += `Pendidik / Wali Kelas:;${(currentUser && currentUser.name) ? currentUser.name : 'Pendidik'}\n`;
+            csv += `Tanggal Ekspor:;${now.toLocaleDateString('id-ID')}\n\n`;
+
+            const daysHeader = Array.from({ length: daysInMonth }, (_, i) => i + 1).join(';');
+            csv += `No;No Absen;Nama Siswa;${daysHeader};Hadir (H);Sakit (S);Izin (I);Alpa (A);% Kehadiran\n`;
+
+            sortedUsers.forEach((u, idx) => {
+                const logs = u.attendanceLogs || {};
+                let h = 0, s = 0, i = 0, a = 0;
+                const dailyCodes = dateHeaders.map(dStr => {
+                    const st = logs[dStr];
+                    if (!st) return '-';
+                    if (st === 'present' || st === 'late') { h++; return st === 'late' ? 'T' : 'H'; }
+                    if (st === 'sick') { s++; return 'S'; }
+                    if (st === 'permit') { i++; return 'I'; }
+                    if (st === 'absent') { a++; return 'A'; }
+                    return '-';
+                });
+
+                const activeInMonth = dateHeaders.filter(dStr => activeWorkdays.includes(dStr)).length;
+                const totalEff = activeInMonth > 0 ? activeInMonth : (h + s + i + a);
+                const pct = totalEff > 0 ? ((h / totalEff) * 100).toFixed(1) : '0.0';
+                const safeName = (u.name || '').includes(';') ? `"${u.name.replace(/"/g, '""')}"` : (u.name || '');
+
+                csv += `${idx + 1};${u.absence_number || String(idx + 1).padStart(2, '0')};${safeName};${dailyCodes.join(';')};${h};${s};${i};${a};${pct}%\n`;
+            });
+
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.setAttribute('href', url);
+            link.setAttribute('download', `Rekap_Presensi_Bulanan_${monthName}_${year}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+
+            showToast(`Rekap bulanan ${monthName} ${year} berhasil diunduh.`);
+        });
+    }
+
     if (importCsvBtn && csvImportInput) {
         importCsvBtn.addEventListener('click', () => {
-            // Reset input value to allow re-selecting the same file
             csvImportInput.value = '';
             csvImportInput.click();
         });
@@ -1395,25 +1566,38 @@ document.addEventListener('DOMContentLoaded', () => {
             const reader = new FileReader();
             reader.onload = (event) => {
                 const text = event.target.result;
-                if (!text) {
-                    alert("Empty file content.");
+                if (!text || !text.trim()) {
+                    showToast('File CSV kosong atau tidak valid.', 'warning');
                     return;
                 }
 
-                const lines = text.split(/\r?\n/).filter(l => l.trim() !== '');
+                const cleanText = text.charCodeAt(0) === 0xFEFF ? text.slice(1) : text;
+                const lines = cleanText.split(/\r?\n/).filter(l => l.trim().length > 0);
                 if (lines.length < 2) {
-                    alert("Not enough data in file (found " + lines.length + " lines).");
+                    showToast('Format CSV minimal harus memiliki header dan 1 baris siswa.', 'warning');
                     return;
                 }
-                
-                const newUsers = [];
-                const parseCsvLine = (csvLine) => {
+
+                const detectDelim = (headerLine) => {
+                    const sc = (headerLine.match(/;/g) || []).length;
+                    const cc = (headerLine.match(/,/g) || []).length;
+                    return sc > cc ? ';' : ',';
+                };
+
+                const parseLine = (csvLine, delimiter) => {
                     const result = [];
                     let cur = "";
                     let inQuotes = false;
-                    for (let char of csvLine) {
-                        if (char === '"') inQuotes = !inQuotes;
-                        else if (char === ',' && !inQuotes) {
+                    for (let i = 0; i < csvLine.length; i++) {
+                        const char = csvLine[i];
+                        if (char === '"') {
+                            if (inQuotes && csvLine[i + 1] === '"') {
+                                cur += '"';
+                                i++;
+                            } else {
+                                inQuotes = !inQuotes;
+                            }
+                        } else if (char === delimiter && !inQuotes) {
                             result.push(cur.trim());
                             cur = "";
                         } else cur += char;
@@ -1422,21 +1606,28 @@ document.addEventListener('DOMContentLoaded', () => {
                     return result;
                 };
 
+                const delimiter = detectDelim(lines[0]);
+                const headerParts = parseLine(lines[0], delimiter).map(h => h.toLowerCase().replace(/["']/g, '').trim());
+                const isFullExport = headerParts.includes('detailed logs') || headerParts.includes('overall %') || (headerParts.length >= 8);
+
+                const newUsers = [];
                 try {
                     for (let i = 1; i < lines.length; i++) {
-                        const parts = parseCsvLine(lines[i]);
-                        if (parts.length >= 8) {
-                            const id = parseInt(parts[0]) || (Date.now() + i);
-                            const absNum = parts[1] || '00';
-                            const name = parts[2].replace(/"/g, '') || "Unkown";
+                        const parts = parseLine(lines[i], delimiter);
+                        if (parts.length < 2) continue;
+
+                        if (isFullExport && parts.length >= 8) {
+                            const id = parseInt(parts[0], 10) || (Date.now() + i);
+                            const absNum = parts[1].replace(/["']/g, '').trim() || String(i).padStart(2, '0');
+                            const name = sanitizeStudentName(parts[2].replace(/["']/g, '').trim()) || `Student ${i}`;
                             
-                            let logsRaw = (parts[7] || "").replace(/"/g, '');
+                            let logsRaw = (parts[7] || "").replace(/["']/g, '').trim();
                             const attendanceLogs = {};
                             if (logsRaw) {
                                 if (logsRaw.includes('|') || logsRaw.includes(':')) {
                                     logsRaw.split('|').forEach(entry => {
-                                        const entryParts = entry.split(':');
-                                        if (entryParts[0]) attendanceLogs[entryParts[0]] = entryParts[1] || 'present';
+                                        const [d, s] = entry.split(':');
+                                        if (d && d.trim()) attendanceLogs[d.trim()] = (s && s.trim()) ? s.trim() : 'present';
                                     });
                                 } else {
                                     logsRaw.split(',').forEach(d => {
@@ -1445,29 +1636,47 @@ document.addEventListener('DOMContentLoaded', () => {
                                     });
                                 }
                             }
-                            newUsers.push({ id, name, absence_number: absNum, attendanceLogs });
+                            newUsers.push({ id, name, absence_number: absNum, attendanceLogs, updatedAt: Date.now() });
+                        } else {
+                            let absNum = '';
+                            let name = '';
+                            if (parts.length >= 3 && !isNaN(parseInt(parts[0], 10)) && !isNaN(parseInt(parts[1], 10))) {
+                                absNum = parts[1].replace(/["']/g, '').trim();
+                                name = sanitizeStudentName(parts[2].replace(/["']/g, '').trim());
+                            } else {
+                                absNum = parts[0].replace(/["']/g, '').trim();
+                                name = sanitizeStudentName(parts[1].replace(/["']/g, '').trim());
+                            }
+                            if (name) {
+                                newUsers.push({ id: Date.now() + i, name, absence_number: absNum || String(i).padStart(2, '0'), attendanceLogs: {}, updatedAt: Date.now() });
+                            }
                         }
                     }
 
                     if (newUsers.length > 0) {
-                        if (confirm("Found " + newUsers.length + " users. Restore current data with this file?")) {
-                            // Update core data
-                            users = newUsers.map(u => ({
-                                ...u,
-                                presenceDates: Object.keys(u.attendanceLogs).filter(d => u.attendanceLogs[d] === 'present')
-                            }));
-                            saveData();
-                            renderTable();
-                            alert("Restore Successful!");
-                        }
+                        showCustomConfirm({
+                            title: 'Pulihkan / Impor Data Siswa?',
+                            message: `Ditemukan ${newUsers.length} data siswa dari CSV. Apakah Anda ingin memperbarui data kelas dengan daftar ini?`,
+                            icon: 'info',
+                            okText: 'Ya, Impor',
+                            onOk: () => {
+                                users = newUsers.map(u => ({
+                                    ...u,
+                                    presenceDates: Object.keys(u.attendanceLogs || {}).filter(d => u.attendanceLogs[d] === 'present')
+                                }));
+                                saveData();
+                                renderTable();
+                                showToast(`Berhasil mengimpor ${newUsers.length} data siswa!`);
+                            }
+                        });
                     } else {
-                        alert("No valid user records found in this CSV.");
+                        showToast('Tidak ada data siswa valid yang terbaca dalam CSV.', 'warning');
                     }
                 } catch (err) {
-                    alert("Error processing CSV: " + err.message);
+                    showToast('Gagal memproses CSV: ' + err.message, 'warning');
                 }
             };
-            reader.onerror = () => alert("FileReader Error: " + reader.error);
+            reader.onerror = () => showToast('Gagal membaca berkas CSV.', 'warning');
             reader.readAsText(file);
         });
     }
