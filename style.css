@@ -91,14 +91,24 @@ button {
 
 /* Auth Section */
 #auth-section {
-    display: none !important;
-    height: 100vh;
+    display: none;
+    min-height: 100vh;
     align-items: center;
     justify-content: center;
+    position: relative;
+    padding: 1.5rem;
 }
 
 #auth-section.active {
+    display: flex !important;
+}
+
+html[data-session="active"] #auth-section {
     display: none !important;
+}
+
+html[data-session="active"] #dashboard-section {
+    display: block !important;
 }
 
 .login-card {
@@ -230,11 +240,11 @@ button {
 
 /* Dashboard Section */
 #dashboard-section {
-    display: block;
+    display: none;
 }
 
 #dashboard-section.active {
-    display: block;
+    display: block !important;
 }
 
 .glass-nav {

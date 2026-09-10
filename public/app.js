@@ -835,8 +835,6 @@ document.addEventListener('DOMContentLoaded', () => {
             localStorage.setItem('myabsence_user', JSON.stringify(currentUser));
         }
 
-        if (authSection) authSection.classList.remove('active');
-        dashboardSection.classList.add('active');
         if (greeting) greeting.textContent = "Presensi Kelas";
         const todayDateDisplay = document.getElementById('today-date-display');
         if (todayDateDisplay) todayDateDisplay.textContent = formatIndonesianDate(new Date());
@@ -1074,8 +1072,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // Masuk ke aplikasi langsung dari welcome screen
     if (enterAppBtn) {
         enterAppBtn.addEventListener('click', () => {
-            currentUser = { name: 'Admin', role: 'admin' };
+            currentUser = { name: 'Pendidik', role: 'admin' };
             localStorage.setItem('myabsence_user', JSON.stringify(currentUser));
+            localStorage.setItem('myabsence_session_active', 'true');
+            document.documentElement.setAttribute('data-session', 'active');
+            if (authSection) authSection.classList.remove('active');
+            if (dashboardSection) dashboardSection.classList.add('active');
             updateUI();
             if (syncCode) {
                 pullSync(syncCode);
@@ -1230,14 +1232,23 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    if (logoutBtn) logoutBtn.addEventListener('click', () => {
-        currentUser = null;
-        localStorage.removeItem('myabsence_user');
-        if (authSection && dashboardSection) {
-            authSection.classList.add('active');
-            dashboardSection.classList.remove('active');
-        }
-    });
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', () => {
+            showCustomConfirm({
+                title: 'Keluar ke Tampilan Awal?',
+                message: 'Anda akan kembali ke halaman pembuka presensi. Seluruh data tetap tersimpan aman di perangkat ini.',
+                icon: 'info',
+                okText: 'Ya, Keluar',
+                onOk: () => {
+                    localStorage.setItem('myabsence_session_active', 'false');
+                    document.documentElement.removeAttribute('data-session');
+                    if (authSection) authSection.classList.add('active');
+                    if (dashboardSection) dashboardSection.classList.remove('active');
+                    showToast('Berhasil keluar ke tampilan awal.', 'info');
+                }
+            });
+        });
+    }
     if (viewMonthSelect) viewMonthSelect.addEventListener('change', (e) => { selectedMonth = parseInt(e.target.value); renderTable(); });
     if (viewYearSelect) viewYearSelect.addEventListener('change', (e) => { selectedYear = parseInt(e.target.value); renderTable(); });
     if (historyToggle) historyToggle.addEventListener('click', () => {
@@ -1424,14 +1435,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (resetTodayBtn) {
         resetTodayBtn.addEventListener('click', () => {
             window.resetAllToday();
-        });
-    }
-
-    if (enterAppBtn) {
-        enterAppBtn.addEventListener('click', () => {
-            currentUser = { name: 'Pendidik', role: 'admin' };
-            localStorage.setItem('myabsence_user', JSON.stringify(currentUser));
-            updateUI();
         });
     }
 
@@ -1682,7 +1685,19 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     initPeriodSelectors();
-    updateUI();
+
+    const isSessionActive = () => localStorage.getItem('myabsence_session_active') === 'true';
+
+    // Jika URL membawa kode sync (link berbagi ke HP) atau sesi aktif, masuk langsung ke dashboard
+    if (incomingShareCode || isSessionActive()) {
+        localStorage.setItem('myabsence_session_active', 'true');
+        if (authSection) authSection.classList.remove('active');
+        if (dashboardSection) dashboardSection.classList.add('active');
+        updateUI();
+    } else {
+        if (authSection) authSection.classList.add('active');
+        if (dashboardSection) dashboardSection.classList.remove('active');
+    }
 
     // Auto-sync on startup if logged in with sync code
     if (currentUser && syncCode) {
