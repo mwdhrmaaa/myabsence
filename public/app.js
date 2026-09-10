@@ -1240,7 +1240,6 @@ document.addEventListener('DOMContentLoaded', () => {
             } catch (e) {}
             if (dashboardSection) dashboardSection.classList.remove('active');
             if (authSection) authSection.classList.add('active');
-            showToast('Berhasil keluar ke tampilan awal.', 'info');
         });
     }
     if (viewMonthSelect) viewMonthSelect.addEventListener('change', (e) => { selectedMonth = parseInt(e.target.value); renderTable(); });
