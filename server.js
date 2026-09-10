@@ -9,7 +9,7 @@ const { seedDatabase } = require('./src/core/database/seed');
 const { createApiRouter } = require('./src/core/http/routes');
 const syncService = require('./src/features/sync/sync.service');
 
-const STATIC_DIR = __dirname;
+const STATIC_DIR = fs.existsSync(path.join(__dirname, 'index.html')) ? __dirname : path.join(__dirname, 'public');
 const apiRouter = createApiRouter();
 
 // Initialize DB and Seed Data

@@ -6,6 +6,8 @@ COPY package.json ./
 
 COPY src/ ./src/
 COPY public/ ./public/
+COPY index.html app.js style.css sw.js manifest.json firebase-config.js ./
+COPY icon* ./
 COPY server.js ./
 
 EXPOSE 3000
