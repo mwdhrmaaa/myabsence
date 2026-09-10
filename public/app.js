@@ -168,7 +168,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // Dashboard Sync UI selectors
     const navShareBtn = document.getElementById('nav-share-btn') || document.getElementById('nav-sync-btn');
     const navShareLabel = document.getElementById('nav-share-label') || document.getElementById('nav-sync-label');
-    const headerSyncBtn = document.getElementById('header-sync-btn');
     const syncModal = document.getElementById('sync-modal');
     const syncConnectedView = document.getElementById('sync-connected-view');
     const syncDisconnectedView = document.getElementById('sync-disconnected-view');
@@ -1112,8 +1111,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // --- Sync Modal Event Handlers ---
-    if (navSyncBtn) navSyncBtn.addEventListener('click', openSyncModal);
-    if (headerSyncBtn) headerSyncBtn.addEventListener('click', openSyncModal);
     if (closeSyncModalBtn) closeSyncModalBtn.addEventListener('click', closeSyncModal);
     if (closeSyncModalBtn2) closeSyncModalBtn2.addEventListener('click', closeSyncModal);
 
@@ -1234,19 +1231,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (logoutBtn) {
         logoutBtn.addEventListener('click', () => {
-            showCustomConfirm({
-                title: 'Keluar ke Tampilan Awal?',
-                message: 'Anda akan kembali ke halaman pembuka presensi. Seluruh data tetap tersimpan aman di perangkat ini.',
-                icon: 'info',
-                okText: 'Ya, Keluar',
-                onOk: () => {
-                    localStorage.setItem('myabsence_session_active', 'false');
-                    document.documentElement.removeAttribute('data-session');
-                    if (authSection) authSection.classList.add('active');
-                    if (dashboardSection) dashboardSection.classList.remove('active');
-                    showToast('Berhasil keluar ke tampilan awal.', 'info');
+            localStorage.setItem('myabsence_session_active', 'false');
+            document.documentElement.removeAttribute('data-session');
+            try {
+                if (window.history.replaceState) {
+                    window.history.replaceState({}, document.title, window.location.pathname);
                 }
-            });
+            } catch (e) {}
+            if (dashboardSection) dashboardSection.classList.remove('active');
+            if (authSection) authSection.classList.add('active');
+            showToast('Berhasil keluar ke tampilan awal.', 'info');
         });
     }
     if (viewMonthSelect) viewMonthSelect.addEventListener('change', (e) => { selectedMonth = parseInt(e.target.value); renderTable(); });
@@ -1688,13 +1682,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const isSessionActive = () => localStorage.getItem('myabsence_session_active') === 'true';
 
-    // Jika URL membawa kode sync (link berbagi ke HP) atau sesi aktif, masuk langsung ke dashboard
+    // Jika URL membawa link berbagi ke HP atau sesi aktif, masuk langsung ke dashboard
     if (incomingShareCode || isSessionActive()) {
         localStorage.setItem('myabsence_session_active', 'true');
+        document.documentElement.setAttribute('data-session', 'active');
         if (authSection) authSection.classList.remove('active');
         if (dashboardSection) dashboardSection.classList.add('active');
         updateUI();
     } else {
+        localStorage.setItem('myabsence_session_active', 'false');
+        document.documentElement.removeAttribute('data-session');
         if (authSection) authSection.classList.add('active');
         if (dashboardSection) dashboardSection.classList.remove('active');
     }

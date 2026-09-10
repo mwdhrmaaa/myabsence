@@ -100,15 +100,15 @@ button {
 }
 
 #auth-section.active {
-    display: flex !important;
+    display: flex;
 }
 
 html[data-session="active"] #auth-section {
-    display: none !important;
+    display: none;
 }
 
 html[data-session="active"] #dashboard-section {
-    display: block !important;
+    display: block;
 }
 
 .login-card {
@@ -244,7 +244,7 @@ html[data-session="active"] #dashboard-section {
 }
 
 #dashboard-section.active {
-    display: block !important;
+    display: block;
 }
 
 .glass-nav {
